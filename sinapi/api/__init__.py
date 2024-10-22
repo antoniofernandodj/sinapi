@@ -325,7 +325,7 @@ class SinapiService:
         self.__auth_data = item
 
     async def __aenter__(self):
-        self.http_client = httpx.AsyncClient(base_url=self.url_base)
+        self.http_client = httpx.AsyncClient(base_url=self.url_base, timeout=3600)
         await self.http_client.__aenter__()
         logger.debug("Opening SinapiService")
         return self

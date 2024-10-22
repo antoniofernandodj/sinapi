@@ -56,7 +56,7 @@ async def download_insumos_or_compositions(
                         mes=mes.value,
                         uf=uf,
                         # page=1,
-                        limit=50,
+                        limit=100,
                         composicao=composicao,
                     )
                     # print(insumos)
