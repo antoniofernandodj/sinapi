@@ -13,12 +13,9 @@ O script manipula arquivos JSON que contêm os dados de insumos e composições 
 O script foi projetado para garantir que os dados estejam sempre sincronizados e atualizados no banco de dados MySQL, usando SQLAlchemy para ORM (Object Relational Mapping).
 
 Requisitos
+- UV (Gerenciador de dependencias do python)
 - Python 3.x
 - MySQL Server
-- Biblioteca sqlalchemy para ORM
-- Biblioteca asyncio para operações assíncronas
-- Arquivos de dados JSON (insumos.json e composicoes.json)
-- Módulo web.py para download de insumos e composições
 
 ## Instalação
 
@@ -29,12 +26,11 @@ Requisitos
 2. Instale as dependências necessárias executando:
 
 ```bash
-pip install sqlalchemy pymysql
+uv sync
 ```
 
-3. Configure o MySQL e certifique-se de que as credenciais de acesso estejam corretas. O banco de dados será criado automaticamente se ainda não existir.
-
-4. Tenha os arquivos insumos.json e composicoes.json disponíveis na pasta ./data/.
+3. Configure o MySQL e certifique-se de que as credenciais de acesso estejam corretas.
+O banco de dados será criado automaticamente se ainda não existir.
 
 ### Estrutura do Banco de Dados
 O banco de dados consiste nas seguintes tabelas:
@@ -46,7 +42,6 @@ O banco de dados consiste nas seguintes tabelas:
 - Composicao: Contém os dados das composições, que podem incluir insumos.
 - InsumoItem: Representa os itens de insumos associados a composições ou insumos.
 - InsumoComposicao: Faz a ligação entre os insumos e as composições.
-
 
 ### Funcionalidades
 
@@ -145,7 +140,7 @@ def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[Ins
 Para executar o script, basta rodar o módulo principal:
 
 ```bash
-python <nome_do_arquivo>.py
+uv run python sinapi
 ```
 
 O script será responsável por:
