@@ -238,8 +238,9 @@ if __name__ == "__main__":
 
     asyncio.run(
         download_insumos_or_compositions(
-            INSUMOS_FILE,
-            composicao=False
+            filename=INSUMOS_FILE,
+            composicao=False,
+            ano='2024'
         )
     )
 
@@ -247,8 +248,9 @@ if __name__ == "__main__":
 
     asyncio.run(
         download_insumos_or_compositions(
-            COMPOSICOES_FILE,
-            composicao=True
+            filename=COMPOSICOES_FILE,
+            composicao=True,
+            ano='2024'
         )
     )
 

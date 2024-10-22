@@ -27,8 +27,8 @@ class Completed(Exception): ...
 
 async def download_insumos_or_compositions(
     filename: str,
+    ano: str,
     composicao=True,
-    ano='2024'
 ):
     async with (
         SinapiService(login, senha) as service,
