@@ -335,7 +335,7 @@ class SinapiService:
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        await self.http_client.aclose()
+        await self.http_client.__aexit__()
         logger.debug("Closing SinapiService")
 
 
