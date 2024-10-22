@@ -1,12 +1,12 @@
 from contextlib import suppress
 import json
-from typing import Any, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import InvalidRequestError
 import asyncio
-from web import download_insumos_or_compositions
+from web import get_insumos_or_compositions
 from models import (
     Base,
     ComposicaoTabela,
@@ -19,19 +19,15 @@ from models import (
 )
 
 SGBD_URL = "mysql+pymysql://itemize:I*2021t1201@localhost"
-DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/insumos"
+DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
 
 with create_engine(SGBD_URL, echo=True).connect() as connection:
-    connection.execute(text("CREATE DATABASE IF NOT EXISTS insumos"))
+    connection.execute(text("CREATE DATABASE IF NOT EXISTS sinapi"))
 
 engine = create_engine(DATABASE_INSUMOS_URL, echo=True)
 Session = sessionmaker(bind=engine)
 session = Session()
 Base.metadata.create_all(engine)
-
-
-INSUMOS_FILE = "./data/insumos.json"
-COMPOSICOES_FILE = "composicoes.json"
 
 
 def load_json(file_path):
@@ -176,7 +172,10 @@ def inserir_composicoes_insumo(data, insumo: Union[InsumoTabela, ComposicaoTabel
     for i in data:
         inserir_insumo_item(i["insumoItem"], i, insumo)
 
-def main_insert(i, Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]]):
+def main_insert(
+    i: Dict[str, Any],
+    Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]]
+):
 
     inserir_unidade(i["unidade"])
     inserir_tabela(i["tabela"])
@@ -201,10 +200,8 @@ def main_insert(i, Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]]):
     session.merge(item)
     session.commit()
     session.flush()
-
     with suppress(InvalidRequestError):
         session.refresh(item)
-
     inserir_composicoes_insumo(i['insumosComposicoes'], item)
 
 def inserir_insumos(data):
@@ -215,43 +212,46 @@ def inserir_composicoes(data):
     for i in data:
         main_insert(i, ComposicaoTabela)
 
-def insert_composicoes():
+def insert_composicoes(composicao: Dict[str, Any]):
 
-    data = load_json(COMPOSICOES_FILE)
+    inserir_classes(composicao)
+    inserir_tabelas(composicao)
+    inserir_unidades(composicao)
+    inserir_composicoes(composicao)
 
-    inserir_classes(data)
-    inserir_tabelas(data)
-    inserir_unidades(data)
-    inserir_composicoes(data)
+def insert_insumos(insumo: Dict[str, Any]):
 
-def insert_insumos():
+    inserir_classes(insumo)
+    inserir_tabelas(insumo)
+    inserir_unidades(insumo)
+    inserir_insumos(insumo)
 
-    data = load_json(INSUMOS_FILE)
 
-    inserir_classes(data)
-    inserir_tabelas(data)
-    inserir_unidades(data)
-    inserir_insumos(data)
+async def cadastrar_insumos():
+    async for insumo_response, estado_response in get_insumos_or_compositions(
+        composicao=False,
+        ano='2024'
+    ):
+        insumo_data = insumo_response.model_dump()
+        estado_data = estado_response.model_dump()
+        print(f'Got insumo!: {insumo_response.model_json_schema()}')
+        insert_insumos(insumo_data['items'])
+        
+
+async def cadastrar_composicoes():
+    async for composicao_response, estado_response in get_insumos_or_compositions(
+        composicao=True,
+        ano='2024'
+    ):
+        composicao_data = composicao_response.model_dump()
+        estado_data = estado_response.model_dump()
+        print(f'Got composicao!: {composicao_response.model_json_schema()}')
+        insert_composicoes(composicao_data['items'])
+
+
+async def main():
+    await asyncio.gather(cadastrar_insumos(), cadastrar_composicoes())
 
 
 if __name__ == "__main__":
-
-    asyncio.run(
-        download_insumos_or_compositions(
-            filename=INSUMOS_FILE,
-            composicao=False,
-            ano='2024'
-        )
-    )
-
-    insert_insumos()
-
-    asyncio.run(
-        download_insumos_or_compositions(
-            filename=COMPOSICOES_FILE,
-            composicao=True,
-            ano='2024'
-        )
-    )
-
-    insert_composicoes()
+    asyncio.run(main())

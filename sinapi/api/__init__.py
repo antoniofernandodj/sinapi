@@ -2,7 +2,7 @@ from copy import deepcopy
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 import httpx
 
 try:
@@ -120,7 +120,7 @@ class SinapiService:
         order: Optional[str] = None,
         direction: Optional[str] = None,
         search_type: Optional[str] = None,
-    ) -> List[schema.InsumosResponseItem]:
+    ) -> AsyncGenerator[schema.InsumosResponse, Any]:
         
         params = self.__remove_none({
             "TipoTabela": tipo_tabela,
@@ -144,12 +144,11 @@ class SinapiService:
             response = await self._make_request("GET", url="api/Insumos", params=params)
             data = response.json()
             result = schema.InsumosResponse(items=data["items"], totalRows=data["totalRows"])
+            yield result
             loop = bool(result.items)
             if result.items:
                 results.extend(result.items)
                 params['Page'] += 1
-                
-        return results
 
     async def estados(
         self,

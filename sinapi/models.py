@@ -149,14 +149,14 @@ class ComposicaoItem(Base):
 class InsumoComposicao(Base):
     __tablename__ = "insumo_composicoes"
     id = Column(Integer, primary_key=True)
-    id_insumo = Column(Integer, ForeignKey("insumos.id"), nullable=True)
-    id_composicao = Column(Integer, ForeignKey("composicoes.id"), nullable=True)
+    id_insumo = Column(Integer, ForeignKey("insumos_tabela.id"), nullable=True)
+    id_composicao = Column(Integer, ForeignKey("composicoes_tabela.id"), nullable=True)
     id_insumo_item = Column(Integer, ForeignKey("insumo_items.id"))
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
     coeficiente = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    insumo = relationship("Insumo", back_populates="insumos_composicoes")
-    composicoes = relationship("Composicao", back_populates="composicoes_composicoes")
+    insumo = relationship("InsumoTabela", back_populates="insumos_composicoes")
+    composicoes = relationship("ComposicaoTabela", back_populates="composicoes_composicoes")
     insumo_item = relationship("InsumoItem")
