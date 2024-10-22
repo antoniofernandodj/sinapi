@@ -198,6 +198,7 @@ def main_insert(i, Model: Union[Type[Insumo], Type[Composicao]]):
     )
     session.merge(item)
     session.commit()
+    session.flush()
     session.refresh(item)
     inserir_composicoes_insumo(i['insumosComposicoes'], item)
 
