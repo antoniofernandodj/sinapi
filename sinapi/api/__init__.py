@@ -14,6 +14,7 @@ logger = logging.getLogger(Path(__file__).name)
 
 class SinapiService:
     __instance = None
+    TIMEOUT = 3600
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
@@ -325,8 +326,11 @@ class SinapiService:
         self.__auth_data = item
 
     async def __aenter__(self):
-        self.http_client = httpx.AsyncClient(base_url=self.url_base, timeout=3600)
-        await self.http_client.__aenter__()
+        self.http_client = await httpx.AsyncClient(
+            base_url=self.url_base,
+            timeout=SinapiService.TIMEOUT
+        ).__aenter__()
+
         logger.debug("Opening SinapiService")
         return self
 
