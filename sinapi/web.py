@@ -36,7 +36,12 @@ async def download_insumos_or_compositions(
     ):
         try:
             estados_response = await service.estados(
-                None, "name", "asc", "contains", 1, 20
+                term=None,
+                order="name",
+                direction="asc",
+                search_type="contains",
+                page=None,  # page=1,
+                limit=None  # limit=20
             )
 
             result: List[Dict[str, Any]] = []
