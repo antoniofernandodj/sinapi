@@ -31,8 +31,8 @@ class Classe(Base):
     excluido = Column(Boolean, nullable=True)
 
 
-class Insumo(Base):
-    __tablename__ = "insumos"
+class InsumoTabela(Base):
+    __tablename__ = "insumos_tabela"
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)
@@ -56,8 +56,8 @@ class Insumo(Base):
     insumos_composicoes = relationship("InsumoComposicao", back_populates="insumo")
 
 
-class Composicao(Base):
-    __tablename__ = "composicoes"
+class ComposicaoTabela(Base):
+    __tablename__ = "composicoes_tabela"
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)

@@ -5,7 +5,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import httpx
 
-from api import schema
+try:
+    from api import schema
+except:
+    from sinapi.api import schema
 
 
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +61,7 @@ class SinapiService:
         order: Optional[str] = None,
         direction: Optional[str] = None,
         search_type: Optional[str] = None,
-        page: Optional[int] = 0,
+        page: Optional[int] = 1,
         limit: Optional[int] = 10,
     ) -> schema.InsumosResponse:
         """
@@ -103,6 +106,50 @@ class SinapiService:
         data = response.json()
 
         return schema.InsumosResponse(items=data["items"], totalRows=data["totalRows"])
+
+    async def insumos_todos(
+        self,
+        tipo_tabela: Optional[str] = None,
+        ano: Optional[str] = None,
+        mes: Optional[int] = None,
+        uf: Optional[str] = None,
+        nome_classe: Optional[str] = None,
+        nome_unidade: Optional[str] = None,
+        composicao: Optional[bool] = None,
+        term: Optional[str] = None,
+        order: Optional[str] = None,
+        direction: Optional[str] = None,
+        search_type: Optional[str] = None,
+    ) -> List[schema.InsumosResponseItem]:
+        
+        params = self.__remove_none({
+            "TipoTabela": tipo_tabela,
+            "Ano": ano,
+            "Mes": mes,
+            "Uf": uf,
+            "NomeClasse": nome_classe,
+            "NomeUnidade": nome_unidade,
+            "Composicao": composicao,
+            "Term": term,
+            "Order": order,
+            "Direction": direction,
+            "SearchType": search_type,
+            "Page": 1,
+            "Limit": 50,
+        })
+
+        results: List[schema.InsumosResponseItem] = []
+        loop = True
+        while loop:
+            response = await self._make_request("GET", url="api/Insumos", params=params)
+            data = response.json()
+            result = schema.InsumosResponse(items=data["items"], totalRows=data["totalRows"])
+            loop = bool(result.items)
+            if result.items:
+                results.extend(result.items)
+                params['Page'] += 1
+                
+        return results
 
     async def estados(
         self,

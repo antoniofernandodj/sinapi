@@ -9,11 +9,11 @@ import asyncio
 from web import download_insumos_or_compositions
 from models import (
     Base,
-    Composicao,
+    ComposicaoTabela,
     Tabela,
     Unidade,
     Classe,
-    Insumo,
+    InsumoTabela,
     InsumoItem,
     InsumoComposicao,
 )
@@ -117,7 +117,7 @@ def inserir_tabela(item: Optional[dict]):
 def inserir_insumo_item(
     item: Optional[dict],
     composicao_item,
-    insumo: Union[Insumo, Composicao],
+    insumo: Union[InsumoTabela, ComposicaoTabela],
 ):
     if item is None:
         return
@@ -145,7 +145,7 @@ def inserir_insumo_item(
     session.merge(insumo_item)
     session.commit()
 
-    if isinstance(insumo, Insumo):
+    if isinstance(insumo, InsumoTabela):
         insumo_composicao = InsumoComposicao(
             id=composicao_item["id"],
             id_insumo=insumo.id,
@@ -157,7 +157,7 @@ def inserir_insumo_item(
             excluido=composicao_item["excluido"],
         )
 
-    elif isinstance(insumo, Composicao):
+    elif isinstance(insumo, ComposicaoTabela):
         insumo_composicao = InsumoComposicao(
             id=composicao_item["id"],
             id_insumo=None,
@@ -172,11 +172,11 @@ def inserir_insumo_item(
     session.merge(insumo_composicao)
     session.commit()
 
-def inserir_composicoes_insumo(data, insumo: Union[Insumo, Composicao]):
+def inserir_composicoes_insumo(data, insumo: Union[InsumoTabela, ComposicaoTabela]):
     for i in data:
         inserir_insumo_item(i["insumoItem"], i, insumo)
 
-def main_insert(i, Model: Union[Type[Insumo], Type[Composicao]]):
+def main_insert(i, Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]]):
 
     inserir_unidade(i["unidade"])
     inserir_tabela(i["tabela"])
@@ -209,11 +209,11 @@ def main_insert(i, Model: Union[Type[Insumo], Type[Composicao]]):
 
 def inserir_insumos(data):
     for i in data:
-        main_insert(i, Insumo)
+        main_insert(i, InsumoTabela)
 
 def inserir_composicoes(data):
     for i in data:
-        main_insert(i, Composicao)
+        main_insert(i, ComposicaoTabela)
 
 def insert_composicoes():
 
