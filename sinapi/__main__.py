@@ -1,8 +1,10 @@
+from contextlib import suppress
 import json
 from typing import Any, Optional, Type, Union
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import InvalidRequestError
 import asyncio
 from web import download_insumos_or_compositions
 from models import (
@@ -199,7 +201,10 @@ def main_insert(i, Model: Union[Type[Insumo], Type[Composicao]]):
     session.merge(item)
     session.commit()
     session.flush()
-    session.refresh(item)
+
+    with suppress(InvalidRequestError):
+        session.refresh(item)
+
     inserir_composicoes_insumo(i['insumosComposicoes'], item)
 
 def inserir_insumos(data):
