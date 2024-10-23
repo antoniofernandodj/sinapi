@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 COPY . .
 
 # Stage 2: Production
-FROM python:3.11 AS sinapi-prod
+FROM python:3.13 AS sinapi-prod
 
 WORKDIR /home/itemize/flow
 
