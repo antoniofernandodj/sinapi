@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM python:3.11 AS sinapi-builder
+FROM python:3.13 AS sinapi-builder
 
 WORKDIR /home/itemize/flow
 
