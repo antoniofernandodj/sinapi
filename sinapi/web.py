@@ -1,12 +1,13 @@
-from datetime import datetime
 import logging
 from pathlib import Path
-from typing import Any, AsyncGenerator, Dict, List
+from typing import Any, AsyncGenerator
 from api import SinapiService
-import aiofiles
-import json
 
-from sinapi.api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+
+try:
+    from sinapi.api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+except:
+    from api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
 
 
 logger = logging.getLogger(Path(__file__).name)

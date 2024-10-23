@@ -5,11 +5,22 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
+class Estado(Base):
+    __tablename__ = 'estados'
+    
+    id = Column(Integer, primary_key=True)
+    nome = Column(Text, nullable=False)
+    uf = Column(Text, nullable=False)
+    ibge = Column(Integer, nullable=False)
+    excluido = Column(Boolean, default=False)
+
+
+
 class Tabela(Base):
     __tablename__ = "tabelas"
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
-    id_estado = Column(Integer)
+    id_estado = Column(Integer, ForeignKey("estados.id"), nullable=False)
     mes = Column(Integer)
     ano = Column(Integer)
     data_hora_atualizacao = Column(Text)
@@ -36,8 +47,8 @@ class InsumoTabela(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)
-    id_tabela = Column(Integer, nullable=True)
-    id_unidade = Column(Integer, nullable=True)
+    id_tabela = Column(Integer, ForeignKey("tabelas.id"))
+    id_unidade = Column(Integer, ForeignKey("unidades.id"))
     id_classe = Column(Integer, nullable=True)
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)

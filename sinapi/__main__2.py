@@ -1,6 +1,6 @@
 from contextlib import suppress
 import json
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import InvalidRequestError
@@ -9,7 +9,6 @@ from web import get_insumos_or_compositions
 from models import (
     Base,
     ComposicaoTabela,
-    Estado,
     Tabela,
     Unidade,
     Classe,
@@ -26,27 +25,15 @@ with create_engine(SGBD_URL, echo=True).connect() as connection:
 
 engine = create_engine(DATABASE_INSUMOS_URL, echo=True)
 Session = sessionmaker(bind=engine)
+session = Session()
 Base.metadata.create_all(engine)
+
 
 def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
     
-
-def inserir_estado(data, session):
-    estado = Estado(
-        id=data['id'],
-        nome=data['nome'],
-        uf=data['uf'],
-        ibge=data['ibge'],
-        excluido=data['excluido'] if data['excluido'] is not None else False
-    )
-
-    session.merge(estado)
-    
-
-
-def inserir_tabelas(data, session):
+def inserir_tabelas(data):
     for item in data:
         tabela = Tabela(
             id=item["tabela"]["id"],
@@ -59,9 +46,29 @@ def inserir_tabelas(data, session):
             excluido=item["tabela"]["excluido"],
         )
         session.merge(tabela)
+    session.commit()
 
+def inserir_classes(data):
+    for item in data:
+        classe = Classe(
+            id=item["classe"]["id"],
+            nome=item["classe"]["nome"],
+            excluido=item["classe"]["excluido"],
+        )
+        session.merge(classe)
+    session.commit()
 
-def inserir_unidade(item: Optional[dict], session):
+def inserir_unidades(data):
+    for item in data:
+        unidade = Unidade(
+            id=item["unidade"]["id"],
+            nome=item["unidade"]["nome"],
+            excluido=item["unidade"]["excluido"],
+        )
+        session.merge(unidade)
+    session.commit()
+
+def inserir_unidade(item: Optional[dict]):
     if item is None:
         return
 
@@ -71,9 +78,9 @@ def inserir_unidade(item: Optional[dict], session):
         excluido=item["excluido"],
     )
     session.merge(unidade)
+    session.commit()
 
-
-def inserir_classe(item: Optional[dict], session):
+def inserir_classe(item: Optional[dict]):
     if item is None:
         return
 
@@ -83,9 +90,9 @@ def inserir_classe(item: Optional[dict], session):
         excluido=item["excluido"],
     )
     session.merge(classe)
+    session.commit()
 
-
-def inserir_tabela(item: Optional[dict], session):
+def inserir_tabela(item: Optional[dict]):
     if item is None:
         return
 
@@ -100,38 +107,25 @@ def inserir_tabela(item: Optional[dict], session):
         excluido=item["excluido"],
     )
     session.merge(tabela)
+    session.commit()
 
-
-def inserir_classes(data, session):
-    for item in data:
-        classe = Classe(
-            id=item["classe"]["id"],
-            nome=item["classe"]["nome"],
-            excluido=item["classe"]["excluido"],
-        )
-        session.merge(classe)
-
-def inserir_unidades(data, session):
-    for item in data:
-        unidade = Unidade(
-            id=item["unidade"]["id"],
-            nome=item["unidade"]["nome"],
-            excluido=item["unidade"]["excluido"],
-        )
-        session.merge(unidade)
-
-def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[InsumoTabela, ComposicaoTabela], session):
+def inserir_insumo_item(
+    item: Optional[dict],
+    composicao_item,
+    insumo: Union[InsumoTabela, ComposicaoTabela],
+):
     if item is None:
         return
 
-    inserir_unidade(item["unidade"], session)
-    inserir_tabela(item['tabela'], session)
+    inserir_unidade(item["unidade"])
+    inserir_tabela(item['tabela'])
     insumo_item = InsumoItem(
         id=item["id"],
         nome=item["nome"],
         codigo=item["codigo"],
         id_tabela=item["idTabela"],
         id_unidade=item["idUnidade"],
+        # descobrir ao que se refere
         id_classe=item["idClasse"],
         valor_onerado=item["valorOnerado"],
         valor_nao_onerado=item["valorNaoOnerado"],
@@ -144,6 +138,7 @@ def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[Ins
         excluido=item["excluido"],
     )
     session.merge(insumo_item)
+    session.commit()
 
     if isinstance(insumo, InsumoTabela):
         insumo_composicao = InsumoComposicao(
@@ -156,6 +151,7 @@ def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[Ins
             coeficiente=composicao_item["coeficiente"],
             excluido=composicao_item["excluido"],
         )
+
     elif isinstance(insumo, ComposicaoTabela):
         insumo_composicao = InsumoComposicao(
             id=composicao_item["id"],
@@ -169,15 +165,20 @@ def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[Ins
         )
     
     session.merge(insumo_composicao)
+    session.commit()
 
-def inserir_composicoes_insumo(data, insumo: Union[InsumoTabela, ComposicaoTabela], session):
+def inserir_composicoes_insumo(data, insumo: Union[InsumoTabela, ComposicaoTabela]):
     for i in data:
-        inserir_insumo_item(i["insumoItem"], i, insumo, session)
+        inserir_insumo_item(i["insumoItem"], i, insumo)
 
-def main_insert(i: Dict[str, Any], Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]], session):
-    inserir_unidade(i["unidade"], session)
-    inserir_tabela(i["tabela"], session)
-    inserir_classe(i["classe"], session)
+def main_insert(
+    i: Dict[str, Any],
+    Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]]
+):
+
+    inserir_unidade(i["unidade"])
+    inserir_tabela(i["tabela"])
+    inserir_classe(i["classe"])
     item = Model(
         id=i["id"],
         nome=i["nome"],
@@ -196,25 +197,34 @@ def main_insert(i: Dict[str, Any], Model: Union[Type[InsumoTabela], Type[Composi
         excluido=i["excluido"],
     )
     session.merge(item)
+    session.commit()
     session.flush()
     with suppress(InvalidRequestError):
         session.refresh(item)
+    inserir_composicoes_insumo(i['insumosComposicoes'], item)
 
-    inserir_composicoes_insumo(i['insumosComposicoes'], item, session)
+def inserir_insumos(data):
+    for i in data:
+        main_insert(i, InsumoTabela)
 
-def inserir_insumos(data, estado_data):
-    with Session() as session:
-        inserir_estado(estado_data, session)
-        for i in data:
-            main_insert(i, InsumoTabela, session)
-        session.commit()
+def inserir_composicoes(data):
+    for i in data:
+        main_insert(i, ComposicaoTabela)
 
-def inserir_composicoes(data, estado_data):
-    with Session() as session:
-        inserir_estado(estado_data, session)
-        for i in data:
-            main_insert(i, ComposicaoTabela, session)
-        session.commit()
+def insert_composicoes(composicao: Dict[str, Any]):
+
+    inserir_classes(composicao)
+    inserir_tabelas(composicao)
+    inserir_unidades(composicao)
+    inserir_composicoes(composicao)
+
+def insert_insumos(insumo: Dict[str, Any]):
+
+    inserir_classes(insumo)
+    inserir_tabelas(insumo)
+    inserir_unidades(insumo)
+    inserir_insumos(insumo)
+
 
 async def cadastrar_insumos():
     async for insumo_response, estado_response in get_insumos_or_compositions(
@@ -224,7 +234,8 @@ async def cadastrar_insumos():
         insumo_data = insumo_response.model_dump()
         estado_data = estado_response.model_dump()
         print(f'Got insumo!: {insumo_response.model_json_schema()}')
-        inserir_insumos(insumo_data['items'], estado_data)
+        insert_insumos(insumo_data['items'])
+        
 
 async def cadastrar_composicoes():
     async for composicao_response, estado_response in get_insumos_or_compositions(
@@ -233,12 +244,13 @@ async def cadastrar_composicoes():
     ):
         composicao_data = composicao_response.model_dump()
         estado_data = estado_response.model_dump()
-
         print(f'Got composicao!: {composicao_response.model_json_schema()}')
-        inserir_composicoes(composicao_data['items'], estado_data)
+        insert_composicoes(composicao_data['items'])
+
 
 async def main():
     await asyncio.gather(cadastrar_insumos(), cadastrar_composicoes())
+
 
 if __name__ == "__main__":
     asyncio.run(main())
