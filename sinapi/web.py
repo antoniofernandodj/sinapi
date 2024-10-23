@@ -10,9 +10,9 @@ except:
     from api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
 
 
-logger = logging.getLogger(Path(__file__).name)
-handler = logging.FileHandler(filename="sinapi.log", mode="w")
-logger.addHandler(handler)
+# logger = logging.getLogger(Path(__file__).name)
+# handler = logging.FileHandler(filename="sinapi.log", mode="w")
+# logger.addHandler(handler)
 
 
 login = "lsouza17@gmail.com"
@@ -68,4 +68,4 @@ async def get_insumos_or_compositions(
             traceback.print_exc()
             print(error)
             print(type(error))
-            logger.error(f"An error occurred: {error}")
+            # logger.error(f"An error occurred: {error}")
