@@ -47,7 +47,7 @@ async def get_estados_a_cadastrar(service: SinapiService):
     print('estados_a_cadastrar')
     print([e.uf for e in estados_a_cadastrar])
 
-    return list(estados_a_cadastrar)
+    return list(estados_a_cadastrar).sort(key=lambda item: item.id)
 
 
 
