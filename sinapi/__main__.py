@@ -235,7 +235,7 @@ async def cadastrar_composicoes():
         ano='2024'
     ):
         
-        print(f"Cadastrando recursos relacionados ao mes {estado_response}")
+        # print(f"Cadastrando recursos relacionados ao mes {estado_response}")
 
         composicao_data = composicao_response.model_dump()
         estado_data = estado_response.model_dump()
