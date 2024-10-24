@@ -376,8 +376,6 @@ class SinapiService:
             timeout=SinapiService.TIMEOUT
         )
 
-        await self.http_client.__aenter__()
-
         logger.debug("Opening SinapiService")
         return self
 

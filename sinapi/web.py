@@ -38,7 +38,7 @@ async def get_insumos_or_compositions(
 
     async with SinapiService(login, senha) as service:
         try:
-            estados_response = await get_estados_a_cadastrar()
+            estados_response = await get_estados_a_cadastrar(service)
 
             for estado_response in estados_response:
                 uf = estado_response.uf
