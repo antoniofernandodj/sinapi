@@ -248,7 +248,7 @@ async def cadastrar_insumos():
     ):
         insumo_data = insumo_response.model_dump()
         estado_data = estado_response.model_dump()
-        print(f'Got insumo!: {insumo_response.model_json_schema()}')
+        # print(f'Got insumo!: {insumo_response.model_json_schema()}')
         insert_insumos(insumo_data['items'])
         
 
@@ -259,7 +259,7 @@ async def cadastrar_composicoes():
     ):
         composicao_data = composicao_response.model_dump()
         estado_data = estado_response.model_dump()
-        print(f'Got composicao!: {composicao_response.model_json_schema()}')
+        # print(f'Got composicao!: {composicao_response.model_json_schema()}')
         insert_composicoes(composicao_data['items'])
 
 
