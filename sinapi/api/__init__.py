@@ -11,7 +11,7 @@ except:
     from sinapi.api import schema
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(Path(__file__).name)
 
 
