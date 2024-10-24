@@ -179,7 +179,6 @@ class SinapiService:
         Returns:
             dict: Um dicionário contendo os resultados da consulta de estados.
         """
-
         params = self.__remove_none({
             "Term": term,
             "Order": order,

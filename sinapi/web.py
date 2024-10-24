@@ -1,13 +1,13 @@
-import logging
-from pathlib import Path
 from typing import Any, AsyncGenerator
-from api import SinapiService
-
 
 try:
     from sinapi.api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+    from sinapi.api import SinapiService
+    from sinapi.utils import get_estados_a_cadastrar
 except:
+    from api import SinapiService
     from api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+    from utils import get_estados_a_cadastrar
 
 
 # logger = logging.getLogger(Path(__file__).name)
@@ -38,16 +38,9 @@ async def get_insumos_or_compositions(
 
     async with SinapiService(login, senha) as service:
         try:
-            estados_response = await service.estados(
-                term=None,
-                order="name",
-                direction="asc",
-                search_type="contains",
-                page=None,  # page=1,
-                limit=None  # limit=20
-            )
+            estados_response = await get_estados_a_cadastrar()
 
-            for estado_response in estados_response.items:
+            for estado_response in estados_response:
                 uf = estado_response.uf
                 meses = await service.meses_importados(
                     tipo_tabela="SINAPI", uf=uf, ano=ano

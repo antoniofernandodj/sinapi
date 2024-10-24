@@ -1,32 +1,37 @@
-from contextlib import suppress
 import json
-from typing import Any, Dict, List, Optional, Type, Union
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import InvalidRequestError
 import asyncio
+from database import Session
+from contextlib import suppress
+from typing import Any, Dict, Optional, Type, Union
+from sqlalchemy.exc import InvalidRequestError
 from web import get_insumos_or_compositions
-from models import (
-    Base,
-    ComposicaoTabela,
-    Estado,
-    Tabela,
-    Unidade,
-    Classe,
-    InsumoTabela,
-    InsumoItem,
-    InsumoComposicao,
-)
 
-SGBD_URL = "mysql+pymysql://itemize:I*2021t1201@localhost"
-DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
 
-with create_engine(SGBD_URL, echo=True).connect() as connection:
-    connection.execute(text("CREATE DATABASE IF NOT EXISTS sinapi"))
+try:
+    from models import (
+        ComposicaoTabela,
+        Estado,
+        Tabela,
+        Unidade,
+        Classe,
+        InsumoTabela,
+        InsumoItem,
+        InsumoComposicao,
+    )
+except:
+    from sinapi.models import (
+        ComposicaoTabela,
+        Estado,
+        Tabela,
+        Unidade,
+        Classe,
+        InsumoTabela,
+        InsumoItem,
+        InsumoComposicao,
+    )
 
-engine = create_engine(DATABASE_INSUMOS_URL, echo=True)
-Session = sessionmaker(bind=engine)
-Base.metadata.create_all(engine)
+
+
 
 def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
@@ -43,7 +48,6 @@ def inserir_estado(data, session):
     )
 
     session.merge(estado)
-    
 
 
 def inserir_tabelas(data, session):

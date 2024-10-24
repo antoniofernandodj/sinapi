@@ -6,16 +6,31 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import InvalidRequestError
 import asyncio
 from web import get_insumos_or_compositions
-from models import (
-    Base,
-    ComposicaoTabela,
-    Tabela,
-    Unidade,
-    Classe,
-    InsumoTabela,
-    InsumoItem,
-    InsumoComposicao,
-)
+
+try:
+    from models import (
+        Base,
+        ComposicaoTabela,
+        Tabela,
+        Unidade,
+        Classe,
+        InsumoTabela,
+        InsumoItem,
+        InsumoComposicao,
+    )
+except:
+    from sinapi.models import (
+        Base,
+        ComposicaoTabela,
+        Tabela,
+        Unidade,
+        Classe,
+        InsumoTabela,
+        InsumoItem,
+        InsumoComposicao,
+    )
+
+
 
 SGBD_URL = "mysql+pymysql://itemize:I*2021t1201@localhost"
 DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
@@ -23,7 +38,7 @@ DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
 with create_engine(SGBD_URL, echo=True).connect() as connection:
     connection.execute(text("CREATE DATABASE IF NOT EXISTS sinapi"))
 
-engine = create_engine(DATABASE_INSUMOS_URL, echo=True)
+engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 Base.metadata.create_all(engine)

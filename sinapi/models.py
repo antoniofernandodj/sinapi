@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
+
 Base = declarative_base()
 
 
@@ -13,6 +14,19 @@ class Estado(Base):
     uf = Column(Text, nullable=False)
     ibge = Column(Integer, nullable=False)
     excluido = Column(Boolean, default=False)
+
+    def __hash__(self):
+        return hash(self.id)
+    
+    def to_pydantic(self):
+        from sinapi.api.schema import EstadoResponseItem
+        return EstadoResponseItem(
+            id=self.id,  #  type: ignore
+            nome=self.nome,  #  type: ignore
+            uf=self.uf,  #  type: ignore
+            ibge=self.ibge,  #  type: ignore
+            excluido=self.excluido  #  type: ignore
+        )
 
 
 

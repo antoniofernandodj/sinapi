@@ -73,6 +73,9 @@ class EstadoResponseItem(BaseModel):
     ibge: int
     excluido: Any
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 class EstadoResponse(BaseModel):
     items: List[EstadoResponseItem]
