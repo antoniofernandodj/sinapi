@@ -24,6 +24,9 @@ async def get_estados_a_cadastrar(service: SinapiService):
     )
 
     estados_disponiveis = set(estados_response.items)
+    print('estados_disponiveis')
+    print(estados_disponiveis)
+
     with Session() as session:
         estados_cadastrados_sqla = session.query(Estado).all()
 
@@ -32,8 +35,16 @@ async def get_estados_a_cadastrar(service: SinapiService):
     ]
 
     ultimo_estado = estados_cadastrados_list[-1]
+    print('ultimo_estado')
+    print(ultimo_estado)
+
     estados_cadastrados = set(estados_cadastrados_list)
+    print('estados_cadastrados')
+    print(estados_cadastrados)
+
     estados_a_cadastrar = list(estados_disponiveis.difference(estados_cadastrados))
     estados_a_cadastrar.append(ultimo_estado)
+    print('estados_a_cadastrar')
+    print(estados_a_cadastrar)
 
     return estados_a_cadastrar

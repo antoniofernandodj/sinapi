@@ -19,18 +19,6 @@ login = "lsouza17@gmail.com"
 senha = "eflEs2cF"
 
 
-async def get_estados() -> AsyncGenerator[EstadoResponse, Any]:
-    async with SinapiService(login, senha) as service:
-        yield await service.estados(
-            term=None,
-            order="name",
-            direction="asc",
-            search_type="contains",
-            page=None,
-            limit=None
-        )
-
-
 async def get_insumos_or_compositions(
     ano: str,
     composicao=True
