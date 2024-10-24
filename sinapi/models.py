@@ -19,7 +19,11 @@ class Estado(Base):
         return hash(self.id)
     
     def to_pydantic(self):
-        from sinapi.api.schema import EstadoResponseItem
+        try:
+            from sinapi.api.schema import EstadoResponseItem
+        except:
+            from api.schema import EstadoResponseItem
+
         return EstadoResponseItem(
             id=self.id,  #  type: ignore
             nome=self.nome,  #  type: ignore
