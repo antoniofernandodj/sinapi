@@ -73,8 +73,11 @@ class EstadoResponseItem(BaseModel):
     ibge: int
     excluido: Any
 
+    def __eq__(self, other):
+        return isinstance(other, EstadoResponseItem) and self.id == other.id and self.ibge == other.ibge
+
     def __hash__(self):
-        return hash(self.id)
+        return hash((self.id, self.ibge))
 
 
 class EstadoResponse(BaseModel):
