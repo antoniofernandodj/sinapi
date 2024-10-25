@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -125,7 +126,7 @@ class InsumoTabela(Base):
 
     def to_pydantic(self):
         from sinapi.api.schema import InsumosResponseItem
-        insumo_dict = InsumosResponseItem.model_validate({
+        insumo_dict = InsumoItem.model_validate({
             "id": self.id,
             "nome": self.nome,
             "codigo": self.codigo,
@@ -224,6 +225,17 @@ class ComposicaoItem(Base):
     # classe = relationship("Classe")
 
 
+class InsumoComposicaoResponse(BaseModel):
+    id: int
+    id_insumo: int
+    id_composicao: int
+    id_insumo_item: int
+    valor_onerado: float
+    valor_nao_onerado : float
+    coeficiente: float
+    excluido: bool
+
+
 class InsumoComposicao(Base):
     __tablename__ = "insumo_composicoes"
     id = Column(Integer, primary_key=True)
@@ -238,3 +250,18 @@ class InsumoComposicao(Base):
     insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
     composicoes = relationship("ComposicaoTabela", back_populates="composicoes_composicoes")
     insumo_item = relationship("InsumoItem")
+
+
+    def to_pydantic(self):
+        insumo_dict = InsumoComposicaoResponse.model_validate({
+            'id': self.id,
+            'id_insumo': self.id_insumo,
+            'id_composicao': self.id_composicao,
+            'id_insumo_item': self.id_insumo_item,
+            'valor_onerado': self.valor_onerado,
+            'valor_nao_onerado': self.valor_nao_onerado,
+            'coeficiente': self.coeficiente,
+            'excluido': self.excluido,
+        })
+
+        return insumo_dict
