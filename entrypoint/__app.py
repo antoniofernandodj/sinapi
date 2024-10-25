@@ -32,10 +32,13 @@ class InsumosResponse(BaseModel):
     response_model=InsumosResponse
 )
 def read_insumos(
-    skip: int = 0,
+    page: int = 1,
     limit: int = 10,
     db: Session = Depends(get_db)
 ):
+    
+    skip = (page - 1) * limit
+
     insumos: List[InsumoTabela] = (
         db.query(InsumoTabela)
         .offset(skip)
@@ -55,15 +58,25 @@ def read_insumos(
     return InsumosResponse(insumos=insumos_response)
 
 
+
+
+class ComposicaoResponse(BaseModel):
+    composicoes: List[InsumosResponseItem]
+
+
+
 @app.get(
     "/composicoes",
-    response_model=List[ComposicaoTabela]
+    response_model=ComposicaoResponse
 )
 def read_composicoes(
-    skip: int = 0,
+    page: int = 1,
     limit: int = 10,
     db: Session = Depends(get_db)
 ):
+
+    skip = (page - 1) * limit
+    
     composicoes: List[ComposicaoTabela] = (
         db.query(ComposicaoTabela)
         .offset(skip)
@@ -78,6 +91,6 @@ def read_composicoes(
         comp_response.insumosComposicoes = [
             ic.to_pydantic() for ic in insumos_composicoes
         ]
-        insumos_response.append(insumo_response)
+        composicoes_response.append(comp_response)
 
-    return InsumosResponse(insumos=insumos_response)
+    return ComposicaoResponse(composicoes=composicoes_response)
