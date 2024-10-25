@@ -126,7 +126,7 @@ class InsumoTabela(Base):
 
     def to_pydantic(self):
         from sinapi.api.schema import InsumosResponseItem
-        insumo_dict = InsumoItem.model_validate({
+        insumo_dict = InsumosResponseItem.model_validate({
             "id": self.id,
             "nome": self.nome,
             "codigo": self.codigo,
@@ -253,7 +253,7 @@ class InsumoComposicao(Base):
 
 
     def to_pydantic(self):
-        insumo_dict = InsumoComposicaoResponse.model_validate({
+        insumo_dict = InsumoComposicao.model_validate({
             'id': self.id,
             'id_insumo': self.id_insumo,
             'id_composicao': self.id_composicao,
