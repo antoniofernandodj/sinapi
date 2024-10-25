@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped
 Base = declarative_base()
 
 
+
 class Estado(Base):
     __tablename__ = 'estados'
     
@@ -179,6 +180,27 @@ class ComposicaoTabela(Base):
 
     composicoes_composicoes = relationship("InsumoComposicao", back_populates="composicoes")
 
+    def to_pydantic(self):
+        from sinapi.api.schema import InsumosResponseItem
+        return InsumosResponseItem.model_validate({
+            'id': self.id,
+            'nome': self.nome,
+            'codigo': self.codigo,
+            'idTabela': self.id_tabela,
+            'idUnidade': self.id_unidade,
+            'idClasse': self.id_classe,
+            'valorOnerado': self.valor_onerado,
+            'valorNaoOnerado': self.valor_nao_onerado,
+            'composicao': self.composicao,
+            'percentualMaoDeObra': self.percentual_mao_de_obra,
+            'percentualMaterial': self.percentual_material,
+            'percentualEquipamentos': self.percentual_equipamentos,
+            'percentualServicosTerceiros': self.percentual_servicos_terceiros,
+            'percentualOutros': self.percentual_outros,
+            'excluido': self.excluido,
+            'insumosComposicoes': [composicao.to_pydantic() for composicao in self.composicoes_composicoes] if self.composicoes_composicoes else []
+        })
+
 
 class InsumoItem(Base):
     __tablename__ = "insumo_items"
@@ -223,18 +245,6 @@ class ComposicaoItem(Base):
     # tabela = relationship("Tabela")
     # unidade = relationship("Unidade")
     # classe = relationship("Classe")
-
-
-class InsumoComposicaoResponse(BaseModel):
-    id: int
-    id_insumo: int
-    id_composicao: int
-    id_insumo_item: int
-    valor_onerado: float
-    valor_nao_onerado : float
-    coeficiente: float
-    excluido: bool
-
 
 class InsumoComposicao(Base):
     __tablename__ = "insumo_composicoes"

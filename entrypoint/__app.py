@@ -36,7 +36,12 @@ def read_insumos(
     limit: int = 10,
     db: Session = Depends(get_db)
 ):
-    insumos: List[InsumoTabela] = db.query(InsumoTabela).offset(skip).limit(limit).all()
+    insumos: List[InsumoTabela] = (
+        db.query(InsumoTabela)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
     insumos_response = []
     for insumo in insumos:
@@ -50,14 +55,29 @@ def read_insumos(
     return InsumosResponse(insumos=insumos_response)
 
 
-# @app.get(
-#     "/composicoes",
-#     response_model=List[ComposicaoTabela]
-# )
-# def read_composicoes(
-#     skip: int = 0,
-#     limit: int = 10,
-#     db: Session = Depends(get_db)
-# ):
-#     composicoes = db.query(ComposicaoTabela).offset(skip).limit(limit).all()
-#     return composicoes
+@app.get(
+    "/composicoes",
+    response_model=List[ComposicaoTabela]
+)
+def read_composicoes(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    composicoes: List[ComposicaoTabela] = (
+        db.query(ComposicaoTabela)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    composicoes_response = []
+    for comp in composicoes:
+        insumos_composicoes = db.query(InsumoComposicao).filter_by(id_composicao=comp.id).all()
+        comp_response = comp.to_pydantic()
+        comp_response.insumosComposicoes = [
+            ic.to_pydantic() for ic in insumos_composicoes
+        ]
+        insumos_response.append(insumo_response)
+
+    return InsumosResponse(insumos=insumos_response)
