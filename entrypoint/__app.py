@@ -1,6 +1,6 @@
 from math import ceil
-from typing import List
-from fastapi import FastAPI, Depends
+from typing import Annotated, List
+from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,7 +29,11 @@ app.add_middleware(
 
 
 @app.get("/insumos", response_model=InsumosResponse)
-def read_insumos(page: int = 1, limit: int = 10, session: Session = Depends(get_db)):
+def read_insumos(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 10,
+    session: Session = Depends(get_db),
+):
     offset = (page - 1) * limit
     count = session.query(InsumoTabela).count()
     total_pages = ceil(count / limit)
@@ -48,7 +52,11 @@ def read_insumos(page: int = 1, limit: int = 10, session: Session = Depends(get_
 
 
 @app.get("/composicoes", response_model=ComposicaoResponse)
-def read_composicoes(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
+def read_composicoes(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 10,
+    db: Session = Depends(get_db),
+):
     offset = (page - 1) * limit
     count = db.query(InsumoTabela).count()
     total_pages = ceil(count / limit)
