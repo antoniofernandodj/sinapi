@@ -31,4 +31,4 @@ USER itemize
 
 COPY --from=sinapi-builder /home/itemize/flow /home/itemize/flow
 
-CMD ["python", "sinapi"]
+CMD ["python", "load.py"]

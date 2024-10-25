@@ -6,7 +6,7 @@ from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 import httpx
 
 try:
-    from entrypoint import schema  # type: ignore
+    from sinapi import schema  # type: ignore
 except:
     from sinapi.api import schema
 
@@ -85,21 +85,23 @@ class SinapiService:
         Returns:
             dict: Dicionário com a resposta JSON da API.
         """
-        params = self.__remove_none({
-            "TipoTabela": tipo_tabela,
-            "Ano": ano,
-            "Mes": mes,
-            "Uf": uf,
-            "NomeClasse": nome_classe,
-            "NomeUnidade": nome_unidade,
-            "Composicao": composicao,
-            "Term": term,
-            "Order": order,
-            "Direction": direction,
-            "SearchType": search_type,
-            "Page": page,
-            "Limit": limit,
-        })
+        params = self.__remove_none(
+            {
+                "TipoTabela": tipo_tabela,
+                "Ano": ano,
+                "Mes": mes,
+                "Uf": uf,
+                "NomeClasse": nome_classe,
+                "NomeUnidade": nome_unidade,
+                "Composicao": composicao,
+                "Term": term,
+                "Order": order,
+                "Direction": direction,
+                "SearchType": search_type,
+                "Page": page,
+                "Limit": limit,
+            }
+        )
 
         response = await self._make_request("GET", url="api/Insumos", params=params)
 
@@ -121,34 +123,38 @@ class SinapiService:
         direction: Optional[str] = None,
         search_type: Optional[str] = None,
     ) -> AsyncGenerator[schema.InsumosResponse, Any]:
-        
-        params = self.__remove_none({
-            "TipoTabela": tipo_tabela,
-            "Ano": ano,
-            "Mes": mes,
-            "Uf": uf,
-            "NomeClasse": nome_classe,
-            "NomeUnidade": nome_unidade,
-            "Composicao": composicao,
-            "Term": term,
-            "Order": order,
-            "Direction": direction,
-            "SearchType": search_type,
-            "Page": 1,
-            "Limit": 50,
-        })
+
+        params = self.__remove_none(
+            {
+                "TipoTabela": tipo_tabela,
+                "Ano": ano,
+                "Mes": mes,
+                "Uf": uf,
+                "NomeClasse": nome_classe,
+                "NomeUnidade": nome_unidade,
+                "Composicao": composicao,
+                "Term": term,
+                "Order": order,
+                "Direction": direction,
+                "SearchType": search_type,
+                "Page": 1,
+                "Limit": 50,
+            }
+        )
 
         results: List[schema.InsumosResponseItem] = []
         loop = True
         while loop:
             response = await self._make_request("GET", url="api/Insumos", params=params)
             data = response.json()
-            result = schema.InsumosResponse(items=data["items"], totalRows=data["totalRows"])
+            result = schema.InsumosResponse(
+                items=data["items"], totalRows=data["totalRows"]
+            )
             yield result
             loop = bool(result.items)
             if result.items:
                 results.extend(result.items)
-                params['Page'] += 1
+                params["Page"] += 1
 
     async def estados(
         self,
@@ -179,14 +185,16 @@ class SinapiService:
         Returns:
             dict: Um dicionário contendo os resultados da consulta de estados.
         """
-        params = self.__remove_none({
-            "Term": term,
-            "Order": order,
-            "Direction": direction,
-            "SearchType": search_type,
-            "Page": page,
-            "Limit": limit,
-        })
+        params = self.__remove_none(
+            {
+                "Term": term,
+                "Order": order,
+                "Direction": direction,
+                "SearchType": search_type,
+                "Page": page,
+                "Limit": limit,
+            }
+        )
 
         response = await self._make_request(
             "GET",
@@ -226,17 +234,19 @@ class SinapiService:
         Returns:
             schema.TabelasResponse: Um objeto com os resultados da consulta.
         """
-        params = self.__remove_none({
-            "Ano": ano,
-            "Mes": mes,
-            "Uf": uf,
-            "Term": term,
-            "Order": order,
-            "Direction": direction,
-            "SearchType": search_type,
-            "Page": page,
-            "Limit": limit,
-        })
+        params = self.__remove_none(
+            {
+                "Ano": ano,
+                "Mes": mes,
+                "Uf": uf,
+                "Term": term,
+                "Order": order,
+                "Direction": direction,
+                "SearchType": search_type,
+                "Page": page,
+                "Limit": limit,
+            }
+        )
 
         response = await self._make_request("GET", url="api/Tabelas", params=params)
         data = response.json()
@@ -258,10 +268,7 @@ class SinapiService:
         Returns:
             schema.AnosImportadosResponse: Um objeto com os anos importados.
         """
-        params = self.__remove_none({
-            "TipoTabela": tipo_tabela,
-            "Uf": uf, "Ano": ano
-        })
+        params = self.__remove_none({"TipoTabela": tipo_tabela, "Uf": uf, "Ano": ano})
 
         response = await self._make_request(
             "GET", url="api/Tabelas/anos/select", params=params
@@ -288,11 +295,13 @@ class SinapiService:
         Returns:
             List[schema.Mes]: Uma lista de objetos com os meses importados.
         """
-        params = self.__remove_none({
-            "TipoTabela": tipo_tabela,
-            "Uf": uf,
-            "Ano": ano,
-        })
+        params = self.__remove_none(
+            {
+                "TipoTabela": tipo_tabela,
+                "Uf": uf,
+                "Ano": ano,
+            }
+        )
 
         response = await self._make_request(
             "GET", url="api/Tabelas/meses/select", params=params
@@ -352,10 +361,12 @@ class SinapiService:
         # url: str
         # json: Optional[Dict[str, Any]]
         # data: Optional[Any]
-        kwargs = self.__remove_none({
-            **deepcopy(kw),
-            "headers": {"Authorization": f"Bearer {authorization.token}"},
-        })
+        kwargs = self.__remove_none(
+            {
+                **deepcopy(kw),
+                "headers": {"Authorization": f"Bearer {authorization.token}"},
+            }
+        )
 
         return kwargs
 
@@ -372,8 +383,7 @@ class SinapiService:
 
     async def __aenter__(self):
         self.http_client = httpx.AsyncClient(
-            base_url=self.url_base,
-            timeout=SinapiService.TIMEOUT
+            base_url=self.url_base, timeout=SinapiService.TIMEOUT
         )
 
         logger.debug("Opening SinapiService")
@@ -382,7 +392,6 @@ class SinapiService:
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.http_client.__aexit__()
         logger.debug("Closing SinapiService")
-
 
     def __remove_none(self, params: dict):
         return {k: v for k, v in params.items() if v is not None}

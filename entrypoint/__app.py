@@ -7,9 +7,12 @@ import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
+
 from sinapi.models import ComposicaoTabela, Estado, InsumoComposicao, InsumoTabela
 from sinapi.database import Session as SessionLocal
 from sinapi.api.schema import EstadoResponseItem, InsumosResponseItem
+
+
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -27,28 +30,18 @@ class InsumosResponse(BaseModel):
     insumos: List[InsumosResponseItem]
 
 
-@app.get(
-    "/insumos",
-    response_model=InsumosResponse
-)
-def read_insumos(
-    page: int = 1,
-    limit: int = 10,
-    db: Session = Depends(get_db)
-):
-    
+@app.get("/insumos", response_model=InsumosResponse)
+def read_insumos(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
+
     skip = (page - 1) * limit
 
-    insumos: List[InsumoTabela] = (
-        db.query(InsumoTabela)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    insumos: List[InsumoTabela] = db.query(InsumoTabela).offset(skip).limit(limit).all()
 
     insumos_response = []
     for insumo in insumos:
-        insumos_composicoes = db.query(InsumoComposicao).filter_by(id_insumo=insumo.id).all()
+        insumos_composicoes = (
+            db.query(InsumoComposicao).filter_by(id_insumo=insumo.id).all()
+        )
         insumo_response = insumo.to_pydantic()
         insumo_response.insumosComposicoes = [
             ic.to_pydantic() for ic in insumos_composicoes
@@ -58,35 +51,24 @@ def read_insumos(
     return InsumosResponse(insumos=insumos_response)
 
 
-
-
 class ComposicaoResponse(BaseModel):
     composicoes: List[InsumosResponseItem]
 
 
-
-@app.get(
-    "/composicoes",
-    response_model=ComposicaoResponse
-)
-def read_composicoes(
-    page: int = 1,
-    limit: int = 10,
-    db: Session = Depends(get_db)
-):
+@app.get("/composicoes", response_model=ComposicaoResponse)
+def read_composicoes(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
 
     skip = (page - 1) * limit
-    
+
     composicoes: List[ComposicaoTabela] = (
-        db.query(ComposicaoTabela)
-        .offset(skip)
-        .limit(limit)
-        .all()
+        db.query(ComposicaoTabela).offset(skip).limit(limit).all()
     )
 
     composicoes_response = []
     for comp in composicoes:
-        insumos_composicoes = db.query(InsumoComposicao).filter_by(id_composicao=comp.id).all()
+        insumos_composicoes = (
+            db.query(InsumoComposicao).filter_by(id_composicao=comp.id).all()
+        )
         comp_response = comp.to_pydantic()
         comp_response.insumosComposicoes = [
             ic.to_pydantic() for ic in insumos_composicoes
