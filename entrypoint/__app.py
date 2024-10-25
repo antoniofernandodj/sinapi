@@ -19,13 +19,11 @@ from entrypoint.schema import InsumosResponse, ComposicaoResponse
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware(
-        app=app,
-        allow_origins=["*"],
-        allow_headers=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-    )
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
 )
 
 
