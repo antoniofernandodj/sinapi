@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
+from sqlalchemy.orm import Mapped
+
 
 Base = declarative_base()
 
@@ -45,6 +47,24 @@ class Tabela(Base):
     id_tipo_tabela = Column(Integer)
     excluido = Column(Boolean, nullable=True)
 
+    estado = relationship('Estado')
+
+    def to_pydantic(self):
+        from sinapi.api.schema import InsumosResponseTabela
+
+        return InsumosResponseTabela.model_validate({
+            'id': self.id,
+            'nome': self.nome,
+            'idEstado': self.id_estado,
+            'mes': self.mes,
+            'ano': self.ano,
+            'dataHoraAtualizacao': self.data_hora_atualizacao,
+            'idTipoTabela': self.id_tipo_tabela,
+            'excluido': self.excluido,
+            'estado': self.estado.to_pydantic(),
+            'tipoTabela': str(self.id_tipo_tabela)
+        })
+
 
 class Unidade(Base):
     __tablename__ = "unidades"
@@ -52,12 +72,30 @@ class Unidade(Base):
     nome = Column(Text)
     excluido = Column(Boolean, nullable=True)
 
+    def to_pydantic(self):
+        from sinapi.api.schema import InsumosResponseUnidade
+
+        return InsumosResponseUnidade.model_validate({
+            'id': self.id,
+            'nome': self.nome,
+            'excluido': self.excluido,
+        })
+
 
 class Classe(Base):
     __tablename__ = "classes"
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     excluido = Column(Boolean, nullable=True)
+
+    def to_pydantic(self):
+        from sinapi.api.schema import InsumosResponseClasse
+
+        return InsumosResponseClasse.model_validate({
+            'id': self.id,
+            'nome': self.nome,
+            'excluido': self.excluido,
+        })
 
 
 class InsumoTabela(Base):
@@ -78,11 +116,42 @@ class InsumoTabela(Base):
     percentual_outros = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    # tabela = relationship("Tabela")
-    # unidade = relationship("Unidade")
-    # classe = relationship("Classe")
+    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
+    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
+    # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
     insumos_composicoes = relationship("InsumoComposicao", back_populates="insumo")
+
+
+    def to_pydantic(self):
+        from sinapi.api.schema import InsumosResponseItem
+        insumo_dict = InsumosResponseItem.model_validate({
+            "id": self.id,
+            "nome": self.nome,
+            "codigo": self.codigo,
+            "idTabela": self.id_tabela,
+            "idUnidade": self.id_unidade,
+            "idClasse": self.id_classe,
+            "composicao": self.composicao,
+            "percentualMaoDeObra": self.percentual_mao_de_obra,
+            "percentualMaterial": self.percentual_material,
+            "percentualEquipamentos": self.percentual_equipamentos,
+            "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+            "percentualOutros": self.percentual_outros,
+            "excluido": self.excluido,
+            "valorOnerado": self.valor_onerado,
+            "valorNaoOnerado": self.valor_nao_onerado,
+
+            "tabela": self.tabela.to_pydantic() if self.tabela else None,
+            "unidade": self.unidade.to_pydantic() if self.unidade else None,
+            # "classe": self.classe.to_pydantic() if self.classe else None,
+            "classe": None,
+
+            "insumosComposicoes": [insumo_comp.to_pydantic() for insumo_comp in self.insumos_composicoes] if self.insumos_composicoes else []
+            # "insumosComposicoes": []
+        })
+
+        return InsumosResponseItem.model_validate(insumo_dict)
 
 
 class ComposicaoTabela(Base):
@@ -90,17 +159,9 @@ class ComposicaoTabela(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)
-    # id_tabela = Column(
-    #     Integer, nullable=True
-    # )
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    # id_unidade = Column(
-    #     Integer, nullable=True
-    # )
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
-    id_classe = Column(
-        Integer, nullable=True
-    )  # Column(Integer, ForeignKey("classes.id"))
+    id_classe = Column(Integer, nullable=True)
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
     composicao = Column(Boolean)
@@ -123,13 +184,7 @@ class InsumoItem(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)
-    # id_tabela = Column(
-    #     Integer, nullable=True
-    # )
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    # id_unidade = Column(
-    #     Integer, nullable=True
-    # )
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
     id_classe = Column(Integer, nullable=True)
     valor_onerado = Column(Float)
@@ -152,13 +207,7 @@ class ComposicaoItem(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(Text)
     codigo = Column(Text)
-    # id_tabela = Column(
-    #     Integer, nullable=True
-    # )
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    # id_unidade = Column(
-    #     Integer, nullable=True
-    # )
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)

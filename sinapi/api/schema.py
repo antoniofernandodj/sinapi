@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime
+from token import OP
 from typing import Any, List, Optional
 
 from pydantic import BaseModel
+
+
+
+def to_camel_case(string: str) -> str:
+    parts = string.split('_')
+    return parts[0] + ''.join(word.capitalize() for word in parts[1:])
+
 
 
 class Permissao(BaseModel):
@@ -124,25 +132,23 @@ class InsumosResponseItem(BaseModel):
     percentualServicosTerceiros: Any
     percentualOutros: Any
     excluido: Any
-    tabela: InsumosResponseTabela
-    unidade: InsumosResponseUnidade
-    classe: InsumosResponseClasse
     insumosComposicoes: List[Any]
     valorOnerado: Optional[float] = None
     valorNaoOnerado: Optional[float] = None
+    tabela: Optional[InsumosResponseTabela] = None
+    unidade: Optional[InsumosResponseUnidade] = None
+    classe: Optional[InsumosResponseClasse] = None
+
+    class Config:
+        alias_generator = to_camel_case
+        model_config = {
+            'from_attributes': True
+        }
 
 
 class InsumosResponse(BaseModel):
     items: List[InsumosResponseItem]
     totalRows: int
-
-
-class EstadoTabelaResponse(BaseModel):
-    id: int
-    nome: str
-    uf: str
-    ibge: int
-    excluido: Optional[bool]
 
 
 class Tabela(BaseModel):
@@ -154,7 +160,7 @@ class Tabela(BaseModel):
     dataHoraAtualizacao: datetime
     idTipoTabela: int
     excluido: Optional[bool]
-    estado: EstadoTabelaResponse
+    estado: EstadoResponseItem
     tipoTabela: Optional[str]
 
 

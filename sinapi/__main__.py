@@ -4,10 +4,11 @@ from database import Session
 from contextlib import suppress
 from typing import Any, Dict, Optional, Type, Union
 from sqlalchemy.exc import InvalidRequestError
-from web import get_insumos_or_compositions
+
 
 
 try:
+    from web import get_insumos_or_compositions # type: ignore
     from models import (
         ComposicaoTabela,
         Estado,
@@ -19,6 +20,7 @@ try:
         InsumoComposicao,
     )
 except:
+    from sinapi.web import get_insumos_or_compositions
     from sinapi.models import (
         ComposicaoTabela,
         Estado,

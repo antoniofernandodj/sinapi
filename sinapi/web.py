@@ -1,19 +1,13 @@
 from typing import Any, AsyncGenerator
 
 try:
-    from sinapi.api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+    from sinapi.api.schema import EstadoResponseItem, InsumosResponse
     from sinapi.api import SinapiService
     from sinapi.utils import get_estados_a_cadastrar
 except:
     from api import SinapiService
-    from api.schema import EstadoResponse, EstadoResponseItem, InsumosResponse
+    from api.schema import EstadoResponseItem, InsumosResponse
     from utils import get_estados_a_cadastrar
-
-
-# logger = logging.getLogger(Path(__file__).name)
-# handler = logging.FileHandler(filename="sinapi.log", mode="w")
-# logger.addHandler(handler)
-
 
 login = "lsouza17@gmail.com"
 senha = "eflEs2cF"

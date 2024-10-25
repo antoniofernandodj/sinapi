@@ -1,0 +1,1 @@
+from entrypoint.__app import app

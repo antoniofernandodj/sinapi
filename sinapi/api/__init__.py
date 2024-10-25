@@ -6,7 +6,7 @@ from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 import httpx
 
 try:
-    from api import schema
+    from entrypoint import schema  # type: ignore
 except:
     from sinapi.api import schema
 
