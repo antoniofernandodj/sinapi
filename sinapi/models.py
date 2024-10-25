@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
@@ -249,13 +250,14 @@ class ComposicaoItem(Base):
 
 class InsumoComposicaoResponse(BaseModel):
     id: int
-    id_insumo: int
-    id_composicao: int
     id_insumo_item: int
     valor_onerado: float
     valor_nao_onerado: float
     coeficiente: float
-    excluido: bool
+
+    id_insumo: Optional[int] = None
+    id_composicao: Optional[int] = None
+    excluido: Optional[bool] = None
 
 
 class InsumoComposicao(Base):
