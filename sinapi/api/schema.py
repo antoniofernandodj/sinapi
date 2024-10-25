@@ -116,8 +116,8 @@ class InsumosResponseClasse(BaseModel):
     id: int
     nome: str
     excluido: Any
-
-
+    
+    
 class InsumosResponseItem(BaseModel):
     id: int
     nome: str

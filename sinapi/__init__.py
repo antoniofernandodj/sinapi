@@ -51,21 +51,6 @@ def inserir_estado(data, session):
     session.merge(estado)
 
 
-def inserir_tabelas(data, session):
-    for item in data:
-        tabela = Tabela(
-            id=item["tabela"]["id"],
-            nome=item["tabela"]["nome"],
-            id_estado=item["tabela"]["idEstado"],
-            mes=item["tabela"]["mes"],
-            ano=item["tabela"]["ano"],
-            data_hora_atualizacao=item["tabela"]["dataHoraAtualizacao"],
-            id_tipo_tabela=item["tabela"]["idTipoTabela"],
-            excluido=item["tabela"]["excluido"],
-        )
-        session.merge(tabela)
-
-
 def inserir_unidade(item: Optional[dict], session):
     if item is None:
         return
@@ -107,37 +92,13 @@ def inserir_tabela(item: Optional[dict], session):
     session.merge(tabela)
 
 
-def inserir_classes(data, session):
-    for item in data:
-        classe = Classe(
-            id=item["classe"]["id"],
-            nome=item["classe"]["nome"],
-            excluido=item["classe"]["excluido"],
-        )
-        session.merge(classe)
-
-
-def inserir_unidades(data, session):
-    for item in data:
-        unidade = Unidade(
-            id=item["unidade"]["id"],
-            nome=item["unidade"]["nome"],
-            excluido=item["unidade"]["excluido"],
-        )
-        session.merge(unidade)
-
-
-def inserir_insumo_item(
-    item: Optional[dict],
-    composicao_item,
-    insumo: Union[InsumoTabela, ComposicaoTabela],
-    session,
-):
+def inserir_insumo_item(item: Optional[dict], session):
     if item is None:
         return
 
     inserir_unidade(item["unidade"], session)
     inserir_tabela(item["tabela"], session)
+
     insumo_item = InsumoItem(
         id=item["id"],
         nome=item["nome"],
@@ -157,37 +118,44 @@ def inserir_insumo_item(
     )
     session.merge(insumo_item)
 
-    if isinstance(insumo, InsumoTabela):
-        insumo_composicao = InsumoComposicao(
-            id=composicao_item["id"],
-            id_insumo=insumo.id,
-            id_composicao=None,
-            id_insumo_item=insumo_item.id,
-            valor_onerado=composicao_item["valorOnerado"],
-            valor_nao_onerado=composicao_item["valorNaoOnerado"],
-            coeficiente=composicao_item["coeficiente"],
-            excluido=composicao_item["excluido"],
-        )
-    elif isinstance(insumo, ComposicaoTabela):
-        insumo_composicao = InsumoComposicao(
-            id=composicao_item["id"],
-            id_insumo=None,
-            id_composicao=insumo.id,
-            id_insumo_item=insumo_item.id,
-            valor_onerado=composicao_item["valorOnerado"],
-            valor_nao_onerado=composicao_item["valorNaoOnerado"],
-            coeficiente=composicao_item["coeficiente"],
-            excluido=composicao_item["excluido"],
-        )
-
-    session.merge(insumo_composicao)
-
 
 def inserir_composicoes_insumo(
     data, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
-    for i in data:
-        inserir_insumo_item(i["insumoItem"], i, insumo, session)
+
+    if isinstance(insumo, InsumoTabela):
+        insumo_composicao = InsumoComposicao(
+            id=insumo_composicao["id"],
+            id_insumo=insumo.id,
+            id_composicao=None,
+            id_insumo_item=insumo.id,
+            valor_onerado=insumo_composicao["valorOnerado"],
+            valor_nao_onerado=insumo_composicao["valorNaoOnerado"],
+            coeficiente=insumo_composicao["coeficiente"],
+            excluido=insumo_composicao["excluido"],
+        )
+
+    elif isinstance(insumo, ComposicaoTabela):
+        insumo_composicao = InsumoComposicao(
+            id=insumo_composicao["id"],
+            id_insumo=None,
+            id_composicao=insumo.id,
+            id_insumo_item=insumo.id,
+            valor_onerado=insumo_composicao["valorOnerado"],
+            valor_nao_onerado=insumo_composicao["valorNaoOnerado"],
+            coeficiente=insumo_composicao["coeficiente"],
+            excluido=insumo_composicao["excluido"],
+        )
+
+    session.merge(insumo_composicao)
+
+    for insumo_composicao in data:
+        inserir_insumo_item(
+            item=insumo_composicao["insumoItem"],
+            composicao_item=insumo_composicao,
+            insumo=insumo,
+            session=session,
+        )
 
 
 def main_insert(
