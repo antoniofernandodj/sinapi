@@ -246,6 +246,18 @@ class ComposicaoItem(Base):
     # unidade = relationship("Unidade")
     # classe = relationship("Classe")
 
+
+class InsumoComposicaoResponse(BaseModel):
+    id: int
+    id_insumo: int
+    id_composicao: int
+    id_insumo_item: int
+    valor_onerado: float
+    valor_nao_onerado: float
+    coeficiente: float
+    excluido: bool
+
+
 class InsumoComposicao(Base):
     __tablename__ = "insumo_composicoes"
     id = Column(Integer, primary_key=True)
@@ -263,7 +275,7 @@ class InsumoComposicao(Base):
 
 
     def to_pydantic(self):
-        insumo_dict = InsumoComposicao.model_validate({
+        return InsumoComposicaoResponse.model_validate({
             'id': self.id,
             'id_insumo': self.id_insumo,
             'id_composicao': self.id_composicao,
@@ -273,5 +285,3 @@ class InsumoComposicao(Base):
             'coeficiente': self.coeficiente,
             'excluido': self.excluido,
         })
-
-        return insumo_dict
