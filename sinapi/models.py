@@ -120,7 +120,7 @@ class InsumoTabela(Base):
     unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
     # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    insumos_composicoes = relationship("InsumoComposicao", back_populates="insumo_composicoes")
+    insumos_composicoes = relationship("InsumoComposicao", back_populates="insumo")
 
 
     def to_pydantic(self):
