@@ -1,3 +1,4 @@
+from math import ceil
 from typing import List
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
@@ -31,6 +32,7 @@ app.add_middleware(
 def read_insumos(page: int = 1, limit: int = 10, session: Session = Depends(get_db)):
     offset = (page - 1) * limit
     count = session.query(InsumoTabela).count()
+    total_pages = ceil(count / limit)
 
     insumos: List[InsumoTabela] = (
         session.query(InsumoTabela)
@@ -40,13 +42,17 @@ def read_insumos(page: int = 1, limit: int = 10, session: Session = Depends(get_
         .all()
     )
     insumos_response = mount_insumo_composicao_response(session, insumos)
-    return InsumosResponse(insumos=insumos_response, total_rows=count)
+    return InsumosResponse(
+        insumos=insumos_response, total_rows=count, total_pages=total_pages
+    )
 
 
 @app.get("/composicoes", response_model=ComposicaoResponse)
 def read_composicoes(page: int = 1, limit: int = 10, db: Session = Depends(get_db)):
     offset = (page - 1) * limit
     count = db.query(InsumoTabela).count()
+    total_pages = ceil(count / limit)
+
     composicoes: List[ComposicaoTabela] = (
         db.query(ComposicaoTabela)
         .order_by(ComposicaoTabela.id)
@@ -55,4 +61,6 @@ def read_composicoes(page: int = 1, limit: int = 10, db: Session = Depends(get_d
         .all()
     )
     composicoes_response = mount_insumo_composicao_response(db, composicoes)
-    return ComposicaoResponse(composicoes=composicoes_response, total_rows=count)
+    return ComposicaoResponse(
+        composicoes=composicoes_response, total_rows=count, total_pages=total_pages
+    )
