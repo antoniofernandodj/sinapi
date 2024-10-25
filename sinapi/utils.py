@@ -1,5 +1,7 @@
 from contextlib import suppress
 
+from sinapi.api.schema import EstadoResponseItem
+
 
 try:
     from sinapi.api.schema import EstadoResponse
@@ -16,7 +18,7 @@ login = "lsouza17@gmail.com"
 senha = "eflEs2cF"
 
 
-async def get_estados_a_cadastrar(service: SinapiService):
+async def get_estados_a_cadastrar(service: SinapiService) -> list[EstadoResponseItem]:
     estados_response: EstadoResponse = await service.estados(
         term=None,
         order="name",
