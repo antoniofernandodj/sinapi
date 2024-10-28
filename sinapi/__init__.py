@@ -123,31 +123,31 @@ def inserir_insumo_item(item: Optional[dict], session):
 
 
 def inserir_composicoes_insumo(
-    insumo_composicao: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
+    insumo_composicao_api: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
 
     if isinstance(insumo, InsumoTabela):
         insumo_composicao = InsumoComposicao(
-            id=insumo_composicao["id"],
+            id=insumo_composicao_api["id"],
             id_insumo=insumo.id,
             id_composicao=None,
             id_insumo_item=insumo.id,
-            valor_onerado=insumo_composicao["valorOnerado"],
-            valor_nao_onerado=insumo_composicao["valorNaoOnerado"],
-            coeficiente=insumo_composicao["coeficiente"],
-            excluido=insumo_composicao["excluido"],
+            valor_onerado=insumo_composicao_api["valorOnerado"],
+            valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
+            coeficiente=insumo_composicao_api["coeficiente"],
+            excluido=insumo_composicao_api["excluido"],
         )
 
     elif isinstance(insumo, ComposicaoTabela):
         insumo_composicao = InsumoComposicao(
-            id=insumo_composicao["id"],
+            id=insumo_composicao_api["id"],
             id_insumo=None,
             id_composicao=insumo.id,
             id_insumo_item=insumo.id,
-            valor_onerado=insumo_composicao["valorOnerado"],
-            valor_nao_onerado=insumo_composicao["valorNaoOnerado"],
-            coeficiente=insumo_composicao["coeficiente"],
-            excluido=insumo_composicao["excluido"],
+            valor_onerado=insumo_composicao_api["valorOnerado"],
+            valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
+            coeficiente=insumo_composicao_api["coeficiente"],
+            excluido=insumo_composicao_api["excluido"],
         )
 
     session.merge(insumo_composicao)
