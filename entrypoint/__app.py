@@ -16,8 +16,7 @@ from entrypoint.utils import get_db, mount_insumo_composicao_response
 from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
 
 from entrypoint.schema import (
-    InsumosResponse,
-    ComposicaoResponse,
+    InsumosComposicoesResponse,
     EstadosResponse,
     TabelasResponse
 )
@@ -59,7 +58,7 @@ def read_estados(session: Session = Depends(get_db)):
     )
 
 
-@app.get("/insumos", response_model=InsumosResponse)
+@app.get("/insumos", response_model=InsumosComposicoesResponse)
 def read_insumos(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
@@ -86,8 +85,8 @@ def read_insumos(
     insumos: List[InsumoTabela] = query.all()
 
     insumos_response = mount_insumo_composicao_response(session, insumos)
-    return InsumosResponse(
-        insumos=insumos_response,
+    return InsumosComposicoesResponse(
+        payload=insumos_response,
         total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
@@ -95,7 +94,7 @@ def read_insumos(
     )
 
 
-@app.get("/composicoes", response_model=ComposicaoResponse)
+@app.get("/composicoes", response_model=InsumosComposicoesResponse)
 def read_composicoes(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
@@ -121,8 +120,8 @@ def read_composicoes(
     composicoes: List[ComposicaoTabela] = query.all()
     composicoes_response = mount_insumo_composicao_response(db, composicoes)
 
-    return ComposicaoResponse(
-        composicoes=composicoes_response,
+    return InsumosComposicoesResponse(
+        payload=composicoes_response,
         total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
