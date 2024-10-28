@@ -32,10 +32,10 @@ app.add_middleware(
 
 @app.get("/insumos", response_model=InsumosResponse)
 def read_insumos(
-    description: Annotated[Optional[str], Query(None)],
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
     session: Session = Depends(get_db),
+    description: Annotated[Optional[str], Query(max_length=50)] = None,
 ):
     offset = (page - 1) * limit
     total_count = session.query(InsumoTabela).count()
@@ -68,10 +68,10 @@ def read_insumos(
 
 @app.get("/composicoes", response_model=ComposicaoResponse)
 def read_composicoes(
-    description: Annotated[Optional[str], Query(None)],
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
     db: Session = Depends(get_db),
+    description: Annotated[Optional[str], Query(max_length=50)] = None,
 ):
     offset = (page - 1) * limit
     total_count = db.query(ComposicaoTabela).count()
