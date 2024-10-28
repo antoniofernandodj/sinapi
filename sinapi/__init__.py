@@ -125,6 +125,11 @@ def inserir_insumo_item(item: Optional[dict], session):
 def inserir_composicoes_insumo(
     insumo_composicao_api: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
+    
+    inserir_insumo_item(
+        item=insumo_composicao_api["insumoItem"],
+        session=session,
+    )
 
     if isinstance(insumo, InsumoTabela):
         insumo_composicao = InsumoComposicao(
@@ -152,10 +157,6 @@ def inserir_composicoes_insumo(
 
     session.merge(insumo_composicao)
 
-    inserir_insumo_item(
-        item=insumo_composicao_api["insumoItem"],
-        session=session,
-    )
 
 
 def main_insert(
