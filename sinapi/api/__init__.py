@@ -153,10 +153,12 @@ class SinapiService:
                 items=data["items"], totalRows=data["totalRows"]
             )
             yield result
-            loop = bool(result.items)
-            if result.items:
+
+            if len(result.items) != 0:
                 results.extend(result.items)
                 params["Page"] += 1
+            else:
+                loop = False
 
     async def estados(
         self,
