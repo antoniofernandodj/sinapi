@@ -126,6 +126,12 @@ def inserir_composicoes_insumo(
     insumo_composicao_api: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
     
+
+    print('\n'*3)
+    print(insumo_composicao_api)
+    print('\n'*3)
+
+    
     inserir_insumo_item(
         item=insumo_composicao_api["insumoItem"],
         session=session,
