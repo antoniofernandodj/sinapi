@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 
-@app.get("/meses", response_model=TabelasResponse)
+@app.get("/meses", response_model=MesesResponse)
 def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
 
     meses: Set[Mes] = set()
