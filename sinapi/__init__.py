@@ -153,7 +153,7 @@ def inserir_composicoes_insumo(
     session.merge(insumo_composicao)
 
     inserir_insumo_item(
-        item=insumo_composicao["insumoItem"],
+        item=insumo_composicao_api["insumoItem"],
         session=session,
     )
 
