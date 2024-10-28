@@ -27,22 +27,13 @@ async def get_estados_a_cadastrar(service: SinapiService) -> list[EstadoResponse
         page=None,
         limit=None,
     )
-    estados_disponiveis = set(estados_response.items)
-    with Session() as session:
-        estados_cadastrados_sqla = session.query(Estado).all()
-    estados_cadastrados_list = [e.to_pydantic() for e in estados_cadastrados_sqla]
 
-    ultimo_estado = None
-    with suppress(IndexError):
-        ultimo_estado = estados_cadastrados_list[-1]
+    def filtrar_estados(e: EstadoResponseItem):
+        return e.uf in ['SC','SP','SE','TO']
 
-    estados_cadastrados = set(estados_cadastrados_list)
-    estados_a_cadastrar = estados_disponiveis.difference(estados_cadastrados)
+    result = list(filter(filtrar_estados, set(estados_response.items)))
 
-    if ultimo_estado:
-        estados_a_cadastrar.add(ultimo_estado)
-
-    return sorted(list(estados_a_cadastrar), key=lambda item: item.id)
+    return sorted(list(result), key=lambda item: item.id)
 
 
 if __name__ == "__main__":
