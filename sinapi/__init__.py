@@ -186,7 +186,8 @@ def main_insert(
     with suppress(InvalidRequestError):
         session.refresh(item)
 
-    inserir_composicoes_insumo(i["insumosComposicoes"], item, session)
+    for insumo_composicao in i["insumosComposicoes"]:
+        inserir_composicoes_insumo(insumo_composicao, item, session)
 
 
 def inserir_insumos(data, estado_data):
