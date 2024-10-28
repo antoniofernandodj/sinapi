@@ -96,8 +96,11 @@ def inserir_insumo_item(item: Optional[dict], session):
     if item is None:
         return
 
-    inserir_unidade(item["unidade"], session)
-    inserir_tabela(item["tabela"], session)
+    if item["unidade"]:
+        inserir_unidade(item["unidade"], session)
+
+    if item["tabela"]:
+        inserir_tabela(item["tabela"], session)
 
     insumo_item = InsumoItem(
         id=item["id"],
@@ -149,13 +152,10 @@ def inserir_composicoes_insumo(
 
     session.merge(insumo_composicao)
 
-    for insumo_composicao in data:
-        inserir_insumo_item(
-            item=insumo_composicao["insumoItem"],
-            composicao_item=insumo_composicao,
-            insumo=insumo,
-            session=session,
-        )
+    inserir_insumo_item(
+        item=insumo_composicao["insumoItem"],
+        session=session,
+    )
 
 
 def main_insert(
@@ -218,7 +218,6 @@ async def cadastrar_composicoes():
     async for composicao_response, estado_response in get_insumos_or_compositions(
         composicao=True, ano="2024"
     ):
-        breakpoint()
 
         # print(f"Cadastrando recursos relacionados ao mes {estado_response}")
 

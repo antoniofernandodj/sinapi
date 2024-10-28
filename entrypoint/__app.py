@@ -17,7 +17,7 @@ from sinapi.models import ComposicaoTabela, InsumoTabela
 from entrypoint.schema import InsumosResponse, ComposicaoResponse
 
 
-app = FastAPI(openapi_prefix='/sinapi')
+app = FastAPI(openapi_prefix='sinapi')
 
 app.add_middleware(
     CORSMiddleware,

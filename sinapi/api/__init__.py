@@ -38,6 +38,8 @@ class SinapiService:
         json = {"login": self.email, "senha": self.token}
         request = await self.http_client.post(url=url, json=json)
 
+        print(request.text)
+
         data = request.json()
 
         auth_data = schema.AuthData(

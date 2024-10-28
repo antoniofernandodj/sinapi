@@ -35,6 +35,8 @@ def mount_insumo_composicao_response(db, insumos_composicoes):
 
         response.insumosComposicoes = []
 
+        breakpoint()
+
         if isinstance(insumos_composicoes, ComposicaoTabela):
             query_all = db.query(InsumoComposicao).filter_by(id_composicao=obj.id).all()
         else:
