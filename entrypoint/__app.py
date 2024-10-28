@@ -47,7 +47,10 @@ def read_insumos(
     )
     insumos_response = mount_insumo_composicao_response(session, insumos)
     return InsumosResponse(
-        insumos=insumos_response, total_rows=count, total_pages=total_pages
+        insumos=insumos_response,
+        total_rows=count,
+        total_pages=total_pages,
+        current_page=page
     )
 
 
@@ -70,5 +73,8 @@ def read_composicoes(
     )
     composicoes_response = mount_insumo_composicao_response(db, composicoes)
     return ComposicaoResponse(
-        composicoes=composicoes_response, total_rows=count, total_pages=total_pages
+        composicoes=composicoes_response,
+        total_rows=count,
+        total_pages=total_pages,
+        current_page=page
     )
