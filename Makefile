@@ -2,7 +2,7 @@ load:
 	git pull origin main
 	docker build -t sinapi_loader -f loader.dockerfile .
 	docker rm -f sinapi_loader
-	docker run -d -it --name sinapi_loader --network host sinapi
+	docker run -d -it --name sinapi_loader --network host sinapi_loader
 	docker logs -f sinapi_loader
 
 app:
