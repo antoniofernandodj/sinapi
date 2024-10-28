@@ -13,9 +13,14 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
 from entrypoint.utils import get_db, mount_insumo_composicao_response
-from sinapi.models import ComposicaoTabela, InsumoTabela
+from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
 
-from entrypoint.schema import InsumosResponse, ComposicaoResponse
+from entrypoint.schema import (
+    InsumosResponse,
+    ComposicaoResponse,
+    EstadosResponse,
+    TabelasResponse
+)
 
 
 app = FastAPI()
@@ -28,6 +33,30 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
 )
+
+
+@app.get("/tabelas", response_model=TabelasResponse)
+def read_tabelas(session: Session = Depends(get_db)):
+
+    tabelas = session.query(Tabela).all()
+
+    return TabelasResponse(
+        tabelas=[
+            tabela.to_pydantic() for tabela in tabelas
+        ]
+    )
+
+
+@app.get("/estados", response_model=EstadosResponse)
+def read_estados(session: Session = Depends(get_db)):
+
+    estados = session.query(Estado).all()
+
+    return EstadosResponse(
+        estados=[
+            estado.to_pydantic() for estado in estados
+        ]
+    )
 
 
 @app.get("/insumos", response_model=InsumosResponse)
