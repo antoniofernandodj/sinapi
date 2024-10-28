@@ -9,6 +9,7 @@ class InsumosResponse(BaseModel):
     total_rows: int
     total_pages: int
     current_page: int
+    result_count: int
 
 
 class ComposicaoResponse(BaseModel):
@@ -16,3 +17,4 @@ class ComposicaoResponse(BaseModel):
     total_rows: int
     total_pages: int
     current_page: int
+    result_count: int
