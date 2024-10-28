@@ -355,7 +355,7 @@ class SinapiService:
         expiry_time = datetime.fromisoformat(fixed_date_str)
         return datetime.now(timezone.utc) < expiry_time
 
-    @retry(max_attempts=5, backoff=1)
+    @retry(max_attempts=15, backoff=1.0)
     async def _make_request(
         self,
         method: str,
