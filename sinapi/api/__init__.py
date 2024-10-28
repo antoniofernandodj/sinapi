@@ -1,7 +1,10 @@
+import asyncio
 from copy import deepcopy
+from functools import wraps
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+import random
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 import httpx
 
@@ -13,6 +16,30 @@ except:
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(Path(__file__).name)
+
+
+
+def retry(max_attempts: int = 5, backoff: float = 1.0):
+    """Decorator to retry a function call with exponential backoff."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_attempts:
+                try:
+                    return await func(*args, **kwargs)
+                except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                    attempts += 1
+                    logger.error(f"Attempt {attempts} failed: {e}")
+                    if attempts >= max_attempts:
+                        logger.error("Max retries reached. Raising exception.")
+                        raise  # Re-raise the last exception
+                    backoff_time = backoff * (2 ** (attempts - 1)) + random.uniform(0, 1)
+                    logger.debug(f"Retrying in {backoff_time:.2f} seconds...")
+                    await asyncio.sleep(backoff_time)
+        return wrapper
+    return decorator
+
 
 
 class SinapiService:
@@ -328,6 +355,7 @@ class SinapiService:
         expiry_time = datetime.fromisoformat(fixed_date_str)
         return datetime.now(timezone.utc) < expiry_time
 
+    @retry(max_attempts=5, backoff=1)
     async def _make_request(
         self,
         method: str,
