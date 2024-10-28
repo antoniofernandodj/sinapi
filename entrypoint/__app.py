@@ -2,8 +2,6 @@ from math import ceil
 from typing import Annotated, List, Optional
 from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
-from fastapi.openapi.utils import get_openapi
-
 from fastapi.middleware.cors import CORSMiddleware
 
 import sys
