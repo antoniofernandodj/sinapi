@@ -152,10 +152,6 @@ def inserir_composicoes_insumo(
 
     session.merge(insumo_composicao)
 
-    print('\n'*10)
-    print(insumo_composicao)
-    print('\n'*10)
-
     inserir_insumo_item(
         item=insumo_composicao["insumoItem"],
         session=session,
