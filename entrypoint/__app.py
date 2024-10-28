@@ -62,13 +62,18 @@ def read_insumos(
     limit: Annotated[int, Query(lt=200)] = 10,
     session: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
+    codigo: Optional[str] = None
 ):
     offset = (page - 1) * limit
     total_count = session.query(InsumoTabela).count()
     total_pages = ceil(total_count / limit)
 
     query = session.query(InsumoTabela)
-    if description:
+
+    if codigo:
+        query = query.filter_by(codigo=codigo)
+
+    elif description:
         query = query.filter(InsumoTabela.nome.like(f'%{description}%'))
 
     query = (
@@ -98,14 +103,18 @@ def read_composicoes(
     limit: Annotated[int, Query(lt=200)] = 10,
     db: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
+    codigo: Optional[str] = None
 ):
     offset = (page - 1) * limit
     total_count = db.query(ComposicaoTabela).count()
     total_pages = ceil(total_count / limit)
 
     query = db.query(ComposicaoTabela)
-    if description:
-        query = query.filter(ComposicaoTabela.nome.like(f'%{description}%'))
+    if codigo:
+        query = query.filter_by(codigo=codigo)
+
+    elif description:
+        query = query.filter(InsumoTabela.nome.like(f'%{description}%'))
 
     query = (
         query
