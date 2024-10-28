@@ -157,7 +157,7 @@ def inserir_composicoes_insumo(
             id=insumo_composicao_api["id"],
             id_insumo=None,
             id_composicao=insumo.id,
-            id_insumo_item=insumo.id,
+            id_insumo_item=insumo_item['id'],
             valor_onerado=insumo_composicao_api["valorOnerado"],
             valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
             coeficiente=insumo_composicao_api["coeficiente"],
