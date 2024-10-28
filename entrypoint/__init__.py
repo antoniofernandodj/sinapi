@@ -1,1 +1,1 @@
-from entrypoint.__app import app
+from entrypoint.__app import app as app

@@ -40,46 +40,43 @@ def load_json(file_path):
 
 
 def inserir_estado(data, session):
-    estado = Estado(
+
+    session.merge(Estado(
         id=data["id"],
         nome=data["nome"],
         uf=data["uf"],
         ibge=data["ibge"],
         excluido=data["excluido"] if data["excluido"] is not None else False,
-    )
-
-    session.merge(estado)
+    ))
 
 
 def inserir_unidade(item: Optional[dict], session):
     if item is None:
         return
 
-    unidade = Unidade(
+    session.merge(Unidade(
         id=item["id"],
         nome=item["nome"],
         excluido=item["excluido"],
-    )
-    session.merge(unidade)
+    ))
 
 
 def inserir_classe(item: Optional[dict], session):
     if item is None:
         return
 
-    classe = Classe(
+    session.merge(Classe(
         id=item["id"],
         nome=item["nome"],
         excluido=item["excluido"],
-    )
-    session.merge(classe)
+    ))
 
 
 def inserir_tabela(item: Optional[dict], session):
     if item is None:
         return
 
-    tabela = Tabela(
+    session.merge(Tabela(
         id=item["id"],
         nome=item["nome"],
         id_estado=item["idEstado"],
@@ -88,8 +85,7 @@ def inserir_tabela(item: Optional[dict], session):
         data_hora_atualizacao=item["dataHoraAtualizacao"],
         id_tipo_tabela=item["idTipoTabela"],
         excluido=item["excluido"],
-    )
-    session.merge(tabela)
+    ))
 
 
 def inserir_insumo_item(item: Optional[dict], session):
@@ -102,7 +98,7 @@ def inserir_insumo_item(item: Optional[dict], session):
     if item["tabela"]:
         inserir_tabela(item["tabela"], session)
 
-    insumo_item = InsumoItem(
+    session.merge(InsumoItem(
         id=item["id"],
         nome=item["nome"],
         codigo=item["codigo"],
@@ -118,8 +114,7 @@ def inserir_insumo_item(item: Optional[dict], session):
         percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),
         percentual_outros=item.get("percentualOutros"),
         excluido=item["excluido"],
-    )
-    session.merge(insumo_item)
+    ))
 
 
 def inserir_composicoes_insumo(
@@ -131,7 +126,7 @@ def inserir_composicoes_insumo(
     inserir_insumo_item(item=insumo_item, session=session)
 
     if isinstance(insumo, InsumoTabela):
-        insumo_composicao = InsumoComposicao(
+        session.merge(InsumoComposicao(
             id=insumo_composicao_api["id"],
             id_insumo=insumo.id,
             id_composicao=None,
@@ -140,10 +135,10 @@ def inserir_composicoes_insumo(
             valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
             coeficiente=insumo_composicao_api["coeficiente"],
             excluido=insumo_composicao_api["excluido"],
-        )
+        ))
 
     elif isinstance(insumo, ComposicaoTabela):
-        insumo_composicao = InsumoComposicao(
+        session.merge(InsumoComposicao(
             id=insumo_composicao_api["id"],
             id_insumo=None,
             id_composicao=insumo.id,
@@ -152,9 +147,7 @@ def inserir_composicoes_insumo(
             valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
             coeficiente=insumo_composicao_api["coeficiente"],
             excluido=insumo_composicao_api["excluido"],
-        )
-
-    session.merge(insumo_composicao)
+        ))
 
 
 def main_insert(
