@@ -158,7 +158,6 @@ def inserir_composicoes_insumo(
     session.merge(insumo_composicao)
 
 
-
 def main_insert(
     i: Dict[str, Any], Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]], session
 ):
