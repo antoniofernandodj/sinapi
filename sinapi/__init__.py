@@ -209,6 +209,9 @@ def inserir_insumos(data, estado_data):
 
 def inserir_composicoes(data, estado_data):
     with Session() as session:
+
+        session.autoflush = False
+
         inserir_estado(estado_data, session)
         for i in data:
             main_insert(i, ComposicaoTabela, session)
