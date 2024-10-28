@@ -28,7 +28,7 @@ def retry(max_attempts: int, backoff: float):
             while attempts < max_attempts:
                 try:
                     return await func(*args, **kwargs)
-                except Exception:
+                except Exception as e:
                     attempts += 1
                     logger.error(f"Attempt {attempts} failed: {e}")
                     if attempts >= max_attempts:
