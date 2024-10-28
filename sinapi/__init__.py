@@ -138,10 +138,7 @@ def inserir_composicoes_insumo(
 
     insumo_item = insumo_composicao_api["insumoItem"]
     
-    inserir_insumo_item(
-        item=insumo_item['id'],
-        session=session,
-    )
+    inserir_insumo_item(item=insumo_item, session=session)
 
     if isinstance(insumo, InsumoTabela):
         insumo_composicao = InsumoComposicao(
