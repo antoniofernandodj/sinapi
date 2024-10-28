@@ -19,7 +19,7 @@ logger = logging.getLogger(Path(__file__).name)
 
 
 
-def retry(max_attempts: int = 15, backoff: float = 1.0):
+def retry(max_attempts: int, backoff: float):
     """Decorator to retry a function call with exponential backoff."""
     def decorator(func):
         @wraps(func)
