@@ -2,6 +2,7 @@ from math import ceil
 from typing import Annotated, List
 from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
+from fastapi.openapi.utils import get_openapi
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,8 +18,8 @@ from sinapi.models import ComposicaoTabela, InsumoTabela
 from entrypoint.schema import InsumosResponse, ComposicaoResponse
 
 
-app = FastAPI(openapi_prefix='')
-# app = FastAPI()
+app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +28,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
 )
+
+@app.get("/sinapi/openapi.json")
+async def alternate_openapi():
+    return get_openapi(
+        title=app.title,
+        version=app.version,
+        openapi_version=app.openapi_version,
+        description=app.description,
+        routes=app.routes,
+    )
 
 
 @app.get("/insumos", response_model=InsumosResponse)
