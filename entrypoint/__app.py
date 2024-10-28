@@ -1,5 +1,5 @@
 from math import ceil
-from typing import Annotated, List, Optional
+from typing import Annotated, List, Optional, Set
 from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +16,9 @@ from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
 from entrypoint.schema import (
     InsumosComposicoesResponse,
     EstadosResponse,
-    TabelasResponse
+    TabelasResponse,
+    MesesResponse,
+    Mes,
 )
 
 
@@ -32,7 +34,23 @@ app.add_middleware(
 )
 
 
-@app.get("/tabelas", response_model=TabelasResponse)
+@app.get("/meses", response_model=TabelasResponse)
+def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
+
+    meses: Set[Mes] = set()
+    tabelas = session.query(Tabela).all()
+
+    for t in tabelas:
+        if not isinstance(t.ano, int) or not isinstance(t.mes, int):
+            raise TypeError
+
+        mes = Mes(mes=t.mes, ano=t.ano)
+        meses.add(mes)
+
+    return MesesResponse(meses=list(meses))
+
+
+@app.get("/meses", response_model=TabelasResponse)
 def read_tabelas(session: Session = Depends(get_db)):
 
     tabelas = session.query(Tabela).all()

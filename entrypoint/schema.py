@@ -18,3 +18,19 @@ class EstadosResponse(BaseModel):
 
 class TabelasResponse(BaseModel):
     tabelas: List[InsumosResponseTabela]
+
+
+class Mes(BaseModel):
+    mes: int
+    ano: int
+
+    def __eq__(self, other):
+        return isinstance(other, Mes) and self.mes == other.mes and self.ano == other.ano
+
+    def __hash__(self):
+        return hash((self.mes, self.ano))
+
+
+
+class MesesResponse(BaseModel):
+    meses: List[Mes]
