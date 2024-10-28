@@ -19,7 +19,7 @@ logger = logging.getLogger(Path(__file__).name)
 
 
 
-def retry(max_attempts: int = 5, backoff: float = 1.0):
+def retry(max_attempts: int = 15, backoff: float = 1.0):
     """Decorator to retry a function call with exponential backoff."""
     def decorator(func):
         @wraps(func)
@@ -28,12 +28,12 @@ def retry(max_attempts: int = 5, backoff: float = 1.0):
             while attempts < max_attempts:
                 try:
                     return await func(*args, **kwargs)
-                except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                except Exception:
                     attempts += 1
                     logger.error(f"Attempt {attempts} failed: {e}")
                     if attempts >= max_attempts:
                         logger.error("Max retries reached. Raising exception.")
-                        raise  # Re-raise the last exception
+                        raise
                     backoff_time = backoff * (2 ** (attempts - 1)) + random.uniform(0, 1)
                     logger.debug(f"Retrying in {backoff_time:.2f} seconds...")
                     await asyncio.sleep(backoff_time)
