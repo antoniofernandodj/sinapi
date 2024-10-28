@@ -62,34 +62,45 @@ def read_insumos(
     limit: Annotated[int, Query(lt=200)] = 10,
     session: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
-    codigo: Optional[str] = None
+    codigo: Optional[str] = None,
+    id_tabela: Optional[int] = None,
+    id_classe: Optional[int] = None
 ):
+    
+    Table = InsumoTabela
+    payload: List[InsumoTabela]
+
     offset = (page - 1) * limit
-    total_count = session.query(InsumoTabela).count()
+    total_count = session.query(Table).count()
     total_pages = ceil(total_count / limit)
 
-    query = session.query(InsumoTabela)
+    query = session.query(Table)
 
     if codigo:
         query = query.filter_by(codigo=codigo)
 
-    elif description:
-        query = query.filter(InsumoTabela.nome.like(f'%{description}%'))
+    if description:
+        query = query.filter(Table.nome.like(f'%{description}%'))
+
+    if id_tabela:
+        query = query.filter_by(id_tabela=id_tabela)
+
+    if id_classe:
+        query = query.filter_by(id_classe=id_classe)
 
     query = (
         query
-        .order_by(InsumoTabela.id)
+        .order_by(Table.id)
         .offset(offset)
         .limit(limit)
     )
 
     result_count = query.count()
+    payload = query.all()
+    payload_response = mount_insumo_composicao_response(session, payload)
 
-    insumos: List[InsumoTabela] = query.all()
-
-    insumos_response = mount_insumo_composicao_response(session, insumos)
     return InsumosComposicoesResponse(
-        payload=insumos_response,
+        payload=payload_response,
         total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
@@ -103,32 +114,44 @@ def read_composicoes(
     limit: Annotated[int, Query(lt=200)] = 10,
     db: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
-    codigo: Optional[str] = None
+    codigo: Optional[str] = None,
+    id_tabela: Optional[int] = None,
+    id_classe: Optional[int] = None
 ):
+
+    Table = ComposicaoTabela
+    payload: List[ComposicaoTabela]
+
     offset = (page - 1) * limit
-    total_count = db.query(ComposicaoTabela).count()
+    total_count = db.query(Table).count()
     total_pages = ceil(total_count / limit)
 
-    query = db.query(ComposicaoTabela)
+    query = db.query(Table)
     if codigo:
         query = query.filter_by(codigo=codigo)
 
-    elif description:
-        query = query.filter(InsumoTabela.nome.like(f'%{description}%'))
+    if description:
+        query = query.filter(Table.nome.like(f'%{description}%'))
+
+    if id_tabela:
+        query = query.filter_by(id_tabela=id_tabela)
+
+    if id_classe:
+        query = query.filter_by(id_classe=id_classe)
 
     query = (
         query
-        .order_by(ComposicaoTabela.id)
+        .order_by(Table.id)
         .offset(offset)
         .limit(limit)
     )
 
     result_count = query.count()
-    composicoes: List[ComposicaoTabela] = query.all()
-    composicoes_response = mount_insumo_composicao_response(db, composicoes)
+    payload = query.all()
+    payload_response = mount_insumo_composicao_response(db, payload)
 
     return InsumosComposicoesResponse(
-        payload=composicoes_response,
+        payload=payload_response,
         total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
