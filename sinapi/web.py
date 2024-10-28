@@ -19,6 +19,7 @@ async def get_insumos_or_compositions(
 ) -> AsyncGenerator[tuple[InsumosResponse, EstadoResponseItem], Any]:
 
     async with SinapiService(login, senha) as service:
+        breakpoint()
         try:
             estados_response = await get_estados_a_cadastrar(service)
 

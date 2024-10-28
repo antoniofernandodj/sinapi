@@ -25,10 +25,14 @@ USER itemize
 
 COPY --from=sinapi-builder /usr/local /usr/local
 
-ENV PATH="${PATH}:/home/itemize/.local/bin" PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONBREAKPOINT=0 TERM=xterm-256color
+ENV \
+    PATH="${PATH}:/home/itemize/.local/bin" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TERM=xterm-256color
 
 USER itemize
 
 COPY --from=sinapi-builder /home/itemize/flow /home/itemize/flow
 
-CMD ["python", "load.py"]
+CMD ["python", "app.loader.py"]

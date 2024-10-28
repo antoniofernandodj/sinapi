@@ -120,7 +120,7 @@ def inserir_insumo_item(item: Optional[dict], session):
 
 
 def inserir_composicoes_insumo(
-    data, insumo: Union[InsumoTabela, ComposicaoTabela], session
+    insumo_composicao: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
 
     if isinstance(insumo, InsumoTabela):
@@ -218,6 +218,7 @@ async def cadastrar_composicoes():
     async for composicao_response, estado_response in get_insumos_or_compositions(
         composicao=True, ano="2024"
     ):
+        breakpoint()
 
         # print(f"Cadastrando recursos relacionados ao mes {estado_response}")
 

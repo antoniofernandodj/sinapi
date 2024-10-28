@@ -29,7 +29,6 @@ ENV \
     PATH="${PATH}:/home/itemize/.local/bin" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONBREAKPOINT=0 \
     TERM=xterm-256color
 
 USER itemize
