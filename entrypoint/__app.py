@@ -38,7 +38,7 @@ app.add_middleware(
 def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
 
     meses: Set[Mes] = set()
-    tabelas = session.query(Tabela).all()
+    tabelas: List[Tabela] = session.query(Tabela).all()
 
     for t in tabelas:
         if not isinstance(t.ano, int) or not isinstance(t.mes, int):
@@ -47,7 +47,12 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
         mes = Mes(mes=t.mes, ano=t.ano)
         meses.add(mes)
 
-    return MesesResponse(meses=list(meses))
+    return MesesResponse(
+        meses=sorted(
+            list(meses),
+            key=lambda mes: str(mes.ano) + '/' + str(mes.mes)
+        )
+    )
 
 
 @app.get("/meses", response_model=TabelasResponse)
