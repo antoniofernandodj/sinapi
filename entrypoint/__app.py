@@ -83,7 +83,7 @@ def read_composicoes(
 
     query = (
         query
-        .order_by(InsumoTabela.id)
+        .order_by(ComposicaoTabela.id)
         .offset(offset)
         .limit(limit)
     )
