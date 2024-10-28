@@ -58,7 +58,7 @@ def read_composicoes(
     db: Session = Depends(get_db),
 ):
     offset = (page - 1) * limit
-    count = db.query(InsumoTabela).count()
+    count = db.query(ComposicaoTabela).count()
     total_pages = ceil(count / limit)
 
     composicoes: List[ComposicaoTabela] = (
