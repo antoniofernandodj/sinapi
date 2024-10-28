@@ -35,23 +35,25 @@ def mount_insumo_composicao_response(db, insumos_composicoes):
 
         response.insumosComposicoes = []
 
-        breakpoint()
+        # breakpoint()
 
-        if isinstance(insumos_composicoes, ComposicaoTabela):
-            query_all = db.query(InsumoComposicao).filter_by(id_composicao=obj.id).all()
-        else:
-            query_all = db.query(InsumoComposicao).filter_by(id_insumo=obj.id).all()
+        for insumo_composicao in insumos_composicoes:
 
-        for ic in query_all:
-            if not isinstance(ic, InsumoComposicao):
-                continue
+            if isinstance(insumo_composicao, ComposicaoTabela):
+                query_all = db.query(InsumoComposicao).filter_by(id_composicao=obj.id).all()
+            else:
+                query_all = db.query(InsumoComposicao).filter_by(id_insumo=obj.id).all()
 
-            insumo_item = db.query(InsumoItem).filter_by(id=ic.id_insumo_item).first()
-            ic_response: InsumoComposicaoResponse = ic.to_pydantic(
-                insumo_item.to_pydantic()
-            )
+            for ic in query_all:
+                if not isinstance(ic, InsumoComposicao):
+                    continue
 
-            response.insumosComposicoes.append(ic_response)
+                insumo_item = db.query(InsumoItem).filter_by(id=ic.id_insumo_item).first()
+                ic_response: InsumoComposicaoResponse = ic.to_pydantic(
+                    insumo_item.to_pydantic()
+                )
+
+                response.insumosComposicoes.append(ic_response)
 
         result.append(response)
     return result

@@ -18,6 +18,7 @@ from entrypoint.schema import InsumosResponse, ComposicaoResponse
 
 
 app = FastAPI(openapi_prefix='sinapi')
+# app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
