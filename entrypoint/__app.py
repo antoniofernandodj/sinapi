@@ -55,7 +55,7 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
     )
 
 
-@app.get("/meses", response_model=TabelasResponse)
+@app.get("/tabelas", response_model=TabelasResponse)
 def read_tabelas(session: Session = Depends(get_db)):
 
     tabelas = session.query(Tabela).all()
