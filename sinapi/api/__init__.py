@@ -374,6 +374,7 @@ class SinapiService:
 
             response: httpx.Response = await callable(**kwargs)
             logging.debug(response)
+            print(response.text)
             logging.debug(response.json())
             response.raise_for_status()  # Raises an exception for HTTP errors
             return response
