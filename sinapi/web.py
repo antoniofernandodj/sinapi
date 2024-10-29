@@ -38,7 +38,7 @@ async def get_insumos_or_compositions(
                         uf=uf,
                         composicao=composicao,
                     ):
-                        print(f'I: {insumo_response}')
+                        print(f'I: {insumo_response.totalRows}')
                         yield (insumo_response, estado_response)
 
 
