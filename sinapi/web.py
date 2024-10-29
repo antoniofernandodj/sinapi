@@ -19,36 +19,31 @@ meses = [
     Mes(value=i, text=str(i)) for i in range(1, 13)
 ]
 
-ESTADOS_RESPONSE = None
-
 
 async def get_insumos_or_compositions(
     ano: str,
     composicao=True
 ) -> AsyncGenerator[tuple[InsumosResponse, EstadoResponseItem], Any]:
-    async with SinapiService(login, senha) as service:
-        ESTADOS_RESPONSE = await get_estados_a_cadastrar(service)
+    service = SinapiService(login, senha)
+    estados_response = await get_estados_a_cadastrar(service)
 
-    async with SinapiService(login, senha) as service:
-        try:
-            for estado_response in ESTADOS_RESPONSE:
-                uf = estado_response.uf
-                for mes in meses:
-                    if mes.value in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
-                        continue
-                    
-                    print(f'Buscando para {ano}, {mes.value}, {uf}, {composicao}')
-                    async for insumo_response in service.insumos_todos(
-                        ano=ano, mes=mes.value, uf=uf, composicao=composicao,
-                    ):
-                        print(f'I: {insumo_response.totalRows}')
-                        yield (insumo_response, estado_response)
+    try:
+        for estado_response in estados_response:
+            uf = estado_response.uf
+            for mes in meses:
+                if mes.value != 9:
+                    continue
+                
+                print(f'Buscando para {ano}, {mes.value}, {uf}, {composicao}')
+                async for insumo_response in service.insumos_todos(
+                    ano=ano, mes=mes.value, uf=uf, composicao=composicao,
+                ):
+                    print(f'I: {insumo_response.totalRows}')
+                    yield (insumo_response, estado_response)
 
-
-        except Exception as error:
-            import traceback
-
-            traceback.print_exc()
-            print(error)
-            print(type(error))
-            # logger.error(f"An error occurred: {error}")
+    except Exception as error:
+        import traceback
+        traceback.print_exc()
+        print(error)
+        print(type(error))
+        # logger.error(f"An error occurred: {error}")

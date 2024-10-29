@@ -444,12 +444,5 @@ class SinapiService:
     def auth_data(self, item: schema.AuthData):
         self.__auth_data = item
 
-    async def __aenter__(self):
-        logger.debug("Opening SinapiService")
-        return self
-
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        pass
-
     def __remove_none(self, params: dict):
         return {k: v for k, v in params.items() if v is not None}
