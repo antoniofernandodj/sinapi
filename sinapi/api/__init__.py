@@ -188,9 +188,10 @@ class SinapiService:
                 )
                 yield result
 
-            if result is None or len(result.items) != 0:
-                if result:
-                    results.extend(result.items)
+            if result is None:
+                loop = False
+            elif len(result.items) != 0:
+                results.extend(result.items)
                 params["Page"] += 1
                 print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
             else:
