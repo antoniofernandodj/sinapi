@@ -405,7 +405,7 @@ class SinapiService:
                     return None
 
                 logging.debug(response.json())
-                response.raise_for_status()  # Raises an exception for HTTP errors
+                response.raise_for_status()
                 return response
 
             except httpx.HTTPStatusError as e:
