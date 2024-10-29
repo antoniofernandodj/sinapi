@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
 from pydantic import BaseModel
 from sniffio import current_async_library
@@ -43,5 +43,5 @@ class MesesResponse(BaseModel):
 
 
 class TabelasQuery(BaseModel):
-    mes_ano: Optional[datetime] = None
+    mes_ano: Optional[date] = None
     id_estado: Optional[int] = None
