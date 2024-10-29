@@ -30,7 +30,8 @@ async def get_estados_a_cadastrar(service: SinapiService) -> list[EstadoResponse
     )
 
     def filtrar_estados(estado: EstadoResponseItem):
-        return estado.uf in ['TO']
+        # return estado.uf in ['TO']
+        return True
 
     estados_response_items = estados_response.items if estados_response else []
     result = list(filter(filtrar_estados, set(estados_response_items)))
