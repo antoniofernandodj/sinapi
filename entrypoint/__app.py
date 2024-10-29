@@ -4,6 +4,7 @@ from typing import Annotated, List, Optional, Set
 from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Query as SQLQuery
 
 
 import sys
@@ -94,7 +95,7 @@ def read_insumos(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
     session: Session = Depends(get_db),
-    description: Annotated[Optional[str], Query(max_length=200)] = None,
+    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
     id: Optional[int] = None,
     id_tabela: Optional[int] = None,
@@ -106,15 +107,15 @@ def read_insumos(
 
     offset = (page - 1) * limit
 
-    query: Query = session.query(Table)
+    query: SQLQuery = session.query(Table)
     if id:
         query = query.filter_by(id=id)
 
     if codigo:
         query = query.filter_by(codigo=codigo)
 
-    if description:
-        query = query.filter(Table.nome.like(f"%{description}%"))
+    if descricao:
+        query = query.filter(Table.nome.like(f"%{descricao}%"))
 
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
@@ -124,7 +125,7 @@ def read_insumos(
 
     query = query.order_by(Table.id).offset(offset).limit(limit)
 
-    print({"sqlquery": query})
+    print({"sqlquery": str(query)})
 
     result_count = query.count()
     total_pages = ceil(result_count / limit)
