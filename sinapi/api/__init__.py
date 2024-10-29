@@ -182,7 +182,7 @@ class SinapiService:
             if len(result.items) != 0:
                 results.extend(result.items)
                 params["Page"] += 1
-                print(f"Page: {params['Page']}")
+                print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
             else:
                 loop = False
 
