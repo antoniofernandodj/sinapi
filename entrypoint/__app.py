@@ -132,7 +132,7 @@ def read_insumos(
     sql_str = str(query.statement.compile(dialect=mysql.dialect()))
     params = query.params
     print("Query:", sql_str)
-    print("Params:", params)
+    print("Params:", str(params))
 
     result_count = query.count()
     total_pages = ceil(result_count / limit)
