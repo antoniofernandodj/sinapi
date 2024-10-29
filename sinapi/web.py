@@ -30,7 +30,8 @@ async def get_insumos_or_compositions(
                 for mes in meses:
                     if mes.value in [1, 2, 3, 4, 5, 6, 7, 8]:
                         continue
-
+                    
+                    print(f'Buscando para {ano}, {mes.value}, {uf}, {composicao}')
                     async for insumo_response in service.insumos_todos(
                         ano=ano,
                         mes=mes.value,
