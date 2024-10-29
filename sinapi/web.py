@@ -1,5 +1,7 @@
 from typing import Any, AsyncGenerator
 
+from sinapi.api.schema import Mes
+
 try:
     from sinapi.api.schema import EstadoResponseItem, InsumosResponse
     from sinapi.api import SinapiService
@@ -11,6 +13,10 @@ except:
 
 login = "lsouza17@gmail.com"
 senha = "eflEs2cF"
+
+meses = [
+    Mes(value=i, text=str(i)) for i in range(1, 13)
+]
 
 
 async def get_insumos_or_compositions(
@@ -24,14 +30,14 @@ async def get_insumos_or_compositions(
 
             for estado_response in estados_response:
                 uf = estado_response.uf
-                meses = await service.meses_importados(
-                    tipo_tabela="SINAPI", uf=uf, ano=ano
-                )
-                print('Meses:')
-                print(meses)
-                print('\n\n\n')
+                # meses = await service.meses_importados(
+                #     tipo_tabela="SINAPI", uf=uf, ano=ano
+                # )
+                # print('Meses:')
+                # print(meses)
+                # print('\n\n\n')
                 for mes in meses:
-                    if mes.value in [1, 2, 3, 4, 5, 6, 7, 8]:
+                    if mes.value in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
                         continue
                     
                     print(f'Buscando para {ano}, {mes.value}, {uf}, {composicao}')
