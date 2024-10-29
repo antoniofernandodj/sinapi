@@ -48,10 +48,7 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
         meses.add(mes)
 
     return MesesResponse(
-        meses=sorted(
-            list(meses),
-            key=lambda mes: str(mes.ano) + '/' + str(mes.mes)
-        )
+        meses=sorted(list(meses), key=lambda mes: str(mes.ano) + "/" + str(mes.mes))
     )
 
 
@@ -60,11 +57,7 @@ def read_tabelas(session: Session = Depends(get_db)):
 
     tabelas = session.query(Tabela).all()
 
-    return TabelasResponse(
-        tabelas=[
-            tabela.to_pydantic() for tabela in tabelas
-        ]
-    )
+    return TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
 
 @app.get("/estados", response_model=EstadosResponse)
@@ -72,11 +65,7 @@ def read_estados(session: Session = Depends(get_db)):
 
     estados = session.query(Estado).all()
 
-    return EstadosResponse(
-        estados=[
-            estado.to_pydantic() for estado in estados
-        ]
-    )
+    return EstadosResponse(estados=[estado.to_pydantic() for estado in estados])
 
 
 @app.get("/insumos", response_model=InsumosComposicoesResponse)
@@ -86,10 +75,11 @@ def read_insumos(
     session: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
+    id: Optional[int] = None,
     id_tabela: Optional[int] = None,
-    id_classe: Optional[int] = None
+    id_classe: Optional[int] = None,
 ):
-    
+
     Table = InsumoTabela
     payload: List[InsumoTabela]
 
@@ -98,12 +88,14 @@ def read_insumos(
     total_pages = ceil(total_count / limit)
 
     query = session.query(Table)
+    if id:
+        query = query.filter_by(id=id)
 
     if codigo:
         query = query.filter_by(codigo=codigo)
 
     if description:
-        query = query.filter(Table.nome.like(f'%{description}%'))
+        query = query.filter(Table.nome.like(f"%{description}%"))
 
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
@@ -111,12 +103,7 @@ def read_insumos(
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
 
-    query = (
-        query
-        .order_by(Table.id)
-        .offset(offset)
-        .limit(limit)
-    )
+    query = query.order_by(Table.id).offset(offset).limit(limit)
 
     result_count = query.count()
     payload = query.all()
@@ -127,7 +114,7 @@ def read_insumos(
         total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
-        result_count=result_count
+        result_count=result_count,
     )
 
 
@@ -138,8 +125,9 @@ def read_composicoes(
     db: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
+    id: Optional[int] = None,
     id_tabela: Optional[int] = None,
-    id_classe: Optional[int] = None
+    id_classe: Optional[int] = None,
 ):
 
     Table = ComposicaoTabela
@@ -150,11 +138,14 @@ def read_composicoes(
     total_pages = ceil(total_count / limit)
 
     query = db.query(Table)
+    if id:
+        query = query.filter_by(id=id)
+
     if codigo:
         query = query.filter_by(codigo=codigo)
 
     if description:
-        query = query.filter(Table.nome.like(f'%{description}%'))
+        query = query.filter(Table.nome.like(f"%{description}%"))
 
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
@@ -162,12 +153,7 @@ def read_composicoes(
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
 
-    query = (
-        query
-        .order_by(Table.id)
-        .offset(offset)
-        .limit(limit)
-    )
+    query = query.order_by(Table.id).offset(offset).limit(limit)
 
     result_count = query.count()
     payload = query.all()
