@@ -71,7 +71,7 @@ class Tabela(Base):
                 "dataHoraAtualizacao": self.data_hora_atualizacao,
                 "idTipoTabela": self.id_tipo_tabela,
                 "excluido": self.excluido,
-                "estado": self.estado.to_pydantic(),
+                # "estado": self.estado.to_pydantic(),
                 "tipoTabela": str(self.id_tipo_tabela),
             }
         )

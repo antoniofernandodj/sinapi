@@ -7,11 +7,9 @@ from typing import Any, List, Optional
 from pydantic import BaseModel
 
 
-
 def to_camel_case(string: str) -> str:
-    parts = string.split('_')
-    return parts[0] + ''.join(word.capitalize() for word in parts[1:])
-
+    parts = string.split("_")
+    return parts[0] + "".join(word.capitalize() for word in parts[1:])
 
 
 class Permissao(BaseModel):
@@ -82,7 +80,11 @@ class EstadoResponseItem(BaseModel):
     excluido: Any
 
     def __eq__(self, other):
-        return isinstance(other, EstadoResponseItem) and self.id == other.id and self.ibge == other.ibge
+        return (
+            isinstance(other, EstadoResponseItem)
+            and self.id == other.id
+            and self.ibge == other.ibge
+        )
 
     def __hash__(self):
         return hash((self.id, self.ibge))
@@ -102,8 +104,8 @@ class InsumosResponseTabela(BaseModel):
     dataHoraAtualizacao: str
     idTipoTabela: int
     excluido: Any
-    estado: Any
     tipoTabela: Any
+    estado: Optional[Any] = None
 
 
 class InsumosResponseUnidade(BaseModel):
@@ -116,8 +118,8 @@ class InsumosResponseClasse(BaseModel):
     id: int
     nome: str
     excluido: Any
-    
-    
+
+
 class InsumosResponseItem(BaseModel):
     id: int
     nome: str
@@ -141,9 +143,7 @@ class InsumosResponseItem(BaseModel):
 
     class Config:
         alias_generator = to_camel_case
-        model_config = {
-            'from_attributes': True
-        }
+        model_config = {"from_attributes": True}
 
 
 class InsumosResponse(BaseModel):

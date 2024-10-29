@@ -68,7 +68,7 @@ def read_tabelas(
     if id_estado:
         query = query.filter_by(id_estado=id_estado)
 
-    tabelas = query.all()
+    tabelas: List[Tabela] = query.all()
 
     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
