@@ -70,7 +70,11 @@ def read_tabelas(
 
     tabelas = query.all()
 
-    return TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
+    response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
+
+    print({"response": response})
+
+    return response
 
 
 @app.get("/estados", response_model=EstadosResponse)

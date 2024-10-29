@@ -13,6 +13,6 @@ DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
 with create_engine(SGBD_URL, echo=False).connect() as connection:
     connection.execute(text("CREATE DATABASE IF NOT EXISTS sinapi"))
 
-engine = create_engine(DATABASE_INSUMOS_URL, echo=True)
+engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
