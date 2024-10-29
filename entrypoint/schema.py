@@ -11,7 +11,6 @@ from sinapi.api.schema import (
 
 class InsumosComposicoesResponse(BaseModel):
     payload: List[InsumosResponseItem]
-    total_rows: int
     total_pages: int
     current_page: int
     result_count: int

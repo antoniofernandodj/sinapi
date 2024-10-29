@@ -133,7 +133,6 @@ def read_insumos(
 
     return InsumosComposicoesResponse(
         payload=payload_response,
-        total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
         result_count=result_count,
@@ -183,7 +182,6 @@ def read_composicoes(
 
     return InsumosComposicoesResponse(
         payload=payload_response,
-        total_rows=total_count,
         total_pages=total_pages,
         current_page=page,
         result_count=result_count,
