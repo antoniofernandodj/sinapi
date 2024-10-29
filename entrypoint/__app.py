@@ -125,17 +125,10 @@ def read_insumos(
 
     query = query.order_by(Table.id).offset(offset).limit(limit)
 
-    print({"sqlquery": str(query)})
-
-    from sqlalchemy.dialects import mysql
-
-    sql_str = str(query.statement.compile(dialect=mysql.dialect()))
-    params = query.params()
-    print("Query:", sql_str)
-    print("Params:", str(params))
-
     result_count = query.count()
     total_pages = ceil(result_count / limit)
+
+    print(f"Result Count: {result_count}, Total Pages: {total_pages}")
 
     payload = query.all()
     payload_response = mount_insumo_composicao_response(session, payload)
