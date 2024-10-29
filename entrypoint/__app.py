@@ -77,7 +77,7 @@ def read_tabelas(
 
     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
-    # print({"response": response})
+    print({"response": response})
 
     return response
 
