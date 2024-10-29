@@ -26,7 +26,7 @@ from entrypoint.schema import (
 )
 
 
-app = FastAPI(docs_url="/app/sinapi/docs")
+app = FastAPI(docs_url="/app/sinapi/docs", openapi_url="/app/sinapi/openapi.json")
 
 
 app.add_middleware(
