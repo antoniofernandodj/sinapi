@@ -43,7 +43,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        async with SinapiService(login, senha) as service:
-            await get_estados_a_cadastrar(service)
+        service = SinapiService(login, senha)
+        await get_estados_a_cadastrar(service)
 
     asyncio.run(main())
