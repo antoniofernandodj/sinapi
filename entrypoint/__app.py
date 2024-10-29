@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
+
 import sys
 import pathlib
 
@@ -77,8 +78,6 @@ def read_tabelas(
 
     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
-    print({"response": response})
-
     return response
 
 
@@ -107,7 +106,7 @@ def read_insumos(
 
     offset = (page - 1) * limit
 
-    query = session.query(Table)
+    query: Query = session.query(Table)
     if id:
         query = query.filter_by(id=id)
 
@@ -124,6 +123,8 @@ def read_insumos(
         query = query.filter_by(id_classe=id_classe)
 
     query = query.order_by(Table.id).offset(offset).limit(limit)
+
+    print({"sqlquery": query})
 
     result_count = query.count()
     total_pages = ceil(result_count / limit)
