@@ -8,6 +8,8 @@ import random
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 import httpx
 
+from sinapi.api.schema import TabelasResponse
+
 try:
     from sinapi import schema  # type: ignore
 except:
@@ -92,7 +94,7 @@ class SinapiService:
         search_type: Optional[str] = None,
         page: Optional[int] = 1,
         limit: Optional[int] = 10,
-    ) -> schema.InsumosResponse:
+    ) -> Optional[schema.InsumosResponse]:
         """
         Realiza uma requisição GET ao endpoint /api/Insumos da API para obter uma lista de insumos.
 
@@ -133,6 +135,8 @@ class SinapiService:
         )
 
         response = await self._make_request("GET", url="api/Insumos", params=params)
+        if response is None:
+            return None
 
         data = response.json()
 
@@ -175,11 +179,13 @@ class SinapiService:
         loop = True
         while loop:
             response = await self._make_request("GET", url="api/Insumos", params=params)
-            data = response.json()
-            result = schema.InsumosResponse(
-                items=data["items"], totalRows=data["totalRows"]
-            )
-            yield result
+
+            if response:
+                data = response.json()
+                result = schema.InsumosResponse(
+                    items=data["items"], totalRows=data["totalRows"]
+                )
+                yield result
 
             if len(result.items) != 0:
                 results.extend(result.items)
@@ -196,7 +202,7 @@ class SinapiService:
         search_type: Optional[str] = None,
         page: Optional[int] = None,
         limit: Optional[int] = None,
-    ) -> schema.EstadoResponse:
+    ) -> Optional[schema.EstadoResponse]:
         """
         Obtém uma lista de estados com base nos parâmetros de busca e ordenação.
 
@@ -233,6 +239,8 @@ class SinapiService:
             url="api/Estados",
             params=params,
         )
+        if response is None:
+            return None
 
         return schema.EstadoResponse(**response.json())
 
@@ -247,7 +255,7 @@ class SinapiService:
         search_type: Optional[str] = None,
         page: Optional[int] = 0,
         limit: Optional[int] = 10,
-    ):
+    ) -> Optional[TabelasResponse]:
         """
         Retorna todas as tabelas, as quais são atualizadas mensalmente,
         e possuem informações de acordo com o estado (UF).
@@ -281,6 +289,9 @@ class SinapiService:
         )
 
         response = await self._make_request("GET", url="api/Tabelas", params=params)
+        if response is None:
+            return None
+
         data = response.json()
         return schema.TabelasResponse(items=data["items"], totalRows=data["totalRows"])
 
@@ -289,7 +300,7 @@ class SinapiService:
         tipo_tabela: Optional[str] = None,
         uf: Optional[str] = None,
         ano: Optional[str] = None,
-    ) -> schema.AnosResponse:
+    ) -> Optional[schema.AnosResponse]:
         """
         Retorna uma lista de anos que foram importados, informando Tipo de Tabela e UF.
 
@@ -305,6 +316,9 @@ class SinapiService:
         response = await self._make_request(
             "GET", url="api/Tabelas/anos/select", params=params
         )
+
+        if response is None:
+            return None
 
         data = response.json()
 
@@ -339,7 +353,9 @@ class SinapiService:
             "GET", url="api/Tabelas/meses/select", params=params
         )
 
-        return [schema.Mes(**item) for item in response.json()]
+        if response:
+            return [schema.Mes(**item) for item in response.json()]
+        return []
 
     def _is_token_valid(self) -> bool:
         if self.auth_data is None:
@@ -364,7 +380,7 @@ class SinapiService:
         json: Optional[Dict[str, Any]] = None,
         data: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
-    ) -> httpx.Response:
+    ) -> Optional[httpx.Response]:
 
         try:
             callable = getattr(self.http_client, method.lower())
@@ -374,7 +390,9 @@ class SinapiService:
 
             response: httpx.Response = await callable(**kwargs)
             logging.debug(response)
-            print(response.text)
+            if "Nenhuma tabela importada para o ano/mês informado" in response.text:
+                return None
+
             logging.debug(response.json())
             response.raise_for_status()  # Raises an exception for HTTP errors
             return response

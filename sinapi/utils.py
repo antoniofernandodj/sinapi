@@ -1,4 +1,5 @@
 from contextlib import suppress
+from typing import Optional
 
 from sinapi.api.schema import EstadoResponseItem
 
@@ -19,7 +20,7 @@ senha = "eflEs2cF"
 
 
 async def get_estados_a_cadastrar(service: SinapiService) -> list[EstadoResponseItem]:
-    estados_response: EstadoResponse = await service.estados(
+    estados_response: Optional[EstadoResponse] = await service.estados(
         term=None,
         order="name",
         direction="asc",
@@ -31,7 +32,8 @@ async def get_estados_a_cadastrar(service: SinapiService) -> list[EstadoResponse
     def filtrar_estados(estado: EstadoResponseItem):
         return estado.uf in ['TO']
 
-    result = list(filter(filtrar_estados, set(estados_response.items)))
+    estados_response_items = estados_response.items if estados_response else []
+    result = list(filter(filtrar_estados, set(estados_response_items)))
 
     return sorted(list(result), key=lambda item: item.id)
 
