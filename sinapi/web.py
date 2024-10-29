@@ -38,7 +38,7 @@ async def get_insumos_or_compositions(
                 async for insumo_response in service.insumos_todos(
                     ano=ano, mes=mes.value, uf=uf, composicao=composicao,
                 ):
-                    print(f'I: {insumo_response.totalRows}')
+
                     yield (insumo_response, estado_response)
 
     except Exception as error:
