@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery
+from copy import deepcopy
 
 
 import sys
@@ -125,7 +126,7 @@ def read_insumos(
 
     query = query.order_by(Table.id).offset(offset).limit(limit)
 
-    result_count = query.count()
+    result_count = deepcopy(query).count()
     total_pages = ceil(result_count / limit)
 
     print(f"Result Count: {result_count}, Total Pages: {total_pages}")
