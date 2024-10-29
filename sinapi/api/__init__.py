@@ -180,6 +180,7 @@ class SinapiService:
         while loop:
             response = await self._make_request("GET", url="api/Insumos", params=params)
 
+            result = None
             if response:
                 data = response.json()
                 result = schema.InsumosResponse(
@@ -187,8 +188,9 @@ class SinapiService:
                 )
                 yield result
 
-            if len(result.items) != 0:
-                results.extend(result.items)
+            if result is None or len(result.items) != 0:
+                if result:
+                    results.extend(result.items)
                 params["Page"] += 1
                 print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
             else:
