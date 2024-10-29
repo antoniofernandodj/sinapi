@@ -59,10 +59,11 @@ def read_tabelas(
     id_estado: Optional[int] = None,
     session: Session = Depends(get_db),
 ):
+
+    print({"q": [mes_ano, id_estado]})
+
     if mes_ano is None:
         raise HTTPException(status_code=400, detail="")
-
-    print({"q": [mes_ano.year, mes_ano.month, id_estado]})
 
     query = session.query(Tabela)
 
