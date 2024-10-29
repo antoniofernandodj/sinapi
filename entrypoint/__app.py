@@ -111,28 +111,19 @@ def read_insumos(
     query: SQLQuery = session.query(Table)
     if id:
         query = query.filter_by(id=id)
-
     if codigo:
         query = query.filter_by(codigo=codigo)
-
     if descricao:
         query = query.filter(Table.nome.like(f"%{descricao}%"))
-
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
-
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
 
-    query_without_limit = query
-    query = query.order_by(Table.id).offset(offset).limit(limit)
-
-    result_count = query_without_limit.count()
+    result_count = query.count()
     total_pages = ceil(result_count / limit)
 
-    print(f"Limit: {limit}, Result Count: {result_count}, Total Pages: {total_pages}")
-
-    payload = query.all()
+    payload = query.order_by(Table.id).offset(offset).limit(limit).all()
     payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
@@ -147,7 +138,7 @@ def read_insumos(
 def read_composicoes(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
-    db: Session = Depends(get_db),
+    session: Session = Depends(get_db),
     description: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
     id: Optional[int] = None,
@@ -159,29 +150,24 @@ def read_composicoes(
     payload: List[ComposicaoTabela]
 
     offset = (page - 1) * limit
-    query = db.query(Table)
+    query = session.query(Table)
+
     if id:
         query = query.filter_by(id=id)
-
     if codigo:
         query = query.filter_by(codigo=codigo)
-
     if description:
         query = query.filter(Table.nome.like(f"%{description}%"))
-
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
-
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
 
-    query = query.order_by(Table.id).offset(offset).limit(limit)
-
     result_count = query.count()
-    payload = query.all()
-    payload_response = mount_insumo_composicao_response(db, payload)
-
     total_pages = ceil(result_count / limit)
+
+    payload = query.order_by(Table.id).offset(offset).limit(limit).all()
+    payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
         payload=payload_response,
