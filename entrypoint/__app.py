@@ -1,7 +1,7 @@
 from datetime import date
 from math import ceil
 from typing import Annotated, List, Optional, Set
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -59,6 +59,8 @@ def read_tabelas(
     id_estado: Optional[int] = None,
     session: Session = Depends(get_db),
 ):
+    if mes_ano is None:
+        raise HTTPException(status_code=400, detail="")
 
     print({"q": [mes_ano.year, mes_ano.month, id_estado]})
 
