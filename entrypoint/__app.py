@@ -129,7 +129,7 @@ def read_insumos(
     result_count = deepcopy(query).count()
     total_pages = ceil(result_count / limit)
 
-    print(f"Result Count: {result_count}, Total Pages: {total_pages}")
+    print(f"Limit: {limit}, Result Count: {result_count}, Total Pages: {total_pages}")
 
     payload = query.all()
     payload_response = mount_insumo_composicao_response(session, payload)
