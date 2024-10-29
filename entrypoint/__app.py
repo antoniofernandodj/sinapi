@@ -106,8 +106,6 @@ def read_insumos(
     payload: List[InsumoTabela]
 
     offset = (page - 1) * limit
-    total_count = session.query(Table).count()
-    total_pages = ceil(total_count / limit)
 
     query = session.query(Table)
     if id:
@@ -128,6 +126,8 @@ def read_insumos(
     query = query.order_by(Table.id).offset(offset).limit(limit)
 
     result_count = query.count()
+    total_pages = ceil(result_count / limit)
+
     payload = query.all()
     payload_response = mount_insumo_composicao_response(session, payload)
 
@@ -155,9 +155,6 @@ def read_composicoes(
     payload: List[ComposicaoTabela]
 
     offset = (page - 1) * limit
-    total_count = db.query(Table).count()
-    total_pages = ceil(total_count / limit)
-
     query = db.query(Table)
     if id:
         query = query.filter_by(id=id)
@@ -179,6 +176,8 @@ def read_composicoes(
     result_count = query.count()
     payload = query.all()
     payload_response = mount_insumo_composicao_response(db, payload)
+
+    total_pages = ceil(result_count / limit)
 
     return InsumosComposicoesResponse(
         payload=payload_response,
