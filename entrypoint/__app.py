@@ -60,6 +60,8 @@ def read_tabelas(
     session: Session = Depends(get_db),
 ):
 
+    print({"q": [mes_ano.year, mes_ano.month, id_estado]})
+
     query = session.query(Tabela)
 
     if mes_ano:
@@ -72,7 +74,7 @@ def read_tabelas(
 
     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
-    print({"response": response})
+    # print({"response": response})
 
     return response
 
