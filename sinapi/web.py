@@ -1,3 +1,4 @@
+from pickle import NONE
 from typing import Any, AsyncGenerator
 
 from sinapi.api.schema import Mes
@@ -18,24 +19,20 @@ meses = [
     Mes(value=i, text=str(i)) for i in range(1, 13)
 ]
 
+ESTADOS_RESPONSE = None
+
 
 async def get_insumos_or_compositions(
     ano: str,
     composicao=True
 ) -> AsyncGenerator[tuple[InsumosResponse, EstadoResponseItem], Any]:
+    async with SinapiService(login, senha) as service:
+        ESTADOS_RESPONSE = await get_estados_a_cadastrar(service)
 
     async with SinapiService(login, senha) as service:
         try:
-            estados_response = await get_estados_a_cadastrar(service)
-
-            for estado_response in estados_response:
+            for estado_response in ESTADOS_RESPONSE:
                 uf = estado_response.uf
-                # meses = await service.meses_importados(
-                #     tipo_tabela="SINAPI", uf=uf, ano=ano
-                # )
-                # print('Meses:')
-                # print(meses)
-                # print('\n\n\n')
                 for mes in meses:
                     if mes.value in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
                         continue

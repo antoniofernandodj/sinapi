@@ -61,13 +61,17 @@ class SinapiService:
         self.url_base = "https://api.apisinapi.com.br/"
 
     async def login(self) -> schema.AuthData:
+        http_client = httpx.AsyncClient(
+            base_url=self.url_base, timeout=SinapiService.TIMEOUT
+        )
+
         if self.auth_data and self._is_token_valid():
             logger.debug("Using cached token")
             return self.auth_data
 
         url = "api/Authentication/login"
         json = {"login": self.email, "senha": self.token}
-        request = await self.http_client.post(url=url, json=json)
+        request = await http_client.post(url=url, json=json)
 
         data = request.json()
 
@@ -384,31 +388,35 @@ class SinapiService:
         data: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
     ) -> Optional[httpx.Response]:
+        
+        async with httpx.AsyncClient(
+            base_url=self.url_base, timeout=SinapiService.TIMEOUT
+        ) as http_client:
 
-        try:
-            callable = getattr(self.http_client, method.lower())
-            kwargs = await self._make_request_settings(
-                url=url, json=json, data=data, params=params
-            )
+            try:
+                callable = getattr(http_client, method.lower())
+                kwargs = await self._make_request_settings(
+                    url=url, json=json, data=data, params=params
+                )
 
-            response: httpx.Response = await callable(**kwargs)
-            logging.debug(response)
-            if "Nenhuma tabela importada para o ano/mês informado" in response.text:
-                return None
+                response: httpx.Response = await callable(**kwargs)
+                logging.debug(response)
+                if "Nenhuma tabela importada para o ano/mês informado" in response.text:
+                    return None
 
-            logging.debug(response.json())
-            response.raise_for_status()  # Raises an exception for HTTP errors
-            return response
+                logging.debug(response.json())
+                response.raise_for_status()  # Raises an exception for HTTP errors
+                return response
 
-        except httpx.HTTPStatusError as e:
-            logger.error(
-                f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
-            )
-            raise
+            except httpx.HTTPStatusError as e:
+                logger.error(
+                    f"HTTP error occurred: {e.response.status_code} - {e.response.text}"
+                )
+                raise
 
-        except httpx.RequestError as e:
-            logger.error(f"Request error occurred: {e}")
-            raise
+            except httpx.RequestError as e:
+                logger.error(f"Request error occurred: {e}")
+                raise
 
     async def _make_request_settings(self, **kw):
         authorization = await self.login()
@@ -437,16 +445,11 @@ class SinapiService:
         self.__auth_data = item
 
     async def __aenter__(self):
-        self.http_client = httpx.AsyncClient(
-            base_url=self.url_base, timeout=SinapiService.TIMEOUT
-        )
-
         logger.debug("Opening SinapiService")
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        await self.http_client.__aexit__()
-        logger.debug("Closing SinapiService")
+        pass
 
     def __remove_none(self, params: dict):
         return {k: v for k, v in params.items() if v is not None}
