@@ -27,6 +27,9 @@ async def get_insumos_or_compositions(
                 meses = await service.meses_importados(
                     tipo_tabela="SINAPI", uf=uf, ano=ano
                 )
+                print('Meses:')
+                print(meses)
+                print('\n\n\n')
                 for mes in meses:
                     if mes.value in [1, 2, 3, 4, 5, 6, 7, 8]:
                         continue
