@@ -26,7 +26,7 @@ from entrypoint.schema import (
 )
 
 
-app = FastAPI()
+app = FastAPI(docs_url="https://mng.itemize.com.br/app/sinapi/docs")
 
 
 app.add_middleware(
