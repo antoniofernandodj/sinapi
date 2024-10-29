@@ -103,35 +103,44 @@ def read_insumos(
     id_classe: Optional[int] = None,
 ):
 
-    Table = InsumoTabela
     payload: List[InsumoTabela]
 
-    offset = (page - 1) * limit
+    def create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe):
 
-    query: SQLQuery = session.query(Table)
-    if id:
-        query = query.filter_by(id=id)
+        Table = InsumoTabela
 
-    if codigo:
-        query = query.filter_by(codigo=codigo)
+        offset = (page - 1) * limit
 
-    if descricao:
-        query = query.filter(Table.nome.like(f"%{descricao}%"))
+        query: SQLQuery = session.query(Table)
+        if id:
+            query = query.filter_by(id=id)
 
-    if id_tabela:
-        query = query.filter_by(id_tabela=id_tabela)
+        if codigo:
+            query = query.filter_by(codigo=codigo)
 
-    if id_classe:
-        query = query.filter_by(id_classe=id_classe)
+        if descricao:
+            query = query.filter(Table.nome.like(f"%{descricao}%"))
 
-    query = query.order_by(Table.id).offset(offset).limit(limit)
+        if id_tabela:
+            query = query.filter_by(id_tabela=id_tabela)
 
-    result_count = deepcopy(query).count()
+        if id_classe:
+            query = query.filter_by(id_classe=id_classe)
+
+        query = query.order_by(Table.id).offset(offset).limit(limit)
+
+        result_count = deepcopy(query).count()
+        total_pages = ceil(result_count / limit)
+
+    q1 = create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe)
+    q2 = create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe)
+
+    result_count = q1.count()
     total_pages = ceil(result_count / limit)
 
     print(f"Limit: {limit}, Result Count: {result_count}, Total Pages: {total_pages}")
 
-    payload = query.all()
+    payload = q2.all()
     payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
