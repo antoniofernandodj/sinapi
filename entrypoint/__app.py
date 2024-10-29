@@ -5,6 +5,8 @@ from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery
+from copy import deepcopy
+
 
 import sys
 import pathlib
@@ -101,43 +103,36 @@ def read_insumos(
     id_classe: Optional[int] = None,
 ):
 
+    Table = InsumoTabela
     payload: List[InsumoTabela]
 
-    def create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe):
+    offset = (page - 1) * limit
 
-        Table = InsumoTabela
+    query: SQLQuery = session.query(Table)
+    if id:
+        query = query.filter_by(id=id)
 
-        offset = (page - 1) * limit
+    if codigo:
+        query = query.filter_by(codigo=codigo)
 
-        query: SQLQuery = session.query(Table)
-        if id:
-            query = query.filter_by(id=id)
+    if descricao:
+        query = query.filter(Table.nome.like(f"%{descricao}%"))
 
-        if codigo:
-            query = query.filter_by(codigo=codigo)
+    if id_tabela:
+        query = query.filter_by(id_tabela=id_tabela)
 
-        if descricao:
-            query = query.filter(Table.nome.like(f"%{descricao}%"))
+    if id_classe:
+        query = query.filter_by(id_classe=id_classe)
 
-        if id_tabela:
-            query = query.filter_by(id_tabela=id_tabela)
+    query_without_limit = query.order_by(Table.id).offset(offset)
+    query = query.order_by(Table.id).offset(offset).limit(limit)
 
-        if id_classe:
-            query = query.filter_by(id_classe=id_classe)
-
-        query = query.order_by(Table.id).offset(offset).limit(limit)
-
-        return query
-
-    q1 = create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe)
-    q2 = create_query(page, limit, session, descricao, codigo, id, id_tabela, id_classe)
-
-    result_count = q1.count()
+    result_count = query_without_limit.count()
     total_pages = ceil(result_count / limit)
 
     print(f"Limit: {limit}, Result Count: {result_count}, Total Pages: {total_pages}")
 
-    payload = q2.all()
+    payload = query.all()
     payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
