@@ -16,6 +16,7 @@ from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
 from entrypoint.schema import (
     InsumosComposicoesResponse,
     EstadosResponse,
+    TabelasQuery,
     TabelasResponse,
     MesesResponse,
     Mes,
@@ -53,9 +54,17 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
 
 
 @app.get("/tabelas", response_model=TabelasResponse)
-def read_tabelas(session: Session = Depends(get_db)):
+def read_tabelas(query_args: TabelasQuery, session: Session = Depends(get_db)):
 
-    tabelas = session.query(Tabela).all()
+    query = session.query(Tabela)
+
+    if query_args.mes_ano:
+        query = query.filter_by(ano=query_args.ano, mes=query_args.mes)
+
+    if query_args.id_estado:
+        query = query.filter_by(id_estado=query_args.id_estado)
+
+    tabelas = query.all()
 
     return TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 

@@ -1,7 +1,12 @@
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel
 from sniffio import current_async_library
-from sinapi.api.schema import EstadoResponseItem, InsumosResponseItem, InsumosResponseTabela
+from sinapi.api.schema import (
+    EstadoResponseItem,
+    InsumosResponseItem,
+    InsumosResponseTabela,
+)
 
 
 class InsumosComposicoesResponse(BaseModel):
@@ -25,12 +30,18 @@ class Mes(BaseModel):
     ano: int
 
     def __eq__(self, other):
-        return isinstance(other, Mes) and self.mes == other.mes and self.ano == other.ano
+        return (
+            isinstance(other, Mes) and self.mes == other.mes and self.ano == other.ano
+        )
 
     def __hash__(self):
         return hash((self.mes, self.ano))
 
 
-
 class MesesResponse(BaseModel):
     meses: List[Mes]
+
+
+class TabelasQuery(BaseModel):
+    mes_ano: Optional[datetime] = None
+    id_estado: Optional[int] = None
