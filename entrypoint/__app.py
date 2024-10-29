@@ -127,6 +127,13 @@ def read_insumos(
 
     print({"sqlquery": str(query)})
 
+    from sqlalchemy.dialects import mysql
+
+    sql_str = str(query.statement.compile(dialect=mysql.dialect()))
+    params = query.params
+    print("Query:", sql_str)
+    print("Params:", params)
+
     result_count = query.count()
     total_pages = ceil(result_count / limit)
 
