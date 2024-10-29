@@ -130,7 +130,7 @@ def read_insumos(
     from sqlalchemy.dialects import mysql
 
     sql_str = str(query.statement.compile(dialect=mysql.dialect()))
-    params = query.params
+    params = query.params()
     print("Query:", sql_str)
     print("Params:", str(params))
 
