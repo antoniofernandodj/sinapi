@@ -40,8 +40,3 @@ class Mes(BaseModel):
 
 class MesesResponse(BaseModel):
     meses: List[Mes]
-
-
-class TabelasQuery(BaseModel):
-    mes_ano: Optional[date] = None
-    id_estado: Optional[int] = None

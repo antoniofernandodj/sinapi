@@ -1,3 +1,4 @@
+from datetime import date
 from math import ceil
 from typing import Annotated, List, Optional, Set
 from fastapi import FastAPI, Depends, Query
@@ -16,7 +17,6 @@ from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
 from entrypoint.schema import (
     InsumosComposicoesResponse,
     EstadosResponse,
-    TabelasQuery,
     TabelasResponse,
     MesesResponse,
     Mes,
@@ -54,15 +54,19 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
 
 
 @app.get("/tabelas", response_model=TabelasResponse)
-def read_tabelas(query_args: TabelasQuery, session: Session = Depends(get_db)):
+def read_tabelas(
+    mes_ano: Optional[date] = None,
+    id_estado: Optional[int] = None,
+    session: Session = Depends(get_db),
+):
 
     query = session.query(Tabela)
 
-    if query_args.mes_ano:
-        query = query.filter_by(ano=query_args.ano, mes=query_args.mes)
+    if mes_ano:
+        query = query.filter_by(ano=mes_ano.ano, mes=mes_ano.mes)
 
-    if query_args.id_estado:
-        query = query.filter_by(id_estado=query_args.id_estado)
+    if id_estado:
+        query = query.filter_by(id_estado=id_estado)
 
     tabelas = query.all()
 
