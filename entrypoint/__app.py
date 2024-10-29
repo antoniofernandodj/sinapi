@@ -63,7 +63,7 @@ def read_tabelas(
     query = session.query(Tabela)
 
     if mes_ano:
-        query = query.filter_by(ano=mes_ano.ano, mes=mes_ano.mes)
+        query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
 
     if id_estado:
         query = query.filter_by(id_estado=id_estado)
