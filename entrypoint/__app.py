@@ -124,7 +124,7 @@ def read_insumos(
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
 
-    query_without_limit = query.order_by(Table.id).offset(offset)
+    query_without_limit = query
     query = query.order_by(Table.id).offset(offset).limit(limit)
 
     result_count = query_without_limit.count()
