@@ -281,7 +281,7 @@ except:
 
 
 async def main():
-    YIELD_COUNT = 100
+    YIELD_COUNT = 10
 
     with Session() as session:
         print(f"i: {session.query(InsumoTabela).count()}")
