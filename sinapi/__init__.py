@@ -297,7 +297,7 @@ def merge_items(items_to_merge, session):
 
 async def main():
     with Session() as session:
-        batch_size = 10_000  # Tamanho do lote
+        batch_size = 20_000  # Tamanho do lote
         items_to_merge = []  # Lista para acumular itens
 
         # Processar InsumoTabela
