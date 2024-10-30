@@ -200,7 +200,7 @@ def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
     return mount_one_insumo_composicao_response(composicao, session)
 
 
-@app.get("/estados/{id_estado}/composicoes")
+@app.get("/estados/composicoes")
 def read_composicoes_do_estado(id_estado: int, session=Depends(get_db)):
 
     estados: List[Estado] = session.query(Estado).all()
@@ -211,7 +211,7 @@ def read_composicoes_do_estado(id_estado: int, session=Depends(get_db)):
         response[estado.nome] = []
         composicoes_do_estado: List[Any] = response[estado.nome]
 
-        query = session.query(Tabela).filter_by(id_estado=id_estado)
+        query = session.query(Tabela).filter_by(id_estado=estado.id)
         tabelas: List[Tabela] = query.all()
 
         for tabela in tabelas:
