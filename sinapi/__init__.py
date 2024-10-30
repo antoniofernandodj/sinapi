@@ -281,6 +281,8 @@ except:
 
 
 async def main():
+    YIELD_COUNT = 100
+
     with Session() as session:
         print(f"i: {session.query(InsumoTabela).count()}")
         print(f"c: {session.query(ComposicaoTabela).count()}")
@@ -289,7 +291,7 @@ async def main():
         insumo_items = []
         composicao_items = []
 
-        insumos_iter = session.query(InsumoTabela).yield_per(1000)
+        insumos_iter = session.query(InsumoTabela).yield_per(YIELD_COUNT)
         for insumo in insumos_iter:
             item = InsumoComposicaoTabela(
                 id=insumo.id,
@@ -314,7 +316,7 @@ async def main():
         session.commit()  # Commit after all inserts
         print(f"Processed insumos: {len(insumo_items)}")
 
-        composicoes_iter = session.query(ComposicaoTabela).yield_per(1000)
+        composicoes_iter = session.query(ComposicaoTabela).yield_per(YIELD_COUNT)
         for composicao in composicoes_iter:
             item = InsumoComposicaoTabela(
                 id=composicao.id,
