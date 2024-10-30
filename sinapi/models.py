@@ -274,30 +274,8 @@ class InsumoItem(Base):
         )
 
 
-class ComposicaoItem(Base):
-    __tablename__ = "composicao_items"
-    id = Column(Integer, primary_key=True)
-    nome = Column(Text)
-    codigo = Column(Text)
-    id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    id_unidade = Column(Integer, ForeignKey("unidades.id"))
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    composicao = Column(Boolean, nullable=True)
-    percentual_mao_de_obra = Column(Float, nullable=True)
-    percentual_material = Column(Float, nullable=True)
-    percentual_equipamentos = Column(Float, nullable=True)
-    percentual_servicos_terceiros = Column(Float, nullable=True)
-    percentual_outros = Column(Float, nullable=True)
-    excluido = Column(Boolean, nullable=True)
-
-    # tabela = relationship("Tabela")
-    # unidade = relationship("Unidade")
-    # classe = relationship("Classe")
-
-
 class InsumoComposicao(Base):
-    __tablename__ = "insumo_composicoes"
+    __tablename__ = "composicao_montada"
     id = Column(Integer, primary_key=True)
     id_insumo = Column(Integer, ForeignKey("insumos_tabela.id"), nullable=True)
     id_composicao = Column(Integer, ForeignKey("composicoes_tabela.id"), nullable=True)
