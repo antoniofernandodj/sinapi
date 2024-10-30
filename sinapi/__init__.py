@@ -280,6 +280,35 @@ except:
 #         await asyncio.sleep(3600)
 
 
+# Supondo que InsumoComposicaoTabela tenha um campo id como chave primária
+def bulk_merge(session, items: list):
+    # Cria uma lista de dicionários com os dados a serem atualizados
+    mappings = [
+        {
+            "id": item.id,
+            "nome": item.nome,
+            "codigo": item.codigo,
+            "id_tabela": item.id_tabela,
+            "id_unidade": item.id_unidade,
+            "id_classe": item.id_classe,
+            "valor_onerado": item.valor_onerado,
+            "valor_nao_onerado": item.valor_nao_onerado,
+            "composicao": item.composicao,
+            "percentual_mao_de_obra": item.percentual_mao_de_obra,
+            "percentual_material": item.percentual_material,
+            "percentual_equipamentos": item.percentual_equipamentos,
+            "percentual_servicos_terceiros": item.percentual_servicos_terceiros,
+            "percentual_outros": item.percentual_outros,
+            "excluido": item.excluido,
+        }
+        for item in items
+    ]
+
+    # Use bulk_update_mappings para atualizar os registros no banco de dados
+    session.bulk_update_mappings(InsumoComposicaoTabela, mappings)
+    session.commit()
+
+
 async def main():
     YIELD_COUNT = 10
     BATCH_SIZE = (
@@ -315,8 +344,9 @@ async def main():
 
             # Commit em batches
             if len(insumo_items) >= BATCH_SIZE:
-                session.bulk_save_objects(insumo_items)
-                session.commit()
+                # session.bulk_save_objects(insumo_items)
+                bulk_merge(session, insumo_items)
+                # session.commit()
                 insumo_items.clear()  # Limpa a lista após o commit
 
         # Commit qualquer restante
@@ -352,8 +382,9 @@ async def main():
 
             # Commit em batches
             if len(composicao_items) >= BATCH_SIZE:
-                session.bulk_save_objects(composicao_items)
-                session.commit()
+                # session.bulk_save_objects(composicao_items)
+                bulk_merge(session, composicao_items)
+                # session.commit()
                 composicao_items.clear()  # Limpa a lista após o commit
 
         # Commit qualquer restante
