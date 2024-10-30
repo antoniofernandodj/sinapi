@@ -306,6 +306,7 @@ def main():
 
             session.merge(item)
             session.commit()
+            print(".")
 
         composicoes: Iterator[ComposicaoTabela]
         composicoes = session.query(ComposicaoTabela).yield_per(1000)  # type: ignore  # 453 MB
@@ -330,6 +331,7 @@ def main():
 
             session.merge(item)
             session.commit()
+            print("-")
 
     print("finalizado!")
 
