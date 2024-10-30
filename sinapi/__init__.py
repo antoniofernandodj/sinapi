@@ -41,51 +41,59 @@ def load_json(file_path):
 
 def inserir_estado(data, session):
 
-    session.merge(Estado(
-        id=data["id"],
-        nome=data["nome"],
-        uf=data["uf"],
-        ibge=data["ibge"],
-        excluido=data["excluido"] if data["excluido"] is not None else False,
-    ))
+    session.merge(
+        Estado(  # type: ignore
+            id=data["id"],  # type: ignore
+            nome=data["nome"],  # type: ignore
+            uf=data["uf"],  # type: ignore
+            ibge=data["ibge"],  # type: ignore
+            excluido=data["excluido"] if data["excluido"] is not None else False,  # type: ignore
+        )
+    )
 
 
 def inserir_unidade(item: Optional[dict], session):
     if item is None:
         return
 
-    session.merge(Unidade(
-        id=item["id"],
-        nome=item["nome"],
-        excluido=item["excluido"],
-    ))
+    session.merge(
+        Unidade(
+            id=item["id"],  # type: ignore
+            nome=item["nome"],  # type: ignore
+            excluido=item["excluido"],  # type: ignore
+        )
+    )
 
 
 def inserir_classe(item: Optional[dict], session):
     if item is None:
         return
 
-    session.merge(Classe(
-        id=item["id"],
-        nome=item["nome"],
-        excluido=item["excluido"],
-    ))
+    session.merge(
+        Classe(
+            id=item["id"],  # type: ignore
+            nome=item["nome"],  # type: ignore
+            excluido=item["excluido"],  # type: ignore
+        )
+    )
 
 
 def inserir_tabela(item: Optional[dict], session):
     if item is None:
         return
 
-    session.merge(Tabela(
-        id=item["id"],
-        nome=item["nome"],
-        id_estado=item["idEstado"],
-        mes=item["mes"],
-        ano=item["ano"],
-        data_hora_atualizacao=item["dataHoraAtualizacao"],
-        id_tipo_tabela=item["idTipoTabela"],
-        excluido=item["excluido"],
-    ))
+    session.merge(
+        Tabela(
+            id=item["id"],  # type: ignore
+            nome=item["nome"],  # type: ignore
+            id_estado=item["idEstado"],  # type: ignore
+            mes=item["mes"],  # type: ignore
+            ano=item["ano"],  # type: ignore
+            data_hora_atualizacao=item["dataHoraAtualizacao"],  # type: ignore
+            id_tipo_tabela=item["idTipoTabela"],  # type: ignore
+            excluido=item["excluido"],  # type: ignore
+        )
+    )
 
 
 def inserir_insumo_item(item: Optional[dict], session):
@@ -98,56 +106,62 @@ def inserir_insumo_item(item: Optional[dict], session):
     if item["tabela"]:
         inserir_tabela(item["tabela"], session)
 
-    session.merge(InsumoItem(
-        id=item["id"],
-        nome=item["nome"],
-        codigo=item["codigo"],
-        id_tabela=item["idTabela"],
-        id_unidade=item["idUnidade"],
-        id_classe=item["idClasse"],
-        valor_onerado=item["valorOnerado"],
-        valor_nao_onerado=item["valorNaoOnerado"],
-        composicao=item["composicao"],
-        percentual_mao_de_obra=item.get("percentualMaoDeObra"),
-        percentual_material=item.get("percentualMaterial"),
-        percentual_equipamentos=item.get("percentualEquipamentos"),
-        percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),
-        percentual_outros=item.get("percentualOutros"),
-        excluido=item["excluido"],
-    ))
+    session.merge(
+        InsumoItem(
+            id=item["id"],  # type: ignore
+            nome=item["nome"],  # type: ignore
+            codigo=item["codigo"],  # type: ignore
+            id_tabela=item["idTabela"],  # type: ignore
+            id_unidade=item["idUnidade"],  # type: ignore
+            id_classe=item["idClasse"],  # type: ignore
+            valor_onerado=item["valorOnerado"],  # type: ignore
+            valor_nao_onerado=item["valorNaoOnerado"],  # type: ignore
+            composicao=item["composicao"],  # type: ignore
+            percentual_mao_de_obra=item.get("percentualMaoDeObra"),  # type: ignore
+            percentual_material=item.get("percentualMaterial"),  # type: ignore
+            percentual_equipamentos=item.get("percentualEquipamentos"),  # type: ignore
+            percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),  # type: ignore
+            percentual_outros=item.get("percentualOutros"),  # type: ignore
+            excluido=item["excluido"],  # type: ignore
+        )
+    )
 
 
 def inserir_composicoes_insumo(
     insumo_composicao_api: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
-    
+
     insumo_item = insumo_composicao_api["insumoItem"]
-    
+
     inserir_insumo_item(item=insumo_item, session=session)
 
     if isinstance(insumo, InsumoTabela):
-        session.merge(InsumoComposicao(
-            id=insumo_composicao_api["id"],
-            id_insumo=insumo.id,
-            id_composicao=None,
-            id_insumo_item=insumo_item['id'],
-            valor_onerado=insumo_composicao_api["valorOnerado"],
-            valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
-            coeficiente=insumo_composicao_api["coeficiente"],
-            excluido=insumo_composicao_api["excluido"],
-        ))
+        session.merge(
+            InsumoComposicao(
+                id=insumo_composicao_api["id"],  # type: ignore
+                id_insumo=insumo.id,  # type: ignore
+                id_composicao=None,  # type: ignore
+                id_insumo_item=insumo_item["id"],  # type: ignore
+                valor_onerado=insumo_composicao_api["valorOnerado"],  # type: ignore
+                valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],  # type: ignore
+                coeficiente=insumo_composicao_api["coeficiente"],  # type: ignore
+                excluido=insumo_composicao_api["excluido"],  # type: ignore
+            )
+        )
 
     elif isinstance(insumo, ComposicaoTabela):
-        session.merge(InsumoComposicao(
-            id=insumo_composicao_api["id"],
-            id_insumo=None,
-            id_composicao=insumo.id,
-            id_insumo_item=insumo_item['id'],
-            valor_onerado=insumo_composicao_api["valorOnerado"],
-            valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
-            coeficiente=insumo_composicao_api["coeficiente"],
-            excluido=insumo_composicao_api["excluido"],
-        ))
+        session.merge(
+            InsumoComposicao(
+                id=insumo_composicao_api["id"],  # type: ignore
+                id_insumo=None,  # type: ignore
+                id_composicao=insumo.id,  # type: ignore
+                id_insumo_item=insumo_item["id"],  # type: ignore
+                valor_onerado=insumo_composicao_api["valorOnerado"],  # type: ignore
+                valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],  # type: ignore
+                coeficiente=insumo_composicao_api["coeficiente"],  # type: ignore
+                excluido=insumo_composicao_api["excluido"],  # type: ignore
+            )
+        )
 
 
 def main_insert(
@@ -157,21 +171,21 @@ def main_insert(
     inserir_tabela(i["tabela"], session)
     inserir_classe(i["classe"], session)
     item = Model(
-        id=i["id"],
-        nome=i["nome"],
-        codigo=i["codigo"],
-        id_tabela=i["tabela"]["id"],
-        id_unidade=i["unidade"]["id"],
-        id_classe=i["classe"]["id"],
-        valor_onerado=i["valorOnerado"],
-        valor_nao_onerado=i["valorNaoOnerado"],
-        composicao=i["composicao"],
-        percentual_mao_de_obra=i["percentualMaoDeObra"],
-        percentual_material=i["percentualMaterial"],
-        percentual_equipamentos=i["percentualEquipamentos"],
-        percentual_servicos_terceiros=i["percentualServicosTerceiros"],
-        percentual_outros=i["percentualOutros"],
-        excluido=i["excluido"],
+        id=i["id"],  # type: ignore
+        nome=i["nome"],  # type: ignore
+        codigo=i["codigo"],  # type: ignore
+        id_tabela=i["tabela"]["id"],  # type: ignore
+        id_unidade=i["unidade"]["id"],  # type: ignore
+        id_classe=i["classe"]["id"],  # type: ignore
+        valor_onerado=i["valorOnerado"],  # type: ignore
+        valor_nao_onerado=i["valorNaoOnerado"],  # type: ignore
+        composicao=i["composicao"],  # type: ignore
+        percentual_mao_de_obra=i["percentualMaoDeObra"],  # type: ignore
+        percentual_material=i["percentualMaterial"],  # type: ignore
+        percentual_equipamentos=i["percentualEquipamentos"],  # type: ignore
+        percentual_servicos_terceiros=i["percentualServicosTerceiros"],  # type: ignore
+        percentual_outros=i["percentualOutros"],  # type: ignore
+        excluido=i["excluido"],  # type: ignore
     )
     session.merge(item)
     session.flush()
@@ -205,8 +219,9 @@ async def cadastrar_insumos():
     async for insumo_response, estado_response in get_insumos_or_compositions(
         composicao=False, ano="2024"
     ):
-        insumo_data = insumo_response.model_dump()
-        estado_data = estado_response.model_dump()
+
+        insumo_data = insumo_response.model_dump()  # type: ignore
+        estado_data = estado_response.model_dump()  # type: ignore
         inserir_insumos(insumo_data["items"], estado_data)
 
 
@@ -215,8 +230,8 @@ async def cadastrar_composicoes():
         composicao=True, ano="2024"
     ):
 
-        composicao_data = composicao_response.model_dump()
-        estado_data = estado_response.model_dump()
+        composicao_data = composicao_response.model_dump()  # type: ignore
+        estado_data = estado_response.model_dump()  # type: ignore
 
         inserir_composicoes(composicao_data["items"], estado_data)
 

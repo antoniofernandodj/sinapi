@@ -16,7 +16,7 @@ from sinapi.api.schema import InsumosResponseItem
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
-from entrypoint.utils import get_db, mount_insumo_composicao_response
+from entrypoint.utils import __mount_one, get_db, mount_insumo_composicao_response
 from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
 
 from entrypoint.schema import (
@@ -120,7 +120,7 @@ def read_insumos(
     if codigo:
         query = query.filter_by(codigo=codigo)
     if descricao:
-        query = query.filter(Table.nome.like(f"%{descricao}%"))
+        query = query.filter(Table.nome.like(f"%{descricao}%"))  # type: ignore
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
     if id_classe:
@@ -129,7 +129,7 @@ def read_insumos(
     result_count = query.count()
     total_pages = ceil(result_count / limit)
 
-    payload = query.order_by(Table.id).offset(offset).limit(limit).all()
+    payload = query.order_by(Table.id).offset(offset).limit(limit).all()  # type: ignore
     payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
@@ -163,7 +163,7 @@ def read_composicoes(
     if codigo:
         query = query.filter_by(codigo=codigo)
     if descricao:
-        query = query.filter(Table.nome.like(f"%{descricao}%"))
+        query = query.filter(Table.nome.like(f"%{descricao}%"))  # type: ignore
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
     if id_classe:
@@ -172,7 +172,7 @@ def read_composicoes(
     result_count = query.count()
     total_pages = ceil(result_count / limit)
 
-    payload = query.order_by(Table.id).offset(offset).limit(limit).all()
+    payload = query.order_by(Table.id).offset(offset).limit(limit).all()  # type: ignore
     payload_response = mount_insumo_composicao_response(session, payload)
 
     return InsumosComposicoesResponse(
@@ -184,7 +184,7 @@ def read_composicoes(
 
 
 @app.get("/composicoes/{composicao_id}", response_model=InsumosResponseItem)
-def read_composicoes(composicao_id: int, session: Session = Depends(get_db)):
+def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
 
     composicao: Optional[ComposicaoTabela] = (
         session.query(ComposicaoTabela).filter_by(id=composicao_id).first()
@@ -192,12 +192,4 @@ def read_composicoes(composicao_id: int, session: Session = Depends(get_db)):
     if not composicao:
         raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
 
-    return composicao.to_pydantic()
-
-
-@app.get("/classes/")
-def read_classes(session: Session = Depends(get_db)):
-
-    classes: List[Classe] = session.query(Classe).all()
-
-    return [classe.to_pydantic() for classe in classes]
+    return __mount_one(composicao, session)
