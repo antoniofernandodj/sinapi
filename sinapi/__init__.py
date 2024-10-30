@@ -335,4 +335,6 @@ async def main():
             session.commit()
             print("-")
 
+        del composicoes
+
     print("finalizado!")
