@@ -16,7 +16,11 @@ from sinapi.api.schema import InsumosResponseItem
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
-from entrypoint.utils import __mount_one, get_db, mount_insumo_composicao_response
+from entrypoint.utils import (
+    mount_one_insumo_composicao_response,
+    get_db,
+    mount_insumo_composicao_response,
+)
 from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
 
 from entrypoint.schema import (
@@ -192,4 +196,4 @@ def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
     if not composicao:
         raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
 
-    return __mount_one(composicao, session)
+    return mount_one_insumo_composicao_response(composicao, session)

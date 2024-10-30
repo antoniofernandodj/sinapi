@@ -13,7 +13,7 @@ from sinapi.models import (
 )
 
 
-def __mount_one(insumo_composicao, db: Session):
+def mount_one_insumo_composicao_response(insumo_composicao, db: Session):
     if not isinstance(insumo_composicao, (InsumoTabela, ComposicaoTabela)):
         return
 
@@ -106,6 +106,14 @@ def mount_insumo_composicao_response(db: Session, insumos_composicoes):
             )
             response.insumosComposicoes.append(ic_response)
 
+        result.append(response)
+    return result
+
+
+def mount_insumo_composicao_response2(db: Session, insumos_composicoes):
+    result = []
+    for obj in insumos_composicoes:
+        response = mount_one_insumo_composicao_response(obj, db)
         result.append(response)
     return result
 
