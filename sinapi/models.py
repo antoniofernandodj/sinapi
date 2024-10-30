@@ -207,9 +207,9 @@ class ComposicaoTabela(Base):
     # unidade = relationship("Unidade")
     # classe = relationship("Classe")
 
-    # composicoes_composicoes = relationship(
-    #     "InsumoComposicao", back_populates="composicoes"
-    # )
+    composicoes_composicoes = relationship(
+        "InsumoComposicao", back_populates="composicoes"
+    )
 
     def to_pydantic(self) -> InsumosResponseItem:
         return InsumosResponseItem.model_validate(
