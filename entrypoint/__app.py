@@ -224,4 +224,7 @@ def read_composicoes_do_estado(session=Depends(get_db)):
 
             composicoes_do_estado.append(composicao.to_pydantic().model_dump())  # type: ignore
 
+        if len(composicoes_do_estado) == 0:
+            del response[estado.nome]
+
     return response
