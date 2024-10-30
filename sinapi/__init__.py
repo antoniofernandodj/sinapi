@@ -304,7 +304,7 @@ def merge_items(items_to_merge, session):
 async def main():
     with Session() as session:
         batch_size = 20_000  # Tamanho do lote
-        items_to_merge = []  # Lista para acumular itens
+        # items_to_merge = []  # Lista para acumular itens
 
         list_ids = get_all_ids(InsumoTabela, session)  # Obter todos os IDs
         chunks = list(chunk_list(list_ids, batch_size))  # Dividir a lista em chunks
