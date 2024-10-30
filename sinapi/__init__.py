@@ -282,7 +282,7 @@ except:
 
 async def main():
     with Session() as session:
-        insumos_iter: Iterator[InsumoTabela]
+        insumos_iter: List[InsumoTabela]
         insumos_iter = session.query(InsumoTabela).all()  # type: ignore # 377 MB
 
         for insumo in insumos_iter:
@@ -307,6 +307,8 @@ async def main():
             session.merge(item)
             session.commit()
             print(".")
+
+        del insumos_iter
 
         composicoes: Iterator[ComposicaoTabela]
         composicoes = session.query(ComposicaoTabela).all()  # type: ignore  # 453 MB
