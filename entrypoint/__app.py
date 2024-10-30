@@ -201,7 +201,11 @@ def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
 
 
 @app.get("/estados/composicoes")
-def read_composicoes_do_estado(session=Depends(get_db)):
+def read_composicoes_do_estado(
+    session=Depends(get_db),
+    codigo: Optional[int] = None,
+    id_composicao: Optional[int] = None,
+):
 
     estados: List[Estado] = session.query(Estado).all()
 
@@ -216,9 +220,16 @@ def read_composicoes_do_estado(session=Depends(get_db)):
 
         for tabela in tabelas:
 
-            composicao: Optional[ComposicaoTabela] = (
-                session.query(ComposicaoTabela).filter_by(id_tabela=tabela.id).first()
-            )
+            query = session.query(ComposicaoTabela).filter_by(id_tabela=tabela.id)
+
+            if codigo:
+                query = query.filter_by(codigo=codigo)
+
+            if id_composicao:
+                query = query.filter_by(id=id_composicao)
+
+            composicao: Optional[ComposicaoTabela] = query.first()
+
             if composicao is None:
                 continue
 
