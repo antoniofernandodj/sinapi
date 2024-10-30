@@ -11,6 +11,8 @@ from copy import deepcopy
 import sys
 import pathlib
 
+from sinapi.api.schema import InsumosResponseItem
+
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
@@ -179,3 +181,15 @@ def read_composicoes(
         current_page=page,
         result_count=result_count,
     )
+
+
+@app.get("/composicoes/{composicao_id}", response_model=InsumosResponseItem)
+def read_composicoes(composicao_id: int, session: Session = Depends(get_db)):
+
+    composicao: Optional[ComposicaoTabela] = (
+        session.query(ComposicaoTabela).filter_by(id=composicao_id).first()
+    )
+    if not composicao:
+        raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
+
+    return composicao.to_pydantic()
