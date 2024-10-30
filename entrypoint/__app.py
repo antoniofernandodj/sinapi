@@ -26,6 +26,7 @@ from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
 
 from entrypoint.schema import (
     InsumosComposicoesResponse,
+    ClassesResponse,
     EstadosResponse,
     TabelasResponse,
     MesesResponse,
@@ -96,10 +97,14 @@ def read_tabelas(
 
 @app.get("/estados", response_model=EstadosResponse)
 def read_estados(session: Session = Depends(get_db)):
-
     estados = session.query(Estado).all()
-
     return EstadosResponse(estados=[estado.to_pydantic() for estado in estados])
+
+
+@app.get("/classes", response_model=ClassesResponse)
+def read_classes(session: Session = Depends(get_db)):
+    classes: List[Classe] = session.query(Classe).all()
+    return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
 
 
 @app.get("/insumos", response_model=InsumosComposicoesResponse)

@@ -6,6 +6,7 @@ from sinapi.api.schema import (
     EstadoResponseItem,
     InsumosResponseItem,
     InsumosResponseTabela,
+    InsumosResponseClasse,
 )
 
 
@@ -18,6 +19,10 @@ class InsumosComposicoesResponse(BaseModel):
 
 class EstadosResponse(BaseModel):
     estados: List[EstadoResponseItem]
+
+
+class ClassesResponse(BaseModel):
+    classes: List[InsumosResponseClasse]
 
 
 class TabelasResponse(BaseModel):
