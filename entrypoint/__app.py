@@ -201,7 +201,7 @@ def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
 
 
 @app.get("/estados/composicoes")
-def read_composicoes_do_estado(id_estado: int, session=Depends(get_db)):
+def read_composicoes_do_estado(session=Depends(get_db)):
 
     estados: List[Estado] = session.query(Estado).all()
 
