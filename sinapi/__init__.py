@@ -282,15 +282,16 @@ except:
 
 async def main():
     YIELD_COUNT = 10
+    BATCH_SIZE = (
+        100  # Limite a quantidade de objetos na memória antes de fazer um commit
+    )
 
     with Session() as session:
         print(f"i: {session.query(InsumoTabela).count()}")
         print(f"c: {session.query(ComposicaoTabela).count()}")
 
-        # List to hold items for bulk operation
+        # Processar Insumos
         insumo_items = []
-        composicao_items = []
-
         insumos_iter = session.query(InsumoTabela).yield_per(YIELD_COUNT)
         for insumo in insumos_iter:
             item = InsumoComposicaoTabela(
@@ -312,10 +313,22 @@ async def main():
             )
             insumo_items.append(item)
 
-        session.bulk_save_objects(insumo_items)  # Efficient bulk insert
-        session.commit()  # Commit after all inserts
-        print(f"Processed insumos: {len(insumo_items)}")
+            # Commit em batches
+            if len(insumo_items) >= BATCH_SIZE:
+                session.bulk_save_objects(insumo_items)
+                session.commit()
+                insumo_items.clear()  # Limpa a lista após o commit
 
+        # Commit qualquer restante
+        if insumo_items:
+            session.bulk_save_objects(insumo_items)
+            session.commit()
+            insumo_items.clear()
+
+        print("Processed insumos!")
+
+        # Processar Composições
+        composicao_items = []
         composicoes_iter = session.query(ComposicaoTabela).yield_per(YIELD_COUNT)
         for composicao in composicoes_iter:
             item = InsumoComposicaoTabela(
@@ -337,8 +350,17 @@ async def main():
             )
             composicao_items.append(item)
 
-        session.bulk_save_objects(composicao_items)  # Efficient bulk insert
-        session.commit()  # Commit after all inserts
-        print(f"Processed composicoes: {len(composicao_items)}")
+            # Commit em batches
+            if len(composicao_items) >= BATCH_SIZE:
+                session.bulk_save_objects(composicao_items)
+                session.commit()
+                composicao_items.clear()  # Limpa a lista após o commit
 
+        # Commit qualquer restante
+        if composicao_items:
+            session.bulk_save_objects(composicao_items)
+            session.commit()
+            composicao_items.clear()
+
+        print("Processed composicoes!")
     print("Finalizado!")
