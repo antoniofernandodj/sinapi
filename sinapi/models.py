@@ -335,37 +335,37 @@ class InsumoComposicaoTabela(Base):
         "ComposicaoMontada", back_populates="insumo_tabela"
     )
 
-    def to_pydantic(self) -> InsumosResponseItem:
-        insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
-            {
-                "id": self.id,
-                "nome": self.nome,
-                "codigo": self.codigo,
-                "idTabela": self.id_tabela,
-                "idUnidade": self.id_unidade,
-                "idClasse": self.id_classe,
-                "composicao": self.composicao,
-                "percentualMaoDeObra": self.percentual_mao_de_obra,
-                "percentualMaterial": self.percentual_material,
-                "percentualEquipamentos": self.percentual_equipamentos,
-                "percentualServicosTerceiros": self.percentual_servicos_terceiros,
-                "percentualOutros": self.percentual_outros,
-                "excluido": self.excluido,
-                "valorOnerado": self.valor_onerado,
-                "valorNaoOnerado": self.valor_nao_onerado,
-                "tabela": self.tabela.to_pydantic() if self.tabela else None,
-                "unidade": self.unidade.to_pydantic() if self.unidade else None,
-                "classe": self.classe.to_pydantic() if self.classe else None,
-                "insumosComposicoes": (
-                    [
-                        insumo_comp.to_pydantic()
-                        for insumo_comp in self.insumos_composicoes
-                    ]
-                    if self.insumos_composicoes
-                    else []
-                ),
-                # "insumosComposicoes": []
-            }
-        )
+    # def to_pydantic(self) -> InsumosResponseItem:
+    #     insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
+    #         {
+    #             "id": self.id,
+    #             "nome": self.nome,
+    #             "codigo": self.codigo,
+    #             "idTabela": self.id_tabela,
+    #             "idUnidade": self.id_unidade,
+    #             "idClasse": self.id_classe,
+    #             "composicao": self.composicao,
+    #             "percentualMaoDeObra": self.percentual_mao_de_obra,
+    #             "percentualMaterial": self.percentual_material,
+    #             "percentualEquipamentos": self.percentual_equipamentos,
+    #             "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+    #             "percentualOutros": self.percentual_outros,
+    #             "excluido": self.excluido,
+    #             "valorOnerado": self.valor_onerado,
+    #             "valorNaoOnerado": self.valor_nao_onerado,
+    #             "tabela": self.tabela.to_pydantic() if self.tabela else None,
+    #             "unidade": self.unidade.to_pydantic() if self.unidade else None,
+    #             "classe": self.classe.to_pydantic() if self.classe else None,
+    #             "insumosComposicoes": (
+    #                 [
+    #                     insumo_comp.to_pydantic()
+    #                     for insumo_comp in self.insumos_composicoes
+    #                 ]
+    #                 if self.insumos_composicoes
+    #                 else []
+    #             ),
+    #             # "insumosComposicoes": []
+    #         }
+    #     )
 
-        return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
+    #     return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
