@@ -306,11 +306,11 @@ async def main():
 
             session.merge(item)
             session.commit()
-            print(".", end="", flush=True)
+            print(".")
 
         del insumos_iter
 
-        composicoes: Iterator[ComposicaoTabela]
+        composicoes: List[ComposicaoTabela]
         composicoes = session.query(ComposicaoTabela).all()  # type: ignore  # 453 MB
         for composicao in composicoes:
             item = InsumoComposicaoTabela(
@@ -333,7 +333,7 @@ async def main():
 
             session.merge(item)
             session.commit()
-            print("-", end="", flush=True)
+            print("-")
 
         del composicoes
 
