@@ -188,3 +188,18 @@ class Mes(BaseModel):
 
 class MesesResponse(BaseModel):
     meses: List[Mes]
+
+
+class InsumoComposicaoResponse(BaseModel):
+    id: int
+
+    id_insumo_item: int
+    valor_onerado: float
+    valor_nao_onerado: float
+    coeficiente: float
+
+    id_insumo: Optional[int] = None
+    id_composicao: Optional[int] = None
+    excluido: Optional[bool] = None
+
+    insumo_item: Optional[InsumosResponseItem] = None

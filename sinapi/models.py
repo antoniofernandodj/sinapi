@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 from sinapi.api.schema import (
+    InsumoComposicaoResponse,
     InsumosResponseItem,
     InsumosResponseTabela,
     InsumosResponseUnidade,
@@ -112,28 +113,34 @@ class Classe(Base):
 class InsumoTabela(Base):
     __tablename__ = "insumos_tabela"
     id = Column(Integer, primary_key=True)
+
     nome = Column(Text)
     codigo = Column(Text)
+
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
     id_classe = Column(Integer, nullable=True)
+
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
+
     composicao = Column(Boolean)
+
     percentual_mao_de_obra = Column(Float)
     percentual_material = Column(Float)
     percentual_equipamentos = Column(Float)
     percentual_servicos_terceiros = Column(Float)
     percentual_outros = Column(Float)
+
     excluido = Column(Boolean, nullable=True)
 
-    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
-    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
+    # tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
+    # unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
     # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    insumos_composicoes = relationship(
-        "InsumoComposicao", back_populates="insumo_tabela"
-    )
+    # insumos_composicoes = relationship(
+    #     "InsumoComposicao", back_populates="insumo_tabela"
+    # )
 
     def to_pydantic(self) -> InsumosResponseItem:
         insumo_dict = InsumosResponseItem.model_validate(
@@ -175,28 +182,34 @@ class InsumoTabela(Base):
 class ComposicaoTabela(Base):
     __tablename__ = "composicoes_tabela"
     id = Column(Integer, primary_key=True)
+
     nome = Column(Text)
     codigo = Column(Text)
+
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
     id_classe = Column(Integer, nullable=True)
+
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
+
     composicao = Column(Boolean)
+
     percentual_mao_de_obra = Column(Float)
     percentual_material = Column(Float)
     percentual_equipamentos = Column(Float)
     percentual_servicos_terceiros = Column(Float)
     percentual_outros = Column(Float)
+
     excluido = Column(Boolean, nullable=True)
 
     # tabela = relationship("Tabela")
     # unidade = relationship("Unidade")
     # classe = relationship("Classe")
 
-    composicoes_composicoes = relationship(
-        "InsumoComposicao", back_populates="composicoes"
-    )
+    # composicoes_composicoes = relationship(
+    #     "InsumoComposicao", back_populates="composicoes"
+    # )
 
     def to_pydantic(self) -> InsumosResponseItem:
         return InsumosResponseItem.model_validate(
@@ -231,19 +244,25 @@ class ComposicaoTabela(Base):
 class InsumoItem(Base):
     __tablename__ = "insumo_items"
     id = Column(Integer, primary_key=True)
+
     nome = Column(Text)
     codigo = Column(Text)
+
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
     id_classe = Column(Integer, nullable=True)
+
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
+
     composicao = Column(Boolean, nullable=True)
+
     percentual_mao_de_obra = Column(Float, nullable=True)
     percentual_material = Column(Float, nullable=True)
     percentual_equipamentos = Column(Float, nullable=True)
     percentual_servicos_terceiros = Column(Float, nullable=True)
     percentual_outros = Column(Float, nullable=True)
+
     excluido = Column(Boolean, nullable=True)
 
     # tabela = relationship("Tabela")
@@ -276,18 +295,24 @@ class InsumoItem(Base):
 class ComposicaoItem(Base):
     __tablename__ = "composicao_items"
     id = Column(Integer, primary_key=True)
+
     nome = Column(Text)
     codigo = Column(Text)
+
     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
     id_unidade = Column(Integer, ForeignKey("unidades.id"))
+
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
+
     composicao = Column(Boolean, nullable=True)
+
     percentual_mao_de_obra = Column(Float, nullable=True)
     percentual_material = Column(Float, nullable=True)
     percentual_equipamentos = Column(Float, nullable=True)
     percentual_servicos_terceiros = Column(Float, nullable=True)
     percentual_outros = Column(Float, nullable=True)
+
     excluido = Column(Boolean, nullable=True)
 
     # tabela = relationship("Tabela")
@@ -295,36 +320,25 @@ class ComposicaoItem(Base):
     # classe = relationship("Classe")
 
 
-class InsumoComposicaoResponse(BaseModel):
-    id: int
-    id_insumo_item: int
-    valor_onerado: float
-    valor_nao_onerado: float
-    coeficiente: float
-
-    id_insumo: Optional[int] = None
-    id_composicao: Optional[int] = None
-    excluido: Optional[bool] = None
-
-    insumo_item: Optional[InsumosResponseItem] = None
-
-
 class InsumoComposicao(Base):
     __tablename__ = "insumo_composicoes"
     id = Column(Integer, primary_key=True)
+
     id_insumo = Column(Integer, ForeignKey("insumos_tabela.id"), nullable=True)
     id_composicao = Column(Integer, ForeignKey("composicoes_tabela.id"), nullable=True)
     id_insumo_item = Column(Integer, ForeignKey("insumo_items.id"))
+
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
+
     coeficiente = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
-    composicoes = relationship(
-        "ComposicaoTabela", back_populates="composicoes_composicoes"
-    )
-    insumo_item = relationship("InsumoItem")
+    # insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
+    # composicoes = relationship(
+    #     "ComposicaoTabela", back_populates="composicoes_composicoes"
+    # )
+    # insumo_item = relationship("InsumoItem")
 
     def to_pydantic(
         self, insumo_item: Optional[InsumosResponseItem] = None

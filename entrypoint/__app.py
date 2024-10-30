@@ -13,6 +13,7 @@ import sys
 import pathlib
 
 from sinapi.api.schema import InsumosResponseItem
+from sinapi.utils import apply_order_by
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
@@ -111,6 +112,7 @@ def read_classes(session: Session = Depends(get_db)):
 def read_insumos(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
+    order_by: Optional[str] = None,
     session: Session = Depends(get_db),
     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
@@ -135,6 +137,8 @@ def read_insumos(
         query = query.filter_by(id_tabela=id_tabela)
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
+    if order_by:
+        query = apply_order_by(query, Table, order_by)
 
     result_count = query.count()
     total_pages = ceil(result_count / limit)
@@ -154,6 +158,7 @@ def read_insumos(
 def read_composicoes(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
+    order_by: Optional[str] = None,
     session: Session = Depends(get_db),
     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
@@ -178,6 +183,8 @@ def read_composicoes(
         query = query.filter_by(id_tabela=id_tabela)
     if id_classe:
         query = query.filter_by(id_classe=id_classe)
+    if order_by:
+        query = apply_order_by(query, Table, order_by)
 
     result_count = query.count()
     total_pages = ceil(result_count / limit)
