@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 from sinapi.api.schema import (
+    InsumoComposicaoResponse,
     InsumosResponseItem,
     InsumosResponseTabela,
     InsumosResponseUnidade,
@@ -293,20 +294,6 @@ class ComposicaoItem(Base):
     # tabela = relationship("Tabela")
     # unidade = relationship("Unidade")
     # classe = relationship("Classe")
-
-
-class InsumoComposicaoResponse(BaseModel):
-    id: int
-    id_insumo_item: int
-    valor_onerado: float
-    valor_nao_onerado: float
-    coeficiente: float
-
-    id_insumo: Optional[int] = None
-    id_composicao: Optional[int] = None
-    excluido: Optional[bool] = None
-
-    insumo_item: Optional[InsumosResponseItem] = None
 
 
 class InsumoComposicao(Base):
