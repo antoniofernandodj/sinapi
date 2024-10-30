@@ -1,7 +1,8 @@
 from datetime import date
 from math import ceil
-from typing import Annotated, List, Optional, Set
+from typing import Annotated, Any, List, Optional, Set
 from fastapi import FastAPI, Depends, Query, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery
@@ -197,3 +198,30 @@ def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
 
     return mount_one_insumo_composicao_response(composicao, session)
+
+
+@app.get("/estados/{id_estado}/composicoes")
+def read_composicoes_do_estado(id_estado: int, session=Depends(get_db)):
+
+    estados: List[Estado] = session.query(Estado).all()
+
+    response = {}
+    for estado in estados:
+
+        response[estado.nome] = []
+        composicoes_do_estado: List[Any] = response[estado.nome]
+
+        query = session.query(Tabela).filter_by(id_estado=id_estado)
+        tabelas: List[Tabela] = query.all()
+
+        for tabela in tabelas:
+
+            composicao: Optional[ComposicaoTabela] = (
+                session.query(ComposicaoTabela).filter_by(id_tabela=tabela.id).first()
+            )
+            if composicao is None:
+                continue
+
+            composicoes_do_estado.append(composicao.to_pydantic().model_dump())  # type: ignore
+
+    return response
