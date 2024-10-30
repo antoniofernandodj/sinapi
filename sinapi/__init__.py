@@ -291,17 +291,11 @@ def get_all_ids(Table, session) -> list:
 
 async def main():
     with Session() as session:
+        batch_size = 1000  # Tamanho do lote
+        items_to_merge = []  # Lista para acumular itens
 
-        # print(f"i: {session.query(InsumoTabela).count()}")
-        # print(f"c: {session.query(ComposicaoTabela).count()}")
-
-        # insumos_iter: Iterator[InsumoTabela]
-        # insumos_iter = session.query(InsumoTabela).yield_per(1000)  # type: ignore # 377 MB
-
-        # i = 0
-        # c = 0
+        # Processar InsumoTabela
         for id in get_all_ids(InsumoTabela, session):
-
             insumo = session.query(InsumoTabela).filter_by(id=id).first()
 
             item = InsumoComposicaoTabela(
@@ -322,14 +316,25 @@ async def main():
                 excluido=insumo.excluido,  # type: ignore
             )
 
-            session.merge(item)
+            items_to_merge.append(item)
+
+            # Realiza o commit a cada 1000 itens
+            if len(items_to_merge) >= batch_size:
+                for merge_item in items_to_merge:
+                    session.merge(merge_item)  # Faz o merge dos itens acumulados
+                session.commit()  # Comita as alterações
+                items_to_merge.clear()  # Limpa a lista após o commit
+
+        # Comita os itens restantes, se houver
+        if items_to_merge:
+            for merge_item in items_to_merge:
+                session.merge(merge_item)
             session.commit()
-            # i += 1
 
-        # composicoes: Iterator[ComposicaoTabela]
-        # composicoes = session.query(ComposicaoTabela).yield_per(1000)  # type: ignore  # 453 MB
+        # Processar ComposicaoTabela de maneira semelhante
+        items_to_merge.clear()  # Limpa a lista para novos itens
+
         for id in get_all_ids(ComposicaoTabela, session):
-
             composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
 
             item = InsumoComposicaoTabela(
@@ -350,10 +355,15 @@ async def main():
                 excluido=composicao.excluido,  # type: ignore
             )
 
-            session.merge(item)
+            items_to_merge.append(item)
+
+            if len(items_to_merge) >= batch_size:
+                for merge_item in items_to_merge:
+                    session.merge(merge_item)
+                session.commit()
+                items_to_merge.clear()
+
+        if items_to_merge:
+            for merge_item in items_to_merge:
+                session.merge(merge_item)
             session.commit()
-            c += 1
-
-        del composicoes
-
-    print(f"finalizado! i: {i} c: {c}")
