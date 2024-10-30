@@ -306,7 +306,7 @@ async def main():
 
             session.merge(item)
             session.commit()
-            print(".")
+            print(".", end="", flush=True)
 
         del insumos_iter
 
@@ -333,7 +333,7 @@ async def main():
 
             session.merge(item)
             session.commit()
-            print("-")
+            print("-", end="", flush=True)
 
         del composicoes
 
