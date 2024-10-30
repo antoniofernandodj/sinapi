@@ -138,9 +138,9 @@ class InsumoTabela(Base):
     # unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
     # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    # insumos_composicoes = relationship(
-    #     "InsumoComposicao", back_populates="insumo_tabela"
-    # )
+    insumos_composicoes = relationship(
+        "InsumoComposicao", back_populates="insumo_tabela"
+    )
 
     def to_pydantic(self) -> InsumosResponseItem:
         insumo_dict = InsumosResponseItem.model_validate(
@@ -334,10 +334,10 @@ class InsumoComposicao(Base):
     coeficiente = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    # insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
-    # composicoes = relationship(
-    #     "ComposicaoTabela", back_populates="composicoes_composicoes"
-    # )
+    insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
+    composicoes = relationship(
+        "ComposicaoTabela", back_populates="composicoes_composicoes"
+    )
     # insumo_item = relationship("InsumoItem")
 
     def to_pydantic(
