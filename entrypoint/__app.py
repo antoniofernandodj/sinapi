@@ -229,11 +229,12 @@ def read_composicoes_do_estado(
                 query = query.filter_by(id=id_composicao)
 
             composicao: Optional[ComposicaoTabela] = query.first()
+            result = mount_one_insumo_composicao_response(composicao, session)
 
             if composicao is None:
                 continue
 
-            composicoes_do_estado.append(composicao.to_pydantic().model_dump())  # type: ignore
+            composicoes_do_estado.append(result.model_dump())  # type: ignore
 
         if len(composicoes_do_estado) == 0:
             del response[estado.nome]
