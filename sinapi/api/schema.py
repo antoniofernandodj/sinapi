@@ -190,7 +190,7 @@ class MesesResponse(BaseModel):
     meses: List[Mes]
 
 
-class InsumoComposicaoResponse(BaseModel):
+class ComposicaoMontadaResponse(BaseModel):
     id: int
 
     id_insumo_item: int

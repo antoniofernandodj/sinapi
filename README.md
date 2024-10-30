@@ -41,7 +41,7 @@ O banco de dados consiste nas seguintes tabelas:
 - Insumo: Contém os dados dos insumos.
 - Composicao: Contém os dados das composições, que podem incluir insumos.
 - InsumoItem: Representa os itens de insumos associados a composições ou insumos.
-- InsumoComposicao: Faz a ligação entre os insumos e as composições.
+- ComposicaoMontada: Faz a ligação entre os insumos e as composições.
 
 ### Funcionalidades
 
@@ -120,12 +120,12 @@ def main_insert(i, Model: Union[Type[Insumo], Type[Composicao]]):
 ```
 
 #### 6. Inserção de Itens de Composição e Insumos
-A função inserir_insumo_item cuida de inserir os itens individuais de insumos e composições. Ela também garante que os relacionamentos entre insumos e composições sejam mantidos corretamente através da tabela de associação InsumoComposicao:
+A função inserir_insumo_item cuida de inserir os itens individuais de insumos e composições. Ela também garante que os relacionamentos entre insumos e composições sejam mantidos corretamente através da tabela de associação ComposicaoMontada:
 
 ```python
 def inserir_insumo_item(item: Optional[dict], composicao_item, insumo: Union[Insumo, Composicao]):
     ...
-    insumo_composicao = InsumoComposicao(
+    insumo_composicao = ComposicaoMontada(
         id=composicao_item["id"],
         id_insumo=insumo.id,
         id_composicao=None,

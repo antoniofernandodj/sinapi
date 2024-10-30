@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from sinapi.models import (
     Classe,
     ComposicaoTabela,
-    InsumoComposicao,
-    InsumoComposicaoResponse,
+    ComposicaoMontada,
+    ComposicaoMontadaResponse,
     InsumoItem,
     InsumoTabela,
     Tabela,
@@ -37,16 +37,16 @@ def mount_one_insumo_composicao_response(insumo_composicao, db: Session):
 
     if isinstance(insumo_composicao, ComposicaoTabela):
         query_all = (
-            db.query(InsumoComposicao)
+            db.query(ComposicaoMontada)
             .filter_by(id_composicao=insumo_composicao.id)
             .all()
         )
     else:
         query_all = (
-            db.query(InsumoComposicao).filter_by(id_insumo=insumo_composicao.id).all()
+            db.query(ComposicaoMontada).filter_by(id_insumo=insumo_composicao.id).all()
         )
     for ic in query_all:
-        if not isinstance(ic, InsumoComposicao):
+        if not isinstance(ic, ComposicaoMontada):
             continue
         insumo_item: Optional[InsumoItem] = (
             db.query(InsumoItem).filter_by(id=ic.id_insumo_item).first()
@@ -55,7 +55,7 @@ def mount_one_insumo_composicao_response(insumo_composicao, db: Session):
         if insumo_item is None:
             continue
 
-        ic_response: InsumoComposicaoResponse = ic.to_pydantic(
+        ic_response: ComposicaoMontadaResponse = ic.to_pydantic(
             insumo_item.to_pydantic()
         )
         response.insumosComposicoes.append(ic_response)
@@ -90,18 +90,20 @@ def mount_insumo_composicao_response(db: Session, insumos_composicoes):
         # breakpoint()
 
         if isinstance(obj, ComposicaoTabela):
-            query_all = db.query(InsumoComposicao).filter_by(id_composicao=obj.id).all()
+            query_all = (
+                db.query(ComposicaoMontada).filter_by(id_composicao=obj.id).all()
+            )
         else:
-            query_all = db.query(InsumoComposicao).filter_by(id_insumo=obj.id).all()
+            query_all = db.query(ComposicaoMontada).filter_by(id_insumo=obj.id).all()
         for ic in query_all:
-            if not isinstance(ic, InsumoComposicao):
+            if not isinstance(ic, ComposicaoMontada):
                 continue
             insumo_item: Optional[InsumoItem] = (
                 db.query(InsumoItem).filter_by(id=ic.id_insumo_item).first()
             )
             if insumo_item is None:
                 continue
-            ic_response: InsumoComposicaoResponse = ic.to_pydantic(
+            ic_response: ComposicaoMontadaResponse = ic.to_pydantic(
                 insumo_item.to_pydantic()
             )
             response.insumosComposicoes.append(ic_response)
