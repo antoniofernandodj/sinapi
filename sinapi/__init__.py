@@ -282,65 +282,61 @@ except:
 
 async def main():
     with Session() as session:
-
         print(f"i: {session.query(InsumoTabela).count()}")
         print(f"c: {session.query(ComposicaoTabela).count()}")
 
-        insumos_iter: Iterator[InsumoTabela]
-        insumos_iter = session.query(InsumoTabela).yield_per(1000)  # type: ignore # 377 MB
+        # List to hold items for bulk operation
+        insumo_items = []
+        composicao_items = []
 
-        i = 0
-        c = 0
+        insumos_iter = session.query(InsumoTabela).yield_per(1000)
         for insumo in insumos_iter:
             item = InsumoComposicaoTabela(
-                id=insumo.id,  # type: ignore
-                nome=insumo.nome,  # type: ignore
-                codigo=insumo.codigo,  # type: ignore
-                id_tabela=insumo.id_tabela,  # type: ignore
-                id_unidade=insumo.id_unidade,  # type: ignore
-                id_classe=insumo.id_classe,  # type: ignore
-                valor_onerado=insumo.valor_onerado,  # type: ignore
-                valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
-                composicao=insumo.composicao,  # type: ignore
-                percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
-                percentual_material=insumo.percentual_material,  # type: ignore
-                percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
-                percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
-                percentual_outros=insumo.percentual_outros,  # type: ignore
-                excluido=insumo.excluido,  # type: ignore
+                id=insumo.id,
+                nome=insumo.nome,
+                codigo=insumo.codigo,
+                id_tabela=insumo.id_tabela,
+                id_unidade=insumo.id_unidade,
+                id_classe=insumo.id_classe,
+                valor_onerado=insumo.valor_onerado,
+                valor_nao_onerado=insumo.valor_nao_onerado,
+                composicao=insumo.composicao,
+                percentual_mao_de_obra=insumo.percentual_mao_de_obra,
+                percentual_material=insumo.percentual_material,
+                percentual_equipamentos=insumo.percentual_equipamentos,
+                percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,
+                percentual_outros=insumo.percentual_outros,
+                excluido=insumo.excluido,
             )
+            insumo_items.append(item)
 
-            session.merge(item)
-            session.commit()
-            i += 1
+        session.bulk_save_objects(insumo_items)  # Efficient bulk insert
+        session.commit()  # Commit after all inserts
+        print(f"Processed insumos: {len(insumo_items)}")
 
-        del insumos_iter
-
-        composicoes: Iterator[ComposicaoTabela]
-        composicoes = session.query(ComposicaoTabela).yield_per(1000)  # type: ignore  # 453 MB
-        for composicao in composicoes:
+        composicoes_iter = session.query(ComposicaoTabela).yield_per(1000)
+        for composicao in composicoes_iter:
             item = InsumoComposicaoTabela(
-                id=composicao.id,  # type: ignore
-                nome=composicao.nome,  # type: ignore
-                codigo=composicao.codigo,  # type: ignore
-                id_tabela=composicao.id_tabela,  # type: ignore
-                id_unidade=composicao.id_unidade,  # type: ignore
-                id_classe=composicao.id_classe,  # type: ignore
-                valor_onerado=composicao.valor_onerado,  # type: ignore
-                valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
-                composicao=composicao.composicao,  # type: ignore
-                percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
-                percentual_material=composicao.percentual_material,  # type: ignore
-                percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
-                percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
-                percentual_outros=composicao.percentual_outros,  # type: ignore
-                excluido=composicao.excluido,  # type: ignore
+                id=composicao.id,
+                nome=composicao.nome,
+                codigo=composicao.codigo,
+                id_tabela=composicao.id_tabela,
+                id_unidade=composicao.id_unidade,
+                id_classe=composicao.id_classe,
+                valor_onerado=composicao.valor_onerado,
+                valor_nao_onerado=composicao.valor_nao_onerado,
+                composicao=composicao.composicao,
+                percentual_mao_de_obra=composicao.percentual_mao_de_obra,
+                percentual_material=composicao.percentual_material,
+                percentual_equipamentos=composicao.percentual_equipamentos,
+                percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,
+                percentual_outros=composicao.percentual_outros,
+                excluido=composicao.excluido,
             )
+            composicao_items.append(item)
 
-            session.merge(item)
-            session.commit()
-            c += 1
+        session.bulk_save_objects(composicao_items)  # Efficient bulk insert
+        session.commit()  # Commit after all inserts
+        print(f"Processed composicoes: {len(composicao_items)}")
 
-        del composicoes
-
-    print(f"finalizado! i: {i} c: {c}")
+    print("Finalizado!")
