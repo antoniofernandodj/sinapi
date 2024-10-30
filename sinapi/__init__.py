@@ -280,118 +280,80 @@ except:
 #         await asyncio.sleep(3600)
 
 
-# Supondo que InsumoComposicaoTabela tenha um campo id como chave primária
-def bulk_merge(session, items: list):
-    # Cria uma lista de dicionários com os dados a serem atualizados
-    mappings = [
-        {
-            "id": item.id,
-            "nome": item.nome,
-            "codigo": item.codigo,
-            "id_tabela": item.id_tabela,
-            "id_unidade": item.id_unidade,
-            "id_classe": item.id_classe,
-            "valor_onerado": item.valor_onerado,
-            "valor_nao_onerado": item.valor_nao_onerado,
-            "composicao": item.composicao,
-            "percentual_mao_de_obra": item.percentual_mao_de_obra,
-            "percentual_material": item.percentual_material,
-            "percentual_equipamentos": item.percentual_equipamentos,
-            "percentual_servicos_terceiros": item.percentual_servicos_terceiros,
-            "percentual_outros": item.percentual_outros,
-            "excluido": item.excluido,
-        }
-        for item in items
-    ]
+def get_all_ids(Table, session) -> list:
+    """Retorna uma lista de todos os IDs da tabela ExampleTable."""
+    from sqlalchemy import select
 
-    # Use bulk_update_mappings para atualizar os registros no banco de dados
-    session.bulk_update_mappings(InsumoComposicaoTabela, mappings)
-    session.commit()
+    stmt = select(Table.id)
+    result = session.execute(stmt)
+    return [row[0] for row in result]
 
 
 async def main():
-    YIELD_COUNT = 10
-    BATCH_SIZE = (
-        100  # Limite a quantidade de objetos na memória antes de fazer um commit
-    )
-
     with Session() as session:
-        print(f"i: {session.query(InsumoTabela).count()}")
-        print(f"c: {session.query(ComposicaoTabela).count()}")
 
-        # Processar Insumos
-        insumo_items = []
-        insumos_iter = session.query(InsumoTabela).yield_per(YIELD_COUNT)
-        for insumo in insumos_iter:
+        # print(f"i: {session.query(InsumoTabela).count()}")
+        # print(f"c: {session.query(ComposicaoTabela).count()}")
+
+        # insumos_iter: Iterator[InsumoTabela]
+        # insumos_iter = session.query(InsumoTabela).yield_per(1000)  # type: ignore # 377 MB
+
+        # i = 0
+        # c = 0
+        for id in get_all_ids(InsumoTabela, session):
+
+            insumo = session.query(InsumoTabela).filter_by(id=id).first()
+
             item = InsumoComposicaoTabela(
-                id=insumo.id,
-                nome=insumo.nome,
-                codigo=insumo.codigo,
-                id_tabela=insumo.id_tabela,
-                id_unidade=insumo.id_unidade,
-                id_classe=insumo.id_classe,
-                valor_onerado=insumo.valor_onerado,
-                valor_nao_onerado=insumo.valor_nao_onerado,
-                composicao=insumo.composicao,
-                percentual_mao_de_obra=insumo.percentual_mao_de_obra,
-                percentual_material=insumo.percentual_material,
-                percentual_equipamentos=insumo.percentual_equipamentos,
-                percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,
-                percentual_outros=insumo.percentual_outros,
-                excluido=insumo.excluido,
+                id=insumo.id,  # type: ignore
+                nome=insumo.nome,  # type: ignore
+                codigo=insumo.codigo,  # type: ignore
+                id_tabela=insumo.id_tabela,  # type: ignore
+                id_unidade=insumo.id_unidade,  # type: ignore
+                id_classe=insumo.id_classe,  # type: ignore
+                valor_onerado=insumo.valor_onerado,  # type: ignore
+                valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
+                composicao=insumo.composicao,  # type: ignore
+                percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
+                percentual_material=insumo.percentual_material,  # type: ignore
+                percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
+                percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
+                percentual_outros=insumo.percentual_outros,  # type: ignore
+                excluido=insumo.excluido,  # type: ignore
             )
-            insumo_items.append(item)
 
-            # Commit em batches
-            if len(insumo_items) >= BATCH_SIZE:
-                # session.bulk_save_objects(insumo_items)
-                bulk_merge(session, insumo_items)
-                # session.commit()
-                insumo_items.clear()  # Limpa a lista após o commit
-
-        # Commit qualquer restante
-        if insumo_items:
-            session.bulk_save_objects(insumo_items)
+            session.merge(item)
             session.commit()
-            insumo_items.clear()
+            # i += 1
 
-        print("Processed insumos!")
+        # composicoes: Iterator[ComposicaoTabela]
+        # composicoes = session.query(ComposicaoTabela).yield_per(1000)  # type: ignore  # 453 MB
+        for id in get_all_ids(ComposicaoTabela, session):
 
-        # Processar Composições
-        composicao_items = []
-        composicoes_iter = session.query(ComposicaoTabela).yield_per(YIELD_COUNT)
-        for composicao in composicoes_iter:
+            composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
+
             item = InsumoComposicaoTabela(
-                id=composicao.id,
-                nome=composicao.nome,
-                codigo=composicao.codigo,
-                id_tabela=composicao.id_tabela,
-                id_unidade=composicao.id_unidade,
-                id_classe=composicao.id_classe,
-                valor_onerado=composicao.valor_onerado,
-                valor_nao_onerado=composicao.valor_nao_onerado,
-                composicao=composicao.composicao,
-                percentual_mao_de_obra=composicao.percentual_mao_de_obra,
-                percentual_material=composicao.percentual_material,
-                percentual_equipamentos=composicao.percentual_equipamentos,
-                percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,
-                percentual_outros=composicao.percentual_outros,
-                excluido=composicao.excluido,
+                id=composicao.id,  # type: ignore
+                nome=composicao.nome,  # type: ignore
+                codigo=composicao.codigo,  # type: ignore
+                id_tabela=composicao.id_tabela,  # type: ignore
+                id_unidade=composicao.id_unidade,  # type: ignore
+                id_classe=composicao.id_classe,  # type: ignore
+                valor_onerado=composicao.valor_onerado,  # type: ignore
+                valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
+                composicao=composicao.composicao,  # type: ignore
+                percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
+                percentual_material=composicao.percentual_material,  # type: ignore
+                percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
+                percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
+                percentual_outros=composicao.percentual_outros,  # type: ignore
+                excluido=composicao.excluido,  # type: ignore
             )
-            composicao_items.append(item)
 
-            # Commit em batches
-            if len(composicao_items) >= BATCH_SIZE:
-                # session.bulk_save_objects(composicao_items)
-                bulk_merge(session, composicao_items)
-                # session.commit()
-                composicao_items.clear()  # Limpa a lista após o commit
-
-        # Commit qualquer restante
-        if composicao_items:
-            session.bulk_save_objects(composicao_items)
+            session.merge(item)
             session.commit()
-            composicao_items.clear()
+            c += 1
 
-        print("Processed composicoes!")
-    print("Finalizado!")
+        del composicoes
+
+    print(f"finalizado! i: {i} c: {c}")
