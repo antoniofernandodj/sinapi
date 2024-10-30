@@ -289,47 +289,49 @@ def get_all_ids(Table, session) -> list:
     return [row[0] for row in result]
 
 
+def merge_items(items_to_merge, session):
+    for merge_item in items_to_merge:
+        session.merge(merge_item)  # Faz o merge dos itens acumulados
+    session.commit()  # Comita as alterações
+
+
 async def main():
     with Session() as session:
-        batch_size = 1000  # Tamanho do lote
+        batch_size = 5000  # Tamanho do lote
         items_to_merge = []  # Lista para acumular itens
 
         # Processar InsumoTabela
         for id in get_all_ids(InsumoTabela, session):
             insumo = session.query(InsumoTabela).filter_by(id=id).first()
 
-            item = InsumoComposicaoTabela(
-                id=insumo.id,  # type: ignore
-                nome=insumo.nome,  # type: ignore
-                codigo=insumo.codigo,  # type: ignore
-                id_tabela=insumo.id_tabela,  # type: ignore
-                id_unidade=insumo.id_unidade,  # type: ignore
-                id_classe=insumo.id_classe,  # type: ignore
-                valor_onerado=insumo.valor_onerado,  # type: ignore
-                valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
-                composicao=insumo.composicao,  # type: ignore
-                percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
-                percentual_material=insumo.percentual_material,  # type: ignore
-                percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
-                percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
-                percentual_outros=insumo.percentual_outros,  # type: ignore
-                excluido=insumo.excluido,  # type: ignore
+            items_to_merge.append(
+                InsumoComposicaoTabela(
+                    id=insumo.id,  # type: ignore
+                    nome=insumo.nome,  # type: ignore
+                    codigo=insumo.codigo,  # type: ignore
+                    id_tabela=insumo.id_tabela,  # type: ignore
+                    id_unidade=insumo.id_unidade,  # type: ignore
+                    id_classe=insumo.id_classe,  # type: ignore
+                    valor_onerado=insumo.valor_onerado,  # type: ignore
+                    valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
+                    composicao=insumo.composicao,  # type: ignore
+                    percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
+                    percentual_material=insumo.percentual_material,  # type: ignore
+                    percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
+                    percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
+                    percentual_outros=insumo.percentual_outros,  # type: ignore
+                    excluido=insumo.excluido,  # type: ignore
+                )
             )
-
-            items_to_merge.append(item)
 
             # Realiza o commit a cada 1000 itens
             if len(items_to_merge) >= batch_size:
-                for merge_item in items_to_merge:
-                    session.merge(merge_item)  # Faz o merge dos itens acumulados
-                session.commit()  # Comita as alterações
+                merge_items(items_to_merge, session)
                 items_to_merge.clear()  # Limpa a lista após o commit
 
         # Comita os itens restantes, se houver
         if items_to_merge:
-            for merge_item in items_to_merge:
-                session.merge(merge_item)
-            session.commit()
+            merge_items(items_to_merge, session)
 
         # Processar ComposicaoTabela de maneira semelhante
         items_to_merge.clear()  # Limpa a lista para novos itens
@@ -337,33 +339,29 @@ async def main():
         for id in get_all_ids(ComposicaoTabela, session):
             composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
 
-            item = InsumoComposicaoTabela(
-                id=composicao.id,  # type: ignore
-                nome=composicao.nome,  # type: ignore
-                codigo=composicao.codigo,  # type: ignore
-                id_tabela=composicao.id_tabela,  # type: ignore
-                id_unidade=composicao.id_unidade,  # type: ignore
-                id_classe=composicao.id_classe,  # type: ignore
-                valor_onerado=composicao.valor_onerado,  # type: ignore
-                valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
-                composicao=composicao.composicao,  # type: ignore
-                percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
-                percentual_material=composicao.percentual_material,  # type: ignore
-                percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
-                percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
-                percentual_outros=composicao.percentual_outros,  # type: ignore
-                excluido=composicao.excluido,  # type: ignore
+            items_to_merge.append(
+                InsumoComposicaoTabela(
+                    id=composicao.id,  # type: ignore
+                    nome=composicao.nome,  # type: ignore
+                    codigo=composicao.codigo,  # type: ignore
+                    id_tabela=composicao.id_tabela,  # type: ignore
+                    id_unidade=composicao.id_unidade,  # type: ignore
+                    id_classe=composicao.id_classe,  # type: ignore
+                    valor_onerado=composicao.valor_onerado,  # type: ignore
+                    valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
+                    composicao=composicao.composicao,  # type: ignore
+                    percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
+                    percentual_material=composicao.percentual_material,  # type: ignore
+                    percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
+                    percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
+                    percentual_outros=composicao.percentual_outros,  # type: ignore
+                    excluido=composicao.excluido,  # type: ignore
+                )
             )
 
-            items_to_merge.append(item)
-
             if len(items_to_merge) >= batch_size:
-                for merge_item in items_to_merge:
-                    session.merge(merge_item)
-                session.commit()
+                merge_items(items_to_merge, session)
                 items_to_merge.clear()
 
         if items_to_merge:
-            for merge_item in items_to_merge:
-                session.merge(merge_item)
-            session.commit()
+            merge_items(items_to_merge, session)
