@@ -312,7 +312,7 @@ async def main():
 
             session.merge(item)
             session.commit()
-            i = +1
+            i += 1
 
         del insumos_iter
 
