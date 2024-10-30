@@ -283,7 +283,7 @@ except:
 async def main():
     with Session() as session:
         insumos_iter: Iterator[InsumoTabela]
-        insumos_iter = session.query(InsumoTabela).yield_per(1000)  # type: ignore # 377 MB
+        insumos_iter = session.query(InsumoTabela).all()  # type: ignore # 377 MB
 
         for insumo in insumos_iter:
             item = InsumoComposicaoTabela(
@@ -309,7 +309,7 @@ async def main():
             print(".")
 
         composicoes: Iterator[ComposicaoTabela]
-        composicoes = session.query(ComposicaoTabela).yield_per(1000)  # type: ignore  # 453 MB
+        composicoes = session.query(ComposicaoTabela).all()  # type: ignore  # 453 MB
         for composicao in composicoes:
             item = InsumoComposicaoTabela(
                 id=composicao.id,  # type: ignore
