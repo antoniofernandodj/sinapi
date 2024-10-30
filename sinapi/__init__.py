@@ -280,6 +280,12 @@ except:
 #         await asyncio.sleep(3600)
 
 
+def chunk_list(lst, chunk_size):
+    """Divide uma lista em múltiplas listas de tamanho especificado."""
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i : i + chunk_size]
+
+
 def get_all_ids(Table, session) -> list:
     """Retorna uma lista de todos os IDs da tabela ExampleTable."""
     from sqlalchemy import select
@@ -300,12 +306,14 @@ async def main():
         batch_size = 20_000  # Tamanho do lote
         items_to_merge = []  # Lista para acumular itens
 
-        # Processar InsumoTabela
-        for id in get_all_ids(InsumoTabela, session):
-            insumo = session.query(InsumoTabela).filter_by(id=id).first()
+        list_ids = get_all_ids(InsumoTabela, session)  # Obter todos os IDs
+        chunks = list(chunk_list(list_ids, batch_size))  # Dividir a lista em chunks
 
-            items_to_merge.append(
-                InsumoComposicaoTabela(
+        for chunk in chunks:
+            for id in chunk:
+                insumo = session.query(InsumoTabela).filter_by(id=id).first()
+
+                item = InsumoComposicaoTabela(
                     id=insumo.id,  # type: ignore
                     nome=insumo.nome,  # type: ignore
                     codigo=insumo.codigo,  # type: ignore
@@ -322,25 +330,20 @@ async def main():
                     percentual_outros=insumo.percentual_outros,  # type: ignore
                     excluido=insumo.excluido,  # type: ignore
                 )
-            )
 
-            # Realiza o commit a cada 1000 itens
-            if len(items_to_merge) >= batch_size:
-                merge_items(items_to_merge, session)
-                items_to_merge.clear()  # Limpa a lista após o commit
+                session.merge(item)
 
-        # Comita os itens restantes, se houver
-        if items_to_merge:
-            merge_items(items_to_merge, session)
+            session.commit()  # Comita após processar cada chunk
 
-        # Processar ComposicaoTabela de maneira semelhante
-        items_to_merge.clear()  # Limpa a lista para novos itens
+        # Repetir o processo para ComposicaoTabela
+        list_ids = get_all_ids(ComposicaoTabela, session)
+        chunks = list(chunk_list(list_ids, batch_size))
 
-        for id in get_all_ids(ComposicaoTabela, session):
-            composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
+        for chunk in chunks:
+            for id in chunk:
+                composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
 
-            items_to_merge.append(
-                InsumoComposicaoTabela(
+                item = InsumoComposicaoTabela(
                     id=composicao.id,  # type: ignore
                     nome=composicao.nome,  # type: ignore
                     codigo=composicao.codigo,  # type: ignore
@@ -357,11 +360,7 @@ async def main():
                     percentual_outros=composicao.percentual_outros,  # type: ignore
                     excluido=composicao.excluido,  # type: ignore
                 )
-            )
 
-            if len(items_to_merge) >= batch_size:
-                merge_items(items_to_merge, session)
-                items_to_merge.clear()
+                session.merge(item)
 
-        if items_to_merge:
-            merge_items(items_to_merge, session)
+            session.commit()  # Comita após processar cada chunk
