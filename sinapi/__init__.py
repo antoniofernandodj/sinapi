@@ -5,6 +5,7 @@ from contextlib import suppress
 from typing import Any, Dict, Iterator, List, Optional, Type, Union
 from sqlalchemy.exc import InvalidRequestError
 
+from sinapi.database import get_session
 from sinapi.models import InsumoComposicaoTabela
 
 
@@ -363,6 +364,7 @@ from sqlalchemy.orm import Session
 
 
 def process_insumo(chunks):
+    Session = get_session()
     for chunk in chunks:
         with Session() as session:  # Cria uma nova session para cada chunk
             for id in chunk:
@@ -391,6 +393,7 @@ def process_insumo(chunks):
 
 
 def process_composicao(chunks):
+    Session = get_session()
     for chunk in chunks:
         with Session() as session:  # Cria uma nova session para cada chunk
             for id in chunk:
