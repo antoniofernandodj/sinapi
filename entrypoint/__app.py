@@ -17,7 +17,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
 from entrypoint.utils import get_db, mount_insumo_composicao_response
-from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela
+from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
 
 from entrypoint.schema import (
     InsumosComposicoesResponse,
@@ -193,3 +193,11 @@ def read_composicoes(composicao_id: int, session: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
 
     return composicao.to_pydantic()
+
+
+@app.get("/classes/")
+def read_classes(session: Session = Depends(get_db)):
+
+    classes: List[Classe] = session.query(Classe).all()
+
+    return [classe.to_pydantic() for classe in classes]
