@@ -16,8 +16,8 @@ try:
         Unidade,
         Classe,
         InsumoTabela,
-        InsumoItem,
-        InsumoComposicao,
+        # InsumoItem,
+        ComposicaoMontada,
     )
 except:
     from sinapi.database import Session
@@ -29,8 +29,8 @@ except:
         Unidade,
         Classe,
         InsumoTabela,
-        InsumoItem,
-        InsumoComposicao,
+        # InsumoItem,
+        ComposicaoMontada,
     )
 
 
@@ -96,7 +96,10 @@ def inserir_tabela(item: Optional[dict], session):
     )
 
 
+# TODO
 def inserir_insumo_item(item: Optional[dict], session):
+
+    raise NotImplementedError
     if item is None:
         return
 
@@ -105,6 +108,9 @@ def inserir_insumo_item(item: Optional[dict], session):
 
     if item["tabela"]:
         inserir_tabela(item["tabela"], session)
+
+    if item["composicao"]:
+        main_insert(item, ComposicaoTabela, session)
 
     session.merge(
         InsumoItem(
@@ -137,7 +143,7 @@ def inserir_composicoes_insumo(
 
     if isinstance(insumo, InsumoTabela):
         session.merge(
-            InsumoComposicao(
+            ComposicaoMontada(
                 id=insumo_composicao_api["id"],  # type: ignore
                 id_insumo=insumo.id,  # type: ignore
                 id_composicao=None,  # type: ignore
@@ -151,7 +157,7 @@ def inserir_composicoes_insumo(
 
     elif isinstance(insumo, ComposicaoTabela):
         session.merge(
-            InsumoComposicao(
+            ComposicaoMontada(
                 id=insumo_composicao_api["id"],  # type: ignore
                 id_insumo=None,  # type: ignore
                 id_composicao=insumo.id,  # type: ignore
@@ -164,13 +170,18 @@ def inserir_composicoes_insumo(
         )
 
 
-def main_insert(
-    i: Dict[str, Any], Model: Union[Type[InsumoTabela], Type[ComposicaoTabela]], session
+# TODO
+def vincular_item_de_composicao_a_uma_composicao(
+    insumo_composicao_api: dict, insumo: Union[InsumoTabela, ComposicaoTabela], session
 ):
+    raise NotImplementedError
+
+
+def inserir_composicao(i: Dict[str, Any], session):
     inserir_unidade(i["unidade"], session)
     inserir_tabela(i["tabela"], session)
     inserir_classe(i["classe"], session)
-    item = Model(
+    item = ComposicaoTabela(
         id=i["id"],  # type: ignore
         nome=i["nome"],  # type: ignore
         codigo=i["codigo"],  # type: ignore
@@ -196,22 +207,46 @@ def main_insert(
         inserir_composicoes_insumo(insumo_composicao, item, session)
 
 
-def inserir_insumos(data, estado_data):
+def inserir_insumo(i: Dict[str, Any], session):
+    inserir_unidade(i["unidade"], session)
+    inserir_tabela(i["tabela"], session)
+    inserir_classe(i["classe"], session)
+    item = InsumoTabela(
+        id=i["id"],  # type: ignore
+        nome=i["nome"],  # type: ignore
+        codigo=i["codigo"],  # type: ignore
+        id_tabela=i["tabela"]["id"],  # type: ignore
+        id_unidade=i["unidade"]["id"],  # type: ignore
+        id_classe=i["classe"]["id"],  # type: ignore
+        valor_onerado=i["valorOnerado"],  # type: ignore
+        valor_nao_onerado=i["valorNaoOnerado"],  # type: ignore
+        composicao=i["composicao"],  # type: ignore
+        percentual_mao_de_obra=i["percentualMaoDeObra"],  # type: ignore
+        percentual_material=i["percentualMaterial"],  # type: ignore
+        percentual_equipamentos=i["percentualEquipamentos"],  # type: ignore
+        percentual_servicos_terceiros=i["percentualServicosTerceiros"],  # type: ignore
+        percentual_outros=i["percentualOutros"],  # type: ignore
+        excluido=i["excluido"],  # type: ignore
+    )
+    session.merge(item)
+    session.flush()
+    with suppress(InvalidRequestError):
+        session.refresh(item)
+
+
+def inserir_insumos(insumos, estado_data):
     with Session() as session:
         inserir_estado(estado_data, session)
-        for i in data:
-            main_insert(i, InsumoTabela, session)
+        for insumo in insumos:
+            inserir_insumo(insumo, session)
         session.commit()
 
 
-def inserir_composicoes(data, estado_data):
+def inserir_composicoes(composicoes, estado_data):
     with Session() as session:
-
-        session.autoflush = False
-
         inserir_estado(estado_data, session)
-        for i in data:
-            main_insert(i, ComposicaoTabela, session)
+        for composicao in composicoes:
+            inserir_composicao(composicao, session)
         session.commit()
 
 
