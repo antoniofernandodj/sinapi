@@ -134,9 +134,9 @@ class InsumoTabela(Base):
 
     excluido = Column(Boolean, nullable=True)
 
-    # tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
-    # unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
-    # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
+    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
+    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
+    classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
     insumos_composicoes = relationship(
         "InsumoComposicao", back_populates="insumo_tabela"
