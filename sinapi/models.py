@@ -331,9 +331,9 @@ class InsumoComposicaoTabela(Base):
     unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])  # type: ignore
     classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])  # type: ignore
 
-    insumos_composicoes = relationship(
-        "ComposicaoMontada", back_populates="insumo_tabela"
-    )
+    # insumos_composicoes = relationship(
+    #     "ComposicaoMontada", back_populates="insumo_tabela"
+    # )
 
     # def to_pydantic(self) -> InsumosResponseItem:
     #     insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
