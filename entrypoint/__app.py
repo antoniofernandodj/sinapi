@@ -143,7 +143,7 @@ def read_composicoes(
     page: int = 1,
     limit: Annotated[int, Query(lt=200)] = 10,
     session: Session = Depends(get_db),
-    description: Annotated[Optional[str], Query(max_length=200)] = None,
+    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
     id: Optional[int] = None,
     id_tabela: Optional[int] = None,
@@ -160,8 +160,8 @@ def read_composicoes(
         query = query.filter_by(id=id)
     if codigo:
         query = query.filter_by(codigo=codigo)
-    if description:
-        query = query.filter(Table.nome.like(f"%{description}%"))
+    if descricao:
+        query = query.filter(Table.nome.like(f"%{descricao}%"))
     if id_tabela:
         query = query.filter_by(id_tabela=id_tabela)
     if id_classe:
