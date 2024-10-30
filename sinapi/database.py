@@ -16,13 +16,3 @@ with create_engine(SGBD_URL, echo=False).connect() as connection:
 engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
-
-
-def get_session():
-    from sqlalchemy.orm import sessionmaker
-
-    DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
-
-    engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
-    Session = sessionmaker(bind=engine)
-    return Session
