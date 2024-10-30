@@ -295,72 +295,147 @@ def get_all_ids(Table, session) -> list:
     return [row[0] for row in result]
 
 
-def merge_items(items_to_merge, session):
-    for merge_item in items_to_merge:
-        session.merge(merge_item)  # Faz o merge dos itens acumulados
-    session.commit()  # Comita as alterações
+# async def main():
+#     with Session() as session:
+#         batch_size = 20_000  # Tamanho do lote
+
+#         list_ids = get_all_ids(InsumoTabela, session)
+#         chunks = list(chunk_list(list_ids, batch_size))
+
+#         for chunk in chunks:
+#             for id in chunk:
+#                 insumo = session.query(InsumoTabela).filter_by(id=id).first()
+
+#                 item = InsumoComposicaoTabela(
+#                     id=insumo.id,  # type: ignore
+#                     nome=insumo.nome,  # type: ignore
+#                     codigo=insumo.codigo,  # type: ignore
+#                     id_tabela=insumo.id_tabela,  # type: ignore
+#                     id_unidade=insumo.id_unidade,  # type: ignore
+#                     id_classe=insumo.id_classe,  # type: ignore
+#                     valor_onerado=insumo.valor_onerado,  # type: ignore
+#                     valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
+#                     composicao=insumo.composicao,  # type: ignore
+#                     percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
+#                     percentual_material=insumo.percentual_material,  # type: ignore
+#                     percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
+#                     percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
+#                     percentual_outros=insumo.percentual_outros,  # type: ignore
+#                     excluido=insumo.excluido,  # type: ignore
+#                 )
+
+#                 session.merge(item)
+
+#             session.commit()
+
+#         list_ids = get_all_ids(ComposicaoTabela, session)
+#         chunks = list(chunk_list(list_ids, batch_size))
+
+#         for chunk in chunks:
+#             for id in chunk:
+#                 composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
+
+#                 item = InsumoComposicaoTabela(
+#                     id=composicao.id,  # type: ignore
+#                     nome=composicao.nome,  # type: ignore
+#                     codigo=composicao.codigo,  # type: ignore
+#                     id_tabela=composicao.id_tabela,  # type: ignore
+#                     id_unidade=composicao.id_unidade,  # type: ignore
+#                     id_classe=composicao.id_classe,  # type: ignore
+#                     valor_onerado=composicao.valor_onerado,  # type: ignore
+#                     valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
+#                     composicao=composicao.composicao,  # type: ignore
+#                     percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
+#                     percentual_material=composicao.percentual_material,  # type: ignore
+#                     percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
+#                     percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
+#                     percentual_outros=composicao.percentual_outros,  # type: ignore
+#                     excluido=composicao.excluido,  # type: ignore
+#                 )
+
+#                 session.merge(item)
+
+#             session.commit()  # Comita após processar cada chunk
+
+
+from concurrent.futures import ThreadPoolExecutor
+from sqlalchemy.orm import Session
+
+
+def process_insumo(chunks):
+    for chunk in chunks:
+        with Session() as session:  # Cria uma nova session para cada chunk
+            for id in chunk:
+                insumo = session.query(InsumoTabela).filter_by(id=id).first()
+                if insumo:  # Certifique-se de que o insumo existe
+                    item = InsumoComposicaoTabela(
+                        id=insumo.id,  # type: ignore
+                        nome=insumo.nome,  # type: ignore
+                        codigo=insumo.codigo,  # type: ignore
+                        id_tabela=insumo.id_tabela,  # type: ignore
+                        id_unidade=insumo.id_unidade,  # type: ignore
+                        id_classe=insumo.id_classe,  # type: ignore
+                        valor_onerado=insumo.valor_onerado,  # type: ignore
+                        valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
+                        composicao=insumo.composicao,  # type: ignore
+                        percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
+                        percentual_material=insumo.percentual_material,  # type: ignore
+                        percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
+                        percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
+                        percentual_outros=insumo.percentual_outros,  # type: ignore
+                        excluido=insumo.excluido,  # type: ignore
+                    )
+                    session.merge(item)
+
+            session.commit()  # Comita após processar cada chunk
+
+
+def process_composicao(chunks):
+    for chunk in chunks:
+        with Session() as session:  # Cria uma nova session para cada chunk
+            for id in chunk:
+                composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
+                if composicao:  # Certifique-se de que a composição existe
+                    item = InsumoComposicaoTabela(
+                        id=composicao.id,  # type: ignore
+                        nome=composicao.nome,  # type: ignore
+                        codigo=composicao.codigo,  # type: ignore
+                        id_tabela=composicao.id_tabela,  # type: ignore
+                        id_unidade=composicao.id_unidade,  # type: ignore
+                        id_classe=composicao.id_classe,  # type: ignore
+                        valor_onerado=composicao.valor_onerado,  # type: ignore
+                        valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
+                        composicao=composicao.composicao,  # type: ignore
+                        percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
+                        percentual_material=composicao.percentual_material,  # type: ignore
+                        percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
+                        percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
+                        percentual_outros=composicao.percentual_outros,  # type: ignore
+                        excluido=composicao.excluido,  # type: ignore
+                    )
+                    session.merge(item)
+
+            session.commit()  # Comita após processar cada chunk
 
 
 async def main():
+    batch_size = 20_000  # Tamanho do lote
+
     with Session() as session:
-        batch_size = 20_000  # Tamanho do lote
-        # items_to_merge = []  # Lista para acumular itens
 
-        list_ids = get_all_ids(InsumoTabela, session)  # Obter todos os IDs
-        chunks = list(chunk_list(list_ids, batch_size))  # Dividir a lista em chunks
+        # Processar Insumos
+        list_ids_insumo = get_all_ids(InsumoTabela, session)
+        chunks_insumo = list(chunk_list(list_ids_insumo, batch_size))
 
-        for chunk in chunks:
-            for id in chunk:
-                insumo = session.query(InsumoTabela).filter_by(id=id).first()
+        # Processar Composições
+        list_ids_composicao = get_all_ids(ComposicaoTabela, session)
+        chunks_composicao = list(chunk_list(list_ids_composicao, batch_size))
 
-                item = InsumoComposicaoTabela(
-                    id=insumo.id,  # type: ignore
-                    nome=insumo.nome,  # type: ignore
-                    codigo=insumo.codigo,  # type: ignore
-                    id_tabela=insumo.id_tabela,  # type: ignore
-                    id_unidade=insumo.id_unidade,  # type: ignore
-                    id_classe=insumo.id_classe,  # type: ignore
-                    valor_onerado=insumo.valor_onerado,  # type: ignore
-                    valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
-                    composicao=insumo.composicao,  # type: ignore
-                    percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
-                    percentual_material=insumo.percentual_material,  # type: ignore
-                    percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
-                    percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
-                    percentual_outros=insumo.percentual_outros,  # type: ignore
-                    excluido=insumo.excluido,  # type: ignore
-                )
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        # Inicia as operações em paralelo
+        future_insumo = executor.submit(process_insumo, chunks_insumo)
+        future_composicao = executor.submit(process_composicao, chunks_composicao)
 
-                session.merge(item)
-
-            session.commit()  # Comita após processar cada chunk
-
-        # Repetir o processo para ComposicaoTabela
-        list_ids = get_all_ids(ComposicaoTabela, session)
-        chunks = list(chunk_list(list_ids, batch_size))
-
-        for chunk in chunks:
-            for id in chunk:
-                composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
-
-                item = InsumoComposicaoTabela(
-                    id=composicao.id,  # type: ignore
-                    nome=composicao.nome,  # type: ignore
-                    codigo=composicao.codigo,  # type: ignore
-                    id_tabela=composicao.id_tabela,  # type: ignore
-                    id_unidade=composicao.id_unidade,  # type: ignore
-                    id_classe=composicao.id_classe,  # type: ignore
-                    valor_onerado=composicao.valor_onerado,  # type: ignore
-                    valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
-                    composicao=composicao.composicao,  # type: ignore
-                    percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
-                    percentual_material=composicao.percentual_material,  # type: ignore
-                    percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
-                    percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
-                    percentual_outros=composicao.percentual_outros,  # type: ignore
-                    excluido=composicao.excluido,  # type: ignore
-                )
-
-                session.merge(item)
-
-            session.commit()  # Comita após processar cada chunk
+        # Espera as duas operações terminarem
+        future_insumo.result()
+        future_composicao.result()
