@@ -280,7 +280,7 @@ except:
 #         await asyncio.sleep(3600)
 
 
-def main():
+async def main():
     with Session() as session:
         insumos_iter: Iterator[InsumoTabela]
         insumos_iter = session.query(InsumoTabela).yield_per(1000)  # type: ignore # 377 MB
@@ -334,7 +334,3 @@ def main():
             print("-")
 
     print("finalizado!")
-
-
-if __name__ == "__main__":
-    main()
