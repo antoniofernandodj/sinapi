@@ -17,7 +17,7 @@ DATABASE_INSUMOS_URL2 = "mysql+pymysql://admin:I*2021t1201@mng.itemize.com.br/si
 
 engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
 Session = sessionmaker(bind=engine)
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 
 def get_session_local(url, echo):
