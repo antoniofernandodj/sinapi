@@ -1,8 +1,7 @@
-from typing import Optional
+from typing import Any, Optional
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, DeclarativeBase  # type: ignore
 
 from sinapi.api.schema import (
     ComposicaoMontadaResponse,
@@ -17,7 +16,29 @@ from sinapi.api.schema import (
 from sqlalchemy.orm import Mapped
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    def truncate_value(self, value: Any, n: int = 10):
+        if len(repr(value)) > n:
+            return repr(value)[0:n] + "..."
+        return repr(value)
+
+    def __repr__(self):
+
+        inner = [
+            str(key) + "=" + self.truncate_value(value, 30)
+            for key, value in self.__dict__.items()
+            if not key.startswith("_")
+        ]
+        return self.__class__.__name__ + "(" + ", ".join(inner) + ")"
+
+    def __str__(self):
+
+        inner = [
+            str(key) + "=" + self.truncate_value(value, 30)
+            for key, value in self.__dict__.items()
+            if not key.startswith("_")
+        ]
+        return self.__class__.__name__ + "(" + ", ".join(inner) + ")"
 
 
 class Estado(Base):
@@ -309,6 +330,35 @@ class ComposicaoMontada(Base):
         )
 
 
+class ComposicaoItem(Base):
+    __tablename__ = "composicao_item"
+    id = Column(Integer, primary_key=True)
+
+    # PAI
+    id_insumo = Column(
+        Integer, ForeignKey("insumos_composicoes_tabela.id"), nullable=True
+    )
+
+    # FILHO
+    id_insumo_item = Column(Integer, ForeignKey("insumos_composicoes_tabela.id"))
+
+    valor_onerado = Column(Float)
+    valor_nao_onerado = Column(Float)
+    coeficiente = Column(Float)
+    excluido = Column(Boolean, nullable=True)
+
+    # Relacionamentos para a estrutura pai e filho
+    insumo_pai = relationship(
+        "InsumoComposicaoTabela", foreign_keys=[id_insumo], back_populates="itens_filho"
+    )
+
+    insumo_filho = relationship(
+        "InsumoComposicaoTabela",
+        foreign_keys=[id_insumo_item],
+        back_populates="itens_pai",
+    )
+
+
 class InsumoComposicaoTabela(Base):
     __tablename__ = "insumos_composicoes_tabela"
     id = Column(Integer, primary_key=True)
@@ -327,81 +377,18 @@ class InsumoComposicaoTabela(Base):
     percentual_outros = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])  # type: ignore
-    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])  # type: ignore
-    classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])  # type: ignore
+    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
+    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
+    classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    # insumos_composicoes = relationship(
-    #     "ComposicaoMontada", back_populates="insumo_tabela"
-    # )
-
-    # def to_pydantic(self) -> InsumosResponseItem:
-    #     insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
-    #         {
-    #             "id": self.id,
-    #             "nome": self.nome,
-    #             "codigo": self.codigo,
-    #             "idTabela": self.id_tabela,
-    #             "idUnidade": self.id_unidade,
-    #             "idClasse": self.id_classe,
-    #             "composicao": self.composicao,
-    #             "percentualMaoDeObra": self.percentual_mao_de_obra,
-    #             "percentualMaterial": self.percentual_material,
-    #             "percentualEquipamentos": self.percentual_equipamentos,
-    #             "percentualServicosTerceiros": self.percentual_servicos_terceiros,
-    #             "percentualOutros": self.percentual_outros,
-    #             "excluido": self.excluido,
-    #             "valorOnerado": self.valor_onerado,
-    #             "valorNaoOnerado": self.valor_nao_onerado,
-    #             "tabela": self.tabela.to_pydantic() if self.tabela else None,
-    #             "unidade": self.unidade.to_pydantic() if self.unidade else None,
-    #             "classe": self.classe.to_pydantic() if self.classe else None,
-    #             "insumosComposicoes": (
-    #                 [
-    #                     insumo_comp.to_pydantic()
-    #                     for insumo_comp in self.insumos_composicoes
-    #                 ]
-    #                 if self.insumos_composicoes
-    #                 else []
-    #             ),
-    #             # "insumosComposicoes": []
-    #         }
-    #     )
-
-    #     return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
-
-
-class ComposicaoItem(Base):
-    __tablename__ = "composicao_item"
-    id = Column(Integer, primary_key=True)
-    id_insumo = Column(
-        Integer, ForeignKey("insumos_composicoes_tabela.id"), nullable=True
+    # Relacionamentos com ComposicaoItem
+    itens_filho = relationship(
+        "ComposicaoItem",
+        foreign_keys=[ComposicaoItem.id_insumo],
+        back_populates="insumo_pai",
     )
-    id_insumo_item = Column(Integer, ForeignKey("insumos_composicoes_tabela.id"))
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    coeficiente = Column(Float)
-    excluido = Column(Boolean, nullable=True)
-
-    # insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
-    # composicoes = relationship(
-    #     "ComposicaoTabela", back_populates="composicoes_composicoes"
-    # )
-    # insumo_item = relationship("InsumoItem")
-
-    # def to_pydantic(
-    #     self, insumo_item: Optional[InsumosResponseItem] = None
-    # ) -> ComposicaoMontadaResponse:
-    #     return ComposicaoMontadaResponse.model_validate(  # type: ignore
-    #         {
-    #             "id": self.id,
-    #             "id_insumo": self.id_insumo,
-    #             "id_composicao": self.id_composicao,
-    #             "id_insumo_item": self.id_insumo_item,
-    #             "insumo_item": insumo_item,
-    #             "valor_onerado": self.valor_onerado,
-    #             "valor_nao_onerado": self.valor_nao_onerado,
-    #             "coeficiente": self.coeficiente,
-    #             "excluido": self.excluido,
-    #         }
-    #     )
+    itens_pai = relationship(
+        "ComposicaoItem",
+        foreign_keys=[ComposicaoItem.id_insumo_item],
+        back_populates="insumo_filho",
+    )

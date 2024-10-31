@@ -306,13 +306,15 @@ async def main():
 
         for chunk in chunks:
             for id in chunk:
-                comp: ComposicaoMontada = (
+                comp: Optional[ComposicaoMontada] = (
                     session.query(ComposicaoMontada).filter_by(id=id).first()
                 )
 
+                assert comp
+
                 item = ComposicaoItem(
                     id=comp.id,  # type: ignore
-                    id_insumo=comp.id_insumo,  # type: ignore
+                    id_insumo=comp.id_insumo or comp.id_composicao,  # type: ignore
                     id_insumo_item=comp.id_insumo_item,  # type: ignore
                     valor_onerado=comp.valor_onerado,  # type: ignore
                     valor_nao_onerado=comp.valor_nao_onerado,  # type: ignore
