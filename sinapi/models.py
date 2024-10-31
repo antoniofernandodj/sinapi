@@ -369,3 +369,39 @@ class InsumoComposicaoTabela(Base):
     #     )
 
     #     return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
+
+
+class ComposicaoItem(Base):
+    __tablename__ = "composicao_montada"
+    id = Column(Integer, primary_key=True)
+    id_insumo = Column(
+        Integer, ForeignKey("insumos_composicoes_tabela.id"), nullable=True
+    )
+    id_insumo_item = Column(Integer, ForeignKey("insumos_composicoes_tabela.id"))
+    valor_onerado = Column(Float)
+    valor_nao_onerado = Column(Float)
+    coeficiente = Column(Float)
+    excluido = Column(Boolean, nullable=True)
+
+    # insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
+    # composicoes = relationship(
+    #     "ComposicaoTabela", back_populates="composicoes_composicoes"
+    # )
+    # insumo_item = relationship("InsumoItem")
+
+    # def to_pydantic(
+    #     self, insumo_item: Optional[InsumosResponseItem] = None
+    # ) -> ComposicaoMontadaResponse:
+    #     return ComposicaoMontadaResponse.model_validate(  # type: ignore
+    #         {
+    #             "id": self.id,
+    #             "id_insumo": self.id_insumo,
+    #             "id_composicao": self.id_composicao,
+    #             "id_insumo_item": self.id_insumo_item,
+    #             "insumo_item": insumo_item,
+    #             "valor_onerado": self.valor_onerado,
+    #             "valor_nao_onerado": self.valor_nao_onerado,
+    #             "coeficiente": self.coeficiente,
+    #             "excluido": self.excluido,
+    #         }
+    #     )

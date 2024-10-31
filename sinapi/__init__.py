@@ -20,6 +20,7 @@ try:
         InsumoTabela,
         InsumoItem,
         ComposicaoMontada,
+        ComposicaoItem,
     )
 except:
     from sinapi.database import Session
@@ -33,6 +34,7 @@ except:
         InsumoTabela,
         InsumoItem,
         ComposicaoMontada,
+        ComposicaoItem,
     )
 
 
@@ -299,32 +301,27 @@ async def main():
     with Session() as session:
         batch_size = 20_000  # Tamanho do lote
 
-        list_ids = get_all_ids(InsumoItem, session)
+        list_ids = get_all_ids(ComposicaoMontada, session)
         chunks = list(chunk_list(list_ids, batch_size))
 
         for chunk in chunks:
             for id in chunk:
-                insumo: InsumoItem = session.query(InsumoItem).filter_by(id=id).first()
+                comp: ComposicaoMontada = (
+                    session.query(ComposicaoMontada).filter_by(id=id).first()
+                )
 
-                item = InsumoComposicaoTabela(
-                    id=insumo.id,  # type: ignore
-                    nome=insumo.nome,  # type: ignore
-                    codigo=insumo.codigo,  # type: ignore
-                    id_tabela=insumo.id_tabela,  # type: ignore
-                    id_unidade=insumo.id_unidade,  # type: ignore
-                    id_classe=insumo.id_classe,  # type: ignore
-                    valor_onerado=insumo.valor_onerado,  # type: ignore
-                    valor_nao_onerado=insumo.valor_nao_onerado,  # type: ignore
-                    composicao=insumo.composicao,  # type: ignore
-                    percentual_mao_de_obra=insumo.percentual_mao_de_obra,  # type: ignore
-                    percentual_material=insumo.percentual_material,  # type: ignore
-                    percentual_equipamentos=insumo.percentual_equipamentos,  # type: ignore
-                    percentual_servicos_terceiros=insumo.percentual_servicos_terceiros,  # type: ignore
-                    percentual_outros=insumo.percentual_outros,  # type: ignore
-                    excluido=insumo.excluido,  # type: ignore
+                item = ComposicaoItem(
+                    id=comp.id,  # type: ignore
+                    id_insumo=comp.id_insumo,  # type: ignore
+                    id_insumo_item=comp.id_insumo_item,  # type: ignore
+                    valor_onerado=comp.valor_onerado,  # type: ignore
+                    valor_nao_onerado=comp.valor_nao_onerado,  # type: ignore
+                    coeficiente=comp.coeficiente,  # type: ignore
+                    excluido=comp.excluido,  # type: ignore
                 )
 
                 session.merge(item)
+                print("-")
 
             session.commit()
-            print(".")
+            print("\n\n")
