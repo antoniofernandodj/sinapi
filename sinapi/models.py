@@ -372,7 +372,7 @@ class InsumoComposicaoTabela(Base):
 
 
 class ComposicaoItem(Base):
-    __tablename__ = "composicao_montada"
+    __tablename__ = "composicao_item"
     id = Column(Integer, primary_key=True)
     id_insumo = Column(
         Integer, ForeignKey("insumos_composicoes_tabela.id"), nullable=True
