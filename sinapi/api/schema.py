@@ -120,6 +120,28 @@ class InsumosResponseClasse(BaseModel):
     excluido: Any
 
 
+class InsumoComposicaoTabelaResponse(BaseModel):
+    id: int
+    nome: str
+    codigo: str
+    idTabela: int
+    idUnidade: int
+    idClasse: int
+    composicao: Any
+    percentualMaoDeObra: Any
+    percentualMaterial: Any
+    percentualEquipamentos: Any
+    percentualServicosTerceiros: Any
+    percentualOutros: Any
+    excluido: Any
+    valorOnerado: Optional[float] = None
+    valorNaoOnerado: Optional[float] = None
+    tabela: Optional[InsumosResponseTabela] = None
+    unidade: Optional[InsumosResponseUnidade] = None
+    classe: Optional[InsumosResponseClasse] = None
+    insumosComposicoes: Optional[List[Any]] = None
+
+
 class InsumosResponseItem(BaseModel):
     id: int
     nome: str
@@ -202,4 +224,4 @@ class ComposicaoMontadaResponse(BaseModel):
     id_composicao: Optional[int] = None
     excluido: Optional[bool] = None
 
-    insumo_item: Optional[InsumosResponseItem] = None
+    insumo_item: Optional[InsumoComposicaoTabelaResponse] = None
