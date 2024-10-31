@@ -304,7 +304,7 @@ async def main():
 
         for chunk in chunks:
             for id in chunk:
-                insumo = session.query(InsumoItem).filter_by(id=id).first()
+                insumo: InsumoItem = session.query(InsumoItem).filter_by(id=id).first()
 
                 item = InsumoComposicaoTabela(
                     id=insumo.id,  # type: ignore
