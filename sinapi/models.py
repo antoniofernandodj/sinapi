@@ -1,9 +1,11 @@
-from typing import Any, Optional
+from typing import Any, List, Optional, Set
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship, DeclarativeBase  # type: ignore
+from sqlalchemy import Table
 
 from sinapi.api.schema import (
+    InsumoComposicaoTabelaResponse,
     ComposicaoMontadaResponse,
     InsumosResponseItem,
     InsumosResponseTabela,
@@ -339,24 +341,40 @@ class ComposicaoItem(Base):
         Integer, ForeignKey("insumos_composicoes_tabela.id"), nullable=True
     )
 
+    insumo: Mapped["InsumoComposicaoTabela"] = relationship(
+        back_populates="itens_de_composicao", foreign_keys=[id_insumo]
+    )
+
     # FILHO
     id_insumo_item = Column(Integer, ForeignKey("insumos_composicoes_tabela.id"))
+
+    insumo_item: Mapped["InsumoComposicaoTabela"] = relationship(
+        "InsumoComposicaoTabela",
+        foreign_keys=[id_insumo_item],
+        primaryjoin="ComposicaoItem.id_insumo_item == InsumoComposicaoTabela.id",
+    )
 
     valor_onerado = Column(Float)
     valor_nao_onerado = Column(Float)
     coeficiente = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
-    # Relacionamentos para a estrutura pai e filho
-    insumo_pai = relationship(
-        "InsumoComposicaoTabela", foreign_keys=[id_insumo], back_populates="itens_filho"
-    )
+    def to_pydantic(self):
 
-    insumo_filho = relationship(
-        "InsumoComposicaoTabela",
-        foreign_keys=[id_insumo_item],
-        back_populates="itens_pai",
-    )
+        itens_response = self.insumo_item.to_pydantic(include_children=False)
+
+        return ComposicaoMontadaResponse.model_validate(
+            {
+                "id": self.id,
+                "id_insumo": self.id_insumo,
+                "id_insumo_item": self.id_insumo_item,
+                "valor_onerado": self.valor_onerado,
+                "valor_nao_onerado": self.valor_nao_onerado,
+                "coeficiente": self.coeficiente,
+                "excluido": self.excluido,
+                "insumo_item": itens_response,
+            }
+        )
 
 
 class InsumoComposicaoTabela(Base):
@@ -377,18 +395,44 @@ class InsumoComposicaoTabela(Base):
     percentual_outros = Column(Float)
     excluido = Column(Boolean, nullable=True)
 
+    itens_de_composicao: Mapped[List["ComposicaoItem"]] = relationship(
+        "ComposicaoItem", foreign_keys=[ComposicaoItem.id_insumo]
+    )
+
     tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])
     unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
     classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    # Relacionamentos com ComposicaoItem
-    itens_filho = relationship(
-        "ComposicaoItem",
-        foreign_keys=[ComposicaoItem.id_insumo],
-        back_populates="insumo_pai",
-    )
-    itens_pai = relationship(
-        "ComposicaoItem",
-        foreign_keys=[ComposicaoItem.id_insumo_item],
-        back_populates="insumo_filho",
-    )
+    def to_pydantic(self, include_children=True):
+
+        itens_da_composicao_response = []
+        if include_children:
+            itens_da_composicao = self.itens_de_composicao
+            itens_da_composicao_response = [
+                i.to_pydantic() for i in itens_da_composicao
+            ]
+
+        return InsumoComposicaoTabelaResponse.model_validate(  # type: ignore
+            {
+                "id": self.id,
+                "nome": self.nome,
+                "codigo": self.codigo,
+                "idTabela": self.id_tabela,
+                "idUnidade": self.id_unidade,
+                "idClasse": self.id_classe,
+                "valorOnerado": self.valor_onerado,
+                "valorNaoOnerado": self.valor_nao_onerado,
+                "composicao": self.composicao,
+                "percentualMaoDeObra": self.percentual_mao_de_obra,
+                "percentualMaterial": self.percentual_material,
+                "percentualEquipamentos": self.percentual_equipamentos,
+                "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+                "percentualOutros": self.percentual_outros,
+                "excluido": self.excluido,
+                "insumosComposicoes": (
+                    itens_da_composicao_response
+                    if len(itens_da_composicao_response) > 0
+                    else None
+                ),
+            }
+        )
