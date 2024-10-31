@@ -18,7 +18,7 @@ try:
         Unidade,
         Classe,
         InsumoTabela,
-        # InsumoItem,
+        InsumoItem,
         ComposicaoMontada,
     )
 except:
@@ -31,7 +31,7 @@ except:
         Unidade,
         Classe,
         InsumoTabela,
-        # InsumoItem,
+        InsumoItem,
         ComposicaoMontada,
     )
 
@@ -299,12 +299,12 @@ async def main():
     with Session() as session:
         batch_size = 20_000  # Tamanho do lote
 
-        list_ids = get_all_ids(InsumoTabela, session)
+        list_ids = get_all_ids(InsumoItem, session)
         chunks = list(chunk_list(list_ids, batch_size))
 
         for chunk in chunks:
             for id in chunk:
-                insumo = session.query(InsumoTabela).filter_by(id=id).first()
+                insumo = session.query(InsumoItem).filter_by(id=id).first()
 
                 item = InsumoComposicaoTabela(
                     id=insumo.id,  # type: ignore
@@ -327,32 +327,4 @@ async def main():
                 session.merge(item)
 
             session.commit()
-
-        list_ids = get_all_ids(ComposicaoTabela, session)
-        chunks = list(chunk_list(list_ids, batch_size))
-
-        for chunk in chunks:
-            for id in chunk:
-                composicao = session.query(ComposicaoTabela).filter_by(id=id).first()
-
-                item = InsumoComposicaoTabela(
-                    id=composicao.id,  # type: ignore
-                    nome=composicao.nome,  # type: ignore
-                    codigo=composicao.codigo,  # type: ignore
-                    id_tabela=composicao.id_tabela,  # type: ignore
-                    id_unidade=composicao.id_unidade,  # type: ignore
-                    id_classe=composicao.id_classe,  # type: ignore
-                    valor_onerado=composicao.valor_onerado,  # type: ignore
-                    valor_nao_onerado=composicao.valor_nao_onerado,  # type: ignore
-                    composicao=composicao.composicao,  # type: ignore
-                    percentual_mao_de_obra=composicao.percentual_mao_de_obra,  # type: ignore
-                    percentual_material=composicao.percentual_material,  # type: ignore
-                    percentual_equipamentos=composicao.percentual_equipamentos,  # type: ignore
-                    percentual_servicos_terceiros=composicao.percentual_servicos_terceiros,  # type: ignore
-                    percentual_outros=composicao.percentual_outros,  # type: ignore
-                    excluido=composicao.excluido,  # type: ignore
-                )
-
-                session.merge(item)
-
-            session.commit()  # Comita após processar cada chunk
+            print(".")
