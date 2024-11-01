@@ -53,25 +53,57 @@ app.add_middleware(
 
 class InsumosComposicoesTabelaResponse(BaseModel):
     payload: List[InsumoComposicaoTabelaResponse]
+    total_pages: int
+    result_count: int
 
 
 @app.get('/insumo-composicao/', response_model=InsumosComposicoesTabelaResponse)
 def read_insumo_composicao(
     composicao: bool,
+    page: int = 1,
+    order_by: Optional[str] = None,
+    limit: Annotated[int, Query(lt=200)] = 10,
+
+    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+    codigo: Optional[str] = None,
+    id: Optional[int] = None,
+    id_tabela: Optional[int] = None,
+    id_classe: Optional[int] = None,
+
     session: Session = Depends(get_db)
 ):
     
-    query = session.query(InsumoComposicaoTabela)
+    Table = InsumoComposicaoTabela
+    offset = (page - 1) * limit
+    
+    query = session.query(Table)
 
     if composicao:
         query = query.filter_by(composicao=composicao)
+    if id:
+        query = query.filter_by(id=id)
+    if codigo:
+        query = query.filter_by(codigo=codigo)
+    if descricao:
+        query = query.filter(Table.nome.like(f"%{descricao}%"))  # type: ignore
+    if id_tabela:
+        query = query.filter_by(id_tabela=id_tabela)
+    if id_classe:
+        query = query.filter_by(id_classe=id_classe)
+    if order_by:
+        query = apply_order_by(query, Table, order_by)
 
-    result = query.all()
+    result_count = query.count()
+    total_pages = ceil(result_count / limit)
+
+    result = query.order_by(Table.id).offset(offset).limit(limit).all()
 
     return InsumosComposicoesTabelaResponse(
+        total_pages=total_pages,
+        result_count=result_count,
         payload=[
             item.to_pydantic() for item in result
-        ]
+        ],
     )
 
 
