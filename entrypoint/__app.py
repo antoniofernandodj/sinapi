@@ -107,7 +107,18 @@ def read_insumo_composicao(
     )
 
 
+@app.get('/insumo-composicao/{id}', response_model=InsumoComposicaoTabelaResponse)
+def read_insumo_composicao_by_id(
+    id: int,
+    session: Session = Depends(get_db)
+):
 
+    item = session.query(InsumoComposicaoTabela).filter_by(id=id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return item.to_pydantic()
 
 
 @app.get("/meses", response_model=MesesResponse)
