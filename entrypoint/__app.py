@@ -12,7 +12,7 @@ from copy import deepcopy
 import sys
 import pathlib
 
-from sinapi.api.schema import InsumosResponseItem
+from sinapi.api.schema import InsumoComposicaoTabelaResponse, InsumosResponseItem
 from sinapi.utils import apply_order_by
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
@@ -23,7 +23,7 @@ from entrypoint.utils import (
     get_db,
     mount_insumo_composicao_response,
 )
-from sinapi.models import ComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
+from sinapi.models import ComposicaoTabela, InsumoComposicaoTabela, InsumoTabela, Estado, Tabela, Classe
 
 from entrypoint.schema import (
     InsumosComposicoesResponse,
@@ -49,6 +49,33 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
 )
+
+
+class InsumosComposicoesTabelaResponse(BaseModel):
+    payload: List[InsumoComposicaoTabelaResponse]
+
+
+@app.get('/insumo-composicao/', response_model=InsumosComposicoesTabelaResponse)
+def read_insumo_composicao(
+    composicao: bool,
+    session: Session = Depends(get_db)
+):
+    
+    query = session.query(InsumoComposicaoTabela)
+
+    if composicao:
+        query = query.filter_by(composicao=composicao)
+
+    result = query.all()
+
+    return InsumosComposicoesTabelaResponse(
+        payload=[
+            item.to_pydantic() for item in result
+        ]
+    )
+
+
+
 
 
 @app.get("/meses", response_model=MesesResponse)
