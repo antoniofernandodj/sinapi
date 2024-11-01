@@ -136,9 +136,9 @@ class InsumoComposicaoTabelaResponse(BaseModel):
     excluido: Any
     valorOnerado: Optional[float] = None
     valorNaoOnerado: Optional[float] = None
-    tabela: Optional[InsumosResponseTabela] = None
-    unidade: Optional[InsumosResponseUnidade] = None
-    classe: Optional[InsumosResponseClasse] = None
+    tabela: Optional[Any] = None
+    unidade: Optional[Any] = None
+    classe: Optional[Any] = None
     insumosComposicoes: Optional[List[Any]] = None
 
 
