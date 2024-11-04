@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from sniffio import current_async_library
 from sinapi.api.schema import (
     EstadoResponseItem,
+    InsumoComposicaoTabelaResponse,
     InsumosResponseItem,
     InsumosResponseTabela,
     InsumosResponseClasse,
@@ -44,3 +45,9 @@ class Mes(BaseModel):
 
 class MesesResponse(BaseModel):
     meses: List[Mes]
+
+
+class InsumosComposicoesTabelaResponse(BaseModel):
+    payload: List[InsumoComposicaoTabelaResponse]
+    total_pages: int
+    result_count: int
