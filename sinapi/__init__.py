@@ -170,38 +170,12 @@ def inserir_composicao(i: Dict[str, Any], session):
         inserir_composicoes_insumo(insumo_composicao, session)
 
 
-def inserir_insumo(i: Dict[str, Any], session):
-    inserir_unidade(i["unidade"], session)
-    inserir_tabela(i["tabela"], session)
-    inserir_classe(i["classe"], session)
-    item = InsumoTabela(
-        id=i["id"],
-        nome=i["nome"],
-        codigo=i["codigo"],
-        id_tabela=i["tabela"]["id"],
-        id_unidade=i["unidade"]["id"],
-        id_classe=i["classe"]["id"],
-        valor_onerado=i["valorOnerado"],
-        valor_nao_onerado=i["valorNaoOnerado"],
-        composicao=i["composicao"],
-        percentual_mao_de_obra=i["percentualMaoDeObra"],
-        percentual_material=i["percentualMaterial"],
-        percentual_equipamentos=i["percentualEquipamentos"],
-        percentual_servicos_terceiros=i["percentualServicosTerceiros"],
-        percentual_outros=i["percentualOutros"],
-        excluido=i["excluido"],
-    )
-    session.merge(item)
-    session.flush()
-    with suppress(InvalidRequestError):
-        session.refresh(item)
-
-
 def inserir_composicoes(composicoes):
     with Session() as session:
-        for composicao in composicoes:
-            inserir_composicao(composicao, session)
-        session.commit()
+        with session.no_autoflush:  # Desativa o autoflush temporariamente
+            for composicao in composicoes:
+                inserir_composicao(composicao, session)
+        session.commit()  # Realiza o commit após o bloco no_autoflush
 
 
 async def cadastrar_composicoes():
@@ -215,50 +189,3 @@ async def main():
     while True:
         print("Terminou!")
         await asyncio.sleep(3600)
-
-
-# def chunk_list(lst, chunk_size):
-#     """Divide uma lista em múltiplas listas de tamanho especificado."""
-#     for i in range(0, len(lst), chunk_size):
-#         yield lst[i : i + chunk_size]
-
-
-# def get_all_ids(Table, session) -> list:
-#     """Retorna uma lista de todos os IDs da tabela ExampleTable."""
-#     from sqlalchemy import select
-
-#     stmt = select(Table.id)
-#     result = session.execute(stmt)
-#     return [row[0] for row in result]
-
-
-# async def main():
-#     with Session() as session:
-#         batch_size = 20_000  # Tamanho do lote
-
-#         list_ids = get_all_ids(ComposicaoMontada, session)
-#         chunks = list(chunk_list(list_ids, batch_size))
-
-#         for chunk in chunks:
-#             for id in chunk:
-#                 comp: Optional[ComposicaoMontada] = (
-#                     session.query(ComposicaoMontada).filter_by(id=id).first()
-#                 )
-
-#                 assert comp
-
-#                 item = ComposicaoItem(
-#                     id=comp.id,
-#                     id_insumo=comp.id_insumo or comp.id_composicao,
-#                     id_insumo_item=comp.id_insumo_item,
-#                     valor_onerado=comp.valor_onerado,
-#                     valor_nao_onerado=comp.valor_nao_onerado,
-#                     coeficiente=comp.coeficiente,
-#                     excluido=comp.excluido,
-#                 )
-
-#                 session.merge(item)
-#                 print("-")
-
-#             session.commit()
-#             print("\n\n")

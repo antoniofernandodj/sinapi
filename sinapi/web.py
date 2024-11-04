@@ -63,6 +63,8 @@ async def get_insumos_or_compositions(
             (6, "RS"),
         ]
 
+        estados_meses = [(1, "MG")]
+
         for mes, uf in estados_meses:
             print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
             async for insumo_response in service.insumos_todos(

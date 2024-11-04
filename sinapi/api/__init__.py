@@ -179,7 +179,7 @@ class SinapiService:
                 "Direction": direction,
                 "SearchType": search_type,
                 "Page": 1,
-                "Limit": 50,
+                "Limit": 100,
             }
         )
 
