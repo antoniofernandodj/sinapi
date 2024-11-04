@@ -118,8 +118,6 @@ def inserir_insumo_item(item: dict, session):
         excluido=item["excluido"],
     )
 
-    print(insumo_composicao)
-
     session.merge(insumo_composicao)
     session.flush()
     session.commit()
@@ -143,8 +141,6 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
         coeficiente=insumo_composicao_api["coeficiente"],
         excluido=insumo_composicao_api["excluido"],
     )
-
-    print(composicao_item)
 
     session.merge(composicao_item)
 

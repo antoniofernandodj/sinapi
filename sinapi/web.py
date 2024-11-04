@@ -40,9 +40,6 @@ async def get_insumos_or_compositions(
     #                 yield (insumo_response, estado_response)
     try:
         estados_meses = [
-            (2, "MG"),
-            (3, "MG"),
-            (4, "MG"),
             (5, "MG"),
             (6, "MG"),
             (7, "MG"),
