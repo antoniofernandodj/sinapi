@@ -1,4 +1,3 @@
-import json
 import asyncio
 
 from contextlib import suppress
@@ -12,24 +11,20 @@ try:
     from database import Session
     from web import get_insumos_or_compositions
     from models import (
-        ComposicaoTabela,
         Estado,
         Tabela,
         Unidade,
         Classe,
-        InsumoTabela,
         ComposicaoItem,
     )
 except:
     from sinapi.database import Session
     from sinapi.web import get_insumos_or_compositions
     from sinapi.models import (
-        ComposicaoTabela,
         Estado,
         Tabela,
         Unidade,
         Classe,
-        InsumoTabela,
         ComposicaoItem,
     )
 

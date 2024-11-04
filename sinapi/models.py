@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, List, Optional, Set
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
@@ -7,11 +8,11 @@ from sqlalchemy import Table
 from sinapi.api.schema import (
     InsumoComposicaoTabelaResponse,
     ComposicaoMontadaResponse,
-    InsumosResponseItem,
+    # InsumosResponseItem,
     InsumosResponseTabela,
     InsumosResponseUnidade,
     InsumosResponseClasse,
-    InsumosResponseItem,
+    # InsumosResponseItem,
 )
 
 
@@ -83,6 +84,12 @@ class Tabela(Base):
 
     estado = relationship("Estado")
 
+    @property
+    def data_hora_atualiz(self):
+        return datetime.strptime(
+            str(self.data_hora_atualizacao), "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
+
     def to_pydantic(self) -> InsumosResponseTabela:
 
         return InsumosResponseTabela.model_validate(  # type: ignore
@@ -133,203 +140,203 @@ class Classe(Base):
         )
 
 
-class InsumoTabela(Base):
-    __tablename__ = "insumos_tabela"
-    id = Column(Integer, primary_key=True)
-    nome = Column(Text)
-    codigo = Column(Text)
-    id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    id_unidade = Column(Integer, ForeignKey("unidades.id"))
-    id_classe = Column(Integer, nullable=True)
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    composicao = Column(Boolean)
-    percentual_mao_de_obra = Column(Float)
-    percentual_material = Column(Float)
-    percentual_equipamentos = Column(Float)
-    percentual_servicos_terceiros = Column(Float)
-    percentual_outros = Column(Float)
-    excluido = Column(Boolean, nullable=True)
+# class InsumoTabela(Base):
+#     __tablename__ = "insumos_tabela"
+#     id = Column(Integer, primary_key=True)
+#     nome = Column(Text)
+#     codigo = Column(Text)
+#     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
+#     id_unidade = Column(Integer, ForeignKey("unidades.id"))
+#     id_classe = Column(Integer, nullable=True)
+#     valor_onerado = Column(Float)
+#     valor_nao_onerado = Column(Float)
+#     composicao = Column(Boolean)
+#     percentual_mao_de_obra = Column(Float)
+#     percentual_material = Column(Float)
+#     percentual_equipamentos = Column(Float)
+#     percentual_servicos_terceiros = Column(Float)
+#     percentual_outros = Column(Float)
+#     excluido = Column(Boolean, nullable=True)
 
-    tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])  # type: ignore
-    unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])  # type: ignore
-    # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
+#     tabela: Mapped["Tabela"] = relationship(foreign_keys=[id_tabela])  # type: ignore
+#     unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])  # type: ignore
+#     # classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    insumos_composicoes = relationship(
-        "ComposicaoMontada", back_populates="insumo_tabela"
-    )
+#     insumos_composicoes = relationship(
+#         "ComposicaoMontada", back_populates="insumo_tabela"
+#     )
 
-    def to_pydantic(self) -> InsumosResponseItem:
-        insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
-            {
-                "id": self.id,
-                "nome": self.nome,
-                "codigo": self.codigo,
-                "idTabela": self.id_tabela,
-                "idUnidade": self.id_unidade,
-                "idClasse": self.id_classe,
-                "composicao": self.composicao,
-                "percentualMaoDeObra": self.percentual_mao_de_obra,
-                "percentualMaterial": self.percentual_material,
-                "percentualEquipamentos": self.percentual_equipamentos,
-                "percentualServicosTerceiros": self.percentual_servicos_terceiros,
-                "percentualOutros": self.percentual_outros,
-                "excluido": self.excluido,
-                "valorOnerado": self.valor_onerado,
-                "valorNaoOnerado": self.valor_nao_onerado,
-                "tabela": self.tabela.to_pydantic() if self.tabela else None,
-                "unidade": self.unidade.to_pydantic() if self.unidade else None,
-                # "classe": self.classe.to_pydantic() if self.classe else None,
-                "classe": None,
-                "insumosComposicoes": (
-                    [
-                        insumo_comp.to_pydantic()
-                        for insumo_comp in self.insumos_composicoes
-                    ]
-                    if self.insumos_composicoes
-                    else []
-                ),
-                # "insumosComposicoes": []
-            }
-        )
+#     def to_pydantic(self) -> InsumosResponseItem:
+#         insumo_dict = InsumosResponseItem.model_validate(  # type: ignore
+#             {
+#                 "id": self.id,
+#                 "nome": self.nome,
+#                 "codigo": self.codigo,
+#                 "idTabela": self.id_tabela,
+#                 "idUnidade": self.id_unidade,
+#                 "idClasse": self.id_classe,
+#                 "composicao": self.composicao,
+#                 "percentualMaoDeObra": self.percentual_mao_de_obra,
+#                 "percentualMaterial": self.percentual_material,
+#                 "percentualEquipamentos": self.percentual_equipamentos,
+#                 "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+#                 "percentualOutros": self.percentual_outros,
+#                 "excluido": self.excluido,
+#                 "valorOnerado": self.valor_onerado,
+#                 "valorNaoOnerado": self.valor_nao_onerado,
+#                 "tabela": self.tabela.to_pydantic() if self.tabela else None,
+#                 "unidade": self.unidade.to_pydantic() if self.unidade else None,
+#                 # "classe": self.classe.to_pydantic() if self.classe else None,
+#                 "classe": None,
+#                 "insumosComposicoes": (
+#                     [
+#                         insumo_comp.to_pydantic()
+#                         for insumo_comp in self.insumos_composicoes
+#                     ]
+#                     if self.insumos_composicoes
+#                     else []
+#                 ),
+#                 # "insumosComposicoes": []
+#             }
+#         )
 
-        return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
-
-
-class ComposicaoTabela(Base):
-    __tablename__ = "composicoes_tabela"
-    id = Column(Integer, primary_key=True)
-    nome = Column(Text)
-    codigo = Column(Text)
-    id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    id_unidade = Column(Integer, ForeignKey("unidades.id"))
-    id_classe = Column(Integer, nullable=True)
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    composicao = Column(Boolean)
-    percentual_mao_de_obra = Column(Float)
-    percentual_material = Column(Float)
-    percentual_equipamentos = Column(Float)
-    percentual_servicos_terceiros = Column(Float)
-    percentual_outros = Column(Float)
-    excluido = Column(Boolean, nullable=True)
-
-    # tabela = relationship("Tabela")
-    # unidade = relationship("Unidade")
-    # classe = relationship("Classe")
-
-    composicoes_composicoes = relationship(
-        "ComposicaoMontada", back_populates="composicoes"
-    )
-
-    def to_pydantic(self) -> InsumosResponseItem:
-        return InsumosResponseItem.model_validate(  # type: ignore
-            {
-                "id": self.id,
-                "nome": self.nome,
-                "codigo": self.codigo,
-                "idTabela": self.id_tabela,
-                "idUnidade": self.id_unidade,
-                "idClasse": self.id_classe,
-                "valorOnerado": self.valor_onerado,
-                "valorNaoOnerado": self.valor_nao_onerado,
-                "composicao": self.composicao,
-                "percentualMaoDeObra": self.percentual_mao_de_obra,
-                "percentualMaterial": self.percentual_material,
-                "percentualEquipamentos": self.percentual_equipamentos,
-                "percentualServicosTerceiros": self.percentual_servicos_terceiros,
-                "percentualOutros": self.percentual_outros,
-                "excluido": self.excluido,
-                "insumosComposicoes": (
-                    [
-                        composicao.to_pydantic()
-                        for composicao in self.composicoes_composicoes
-                    ]
-                    if self.composicoes_composicoes
-                    else []
-                ),
-            }
-        )
+#         return InsumosResponseItem.model_validate(insumo_dict)  # type: ignore
 
 
-class InsumoItem(Base):
-    __tablename__ = "insumo_items"
-    id = Column(Integer, primary_key=True)
-    nome = Column(Text)
-    codigo = Column(Text)
-    id_tabela = Column(Integer, ForeignKey("tabelas.id"))
-    id_unidade = Column(Integer, ForeignKey("unidades.id"))
-    id_classe = Column(Integer, nullable=True)
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    composicao = Column(Boolean, nullable=True)
-    percentual_mao_de_obra = Column(Float, nullable=True)
-    percentual_material = Column(Float, nullable=True)
-    percentual_equipamentos = Column(Float, nullable=True)
-    percentual_servicos_terceiros = Column(Float, nullable=True)
-    percentual_outros = Column(Float, nullable=True)
-    excluido = Column(Boolean, nullable=True)
+# class ComposicaoTabela(Base):
+#     __tablename__ = "composicoes_tabela"
+#     id = Column(Integer, primary_key=True)
+#     nome = Column(Text)
+#     codigo = Column(Text)
+#     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
+#     id_unidade = Column(Integer, ForeignKey("unidades.id"))
+#     id_classe = Column(Integer, nullable=True)
+#     valor_onerado = Column(Float)
+#     valor_nao_onerado = Column(Float)
+#     composicao = Column(Boolean)
+#     percentual_mao_de_obra = Column(Float)
+#     percentual_material = Column(Float)
+#     percentual_equipamentos = Column(Float)
+#     percentual_servicos_terceiros = Column(Float)
+#     percentual_outros = Column(Float)
+#     excluido = Column(Boolean, nullable=True)
 
-    # tabela = relationship("Tabela")
-    # unidade = relationship("Unidade")
-    # classe = relationship("Classe")
+#     tabela = relationship("Tabela")
+#     unidade = relationship("Unidade")
+#     classe = relationship("Classe")
 
-    def to_pydantic(self) -> InsumosResponseItem:
-        return InsumosResponseItem.model_validate(  # type: ignore
-            {
-                "id": self.id,
-                "nome": self.nome,
-                "codigo": self.codigo,
-                "idTabela": self.id_tabela,
-                "idUnidade": self.id_unidade,
-                "idClasse": self.id_classe,
-                "valorOnerado": self.valor_onerado,
-                "valorNaoOnerado": self.valor_nao_onerado,
-                "composicao": self.composicao,
-                "percentualMaoDeObra": self.percentual_mao_de_obra,
-                "percentualMaterial": self.percentual_material,
-                "insumosComposicoes": [],
-                "percentualEquipamentos": self.percentual_equipamentos,
-                "percentualServicosTerceiros": self.percentual_servicos_terceiros,
-                "percentualOutros": self.percentual_outros,
-                "excluido": self.excluido,
-            }
-        )
+#     composicoes_composicoes = relationship(
+#         "ComposicaoMontada", back_populates="composicoes"
+#     )
+
+#     def to_pydantic(self) -> InsumosResponseItem:
+#         return InsumosResponseItem.model_validate(  # type: ignore
+#             {
+#                 "id": self.id,
+#                 "nome": self.nome,
+#                 "codigo": self.codigo,
+#                 "idTabela": self.id_tabela,
+#                 "idUnidade": self.id_unidade,
+#                 "idClasse": self.id_classe,
+#                 "valorOnerado": self.valor_onerado,
+#                 "valorNaoOnerado": self.valor_nao_onerado,
+#                 "composicao": self.composicao,
+#                 "percentualMaoDeObra": self.percentual_mao_de_obra,
+#                 "percentualMaterial": self.percentual_material,
+#                 "percentualEquipamentos": self.percentual_equipamentos,
+#                 "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+#                 "percentualOutros": self.percentual_outros,
+#                 "excluido": self.excluido,
+#                 "insumosComposicoes": (
+#                     [
+#                         composicao.to_pydantic()
+#                         for composicao in self.composicoes_composicoes
+#                     ]
+#                     if self.composicoes_composicoes
+#                     else []
+#                 ),
+#             }
+#         )
 
 
-class ComposicaoMontada(Base):
-    __tablename__ = "composicao_montada"
-    id = Column(Integer, primary_key=True)
-    id_insumo = Column(Integer, ForeignKey("insumos_tabela.id"), nullable=True)
-    id_composicao = Column(Integer, ForeignKey("composicoes_tabela.id"), nullable=True)
-    id_insumo_item = Column(Integer, ForeignKey("insumo_items.id"))
-    valor_onerado = Column(Float)
-    valor_nao_onerado = Column(Float)
-    coeficiente = Column(Float)
-    excluido = Column(Boolean, nullable=True)
+# class InsumoItem(Base):
+#     __tablename__ = "insumo_items"
+#     id = Column(Integer, primary_key=True)
+#     nome = Column(Text)
+#     codigo = Column(Text)
+#     id_tabela = Column(Integer, ForeignKey("tabelas.id"))
+#     id_unidade = Column(Integer, ForeignKey("unidades.id"))
+#     id_classe = Column(Integer, nullable=True)
+#     valor_onerado = Column(Float)
+#     valor_nao_onerado = Column(Float)
+#     composicao = Column(Boolean, nullable=True)
+#     percentual_mao_de_obra = Column(Float, nullable=True)
+#     percentual_material = Column(Float, nullable=True)
+#     percentual_equipamentos = Column(Float, nullable=True)
+#     percentual_servicos_terceiros = Column(Float, nullable=True)
+#     percentual_outros = Column(Float, nullable=True)
+#     excluido = Column(Boolean, nullable=True)
 
-    insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
-    composicoes = relationship(
-        "ComposicaoTabela", back_populates="composicoes_composicoes"
-    )
-    insumo_item = relationship("InsumoItem")
+#     # tabela = relationship("Tabela")
+#     # unidade = relationship("Unidade")
+#     # classe = relationship("Classe")
 
-    def to_pydantic(
-        self, insumo_item: Optional[InsumosResponseItem] = None
-    ) -> ComposicaoMontadaResponse:
-        return ComposicaoMontadaResponse.model_validate(  # type: ignore
-            {
-                "id": self.id,
-                "id_insumo": self.id_insumo,
-                "id_composicao": self.id_composicao,
-                "id_insumo_item": self.id_insumo_item,
-                "insumo_item": insumo_item,
-                "valor_onerado": self.valor_onerado,
-                "valor_nao_onerado": self.valor_nao_onerado,
-                "coeficiente": self.coeficiente,
-                "excluido": self.excluido,
-            }
-        )
+#     def to_pydantic(self) -> InsumosResponseItem:
+#         return InsumosResponseItem.model_validate(  # type: ignore
+#             {
+#                 "id": self.id,
+#                 "nome": self.nome,
+#                 "codigo": self.codigo,
+#                 "idTabela": self.id_tabela,
+#                 "idUnidade": self.id_unidade,
+#                 "idClasse": self.id_classe,
+#                 "valorOnerado": self.valor_onerado,
+#                 "valorNaoOnerado": self.valor_nao_onerado,
+#                 "composicao": self.composicao,
+#                 "percentualMaoDeObra": self.percentual_mao_de_obra,
+#                 "percentualMaterial": self.percentual_material,
+#                 "insumosComposicoes": [],
+#                 "percentualEquipamentos": self.percentual_equipamentos,
+#                 "percentualServicosTerceiros": self.percentual_servicos_terceiros,
+#                 "percentualOutros": self.percentual_outros,
+#                 "excluido": self.excluido,
+#             }
+#         )
+
+
+# class ComposicaoMontada(Base):
+#     __tablename__ = "composicao_montada"
+#     id = Column(Integer, primary_key=True)
+#     id_insumo = Column(Integer, ForeignKey("insumos_tabela.id"), nullable=True)
+#     id_composicao = Column(Integer, ForeignKey("composicoes_tabela.id"), nullable=True)
+#     id_insumo_item = Column(Integer, ForeignKey("insumo_items.id"))
+#     valor_onerado = Column(Float)
+#     valor_nao_onerado = Column(Float)
+#     coeficiente = Column(Float)
+#     excluido = Column(Boolean, nullable=True)
+
+#     insumo_tabela = relationship("InsumoTabela", back_populates="insumos_composicoes")
+#     composicoes = relationship(
+#         "ComposicaoTabela", back_populates="composicoes_composicoes"
+#     )
+#     insumo_item = relationship("InsumoItem")
+
+#     def to_pydantic(
+#         self, insumo_item: Optional[InsumosResponseItem] = None
+#     ) -> ComposicaoMontadaResponse:
+#         return ComposicaoMontadaResponse.model_validate(  # type: ignore
+#             {
+#                 "id": self.id,
+#                 "id_insumo": self.id_insumo,
+#                 "id_composicao": self.id_composicao,
+#                 "id_insumo_item": self.id_insumo_item,
+#                 "insumo_item": insumo_item,
+#                 "valor_onerado": self.valor_onerado,
+#                 "valor_nao_onerado": self.valor_nao_onerado,
+#                 "coeficiente": self.coeficiente,
+#                 "excluido": self.excluido,
+#             }
+#         )
 
 
 class ComposicaoItem(Base):

@@ -39,7 +39,12 @@ async def get_insumos_or_compositions(
 
     #                 yield (insumo_response, estado_response)
     try:
+        """
         estados_meses = [
+            (1, "MG"),
+            (2, "MG"),
+            (3, "MG"),
+            (4, "MG"),
             (5, "MG"),
             (6, "MG"),
             (7, "MG"),
@@ -55,6 +60,12 @@ async def get_insumos_or_compositions(
             (2, "RS"),
             (3, "RS"),
             (4, "RS"),
+            (5, "RS"),
+            (6, "RS"),
+        ]
+        """
+
+        estados_meses = [
             (5, "RS"),
             (6, "RS"),
         ]
