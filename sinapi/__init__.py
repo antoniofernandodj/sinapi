@@ -120,6 +120,8 @@ def inserir_insumo_item(item: dict, session):
         )
     )
 
+    session.flush()
+
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
 
@@ -174,7 +176,7 @@ def inserir_composicoes(composicoes):
     with Session() as session:
         for composicao in composicoes:
             inserir_composicao(composicao, session)
-    session.commit()  # Realiza o commit após o bloco no_autoflush
+    session.commit()
 
 
 async def cadastrar_composicoes():
