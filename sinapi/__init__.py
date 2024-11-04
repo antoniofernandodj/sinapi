@@ -127,7 +127,7 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
 
     insumo_item = insumo_composicao_api["insumoItem"]
 
-    with session.no_autoflush():
+    with session.no_autoflush:
         inserir_insumo_item(insumo_item, session)
 
     # inserir_insumo_item(item=insumo_item, session=session)
