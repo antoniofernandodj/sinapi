@@ -40,7 +40,6 @@ async def get_insumos_or_compositions(
     #                 yield (insumo_response, estado_response)
     try:
         estados_meses = [
-            (1, "MG"),
             (2, "MG"),
             (3, "MG"),
             (4, "MG"),
@@ -62,8 +61,6 @@ async def get_insumos_or_compositions(
             (5, "RS"),
             (6, "RS"),
         ]
-
-        estados_meses = [(1, "MG")]
 
         for mes, uf in estados_meses:
             print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
