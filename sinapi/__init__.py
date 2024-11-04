@@ -172,10 +172,9 @@ def inserir_composicao(i: Dict[str, Any], session):
 
 def inserir_composicoes(composicoes):
     with Session() as session:
-        with session.no_autoflush:  # Desativa o autoflush temporariamente
-            for composicao in composicoes:
-                inserir_composicao(composicao, session)
-        session.commit()  # Realiza o commit após o bloco no_autoflush
+        for composicao in composicoes:
+            inserir_composicao(composicao, session)
+    session.commit()  # Realiza o commit após o bloco no_autoflush
 
 
 async def cadastrar_composicoes():
