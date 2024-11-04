@@ -154,7 +154,7 @@ def inserir_composicao(i: Dict[str, Any], session):
     inserir_unidade(i["unidade"], session)
     inserir_tabela(i["tabela"], session)
     inserir_classe(i["classe"], session)
-    item = ComposicaoTabela(
+    item = InsumoComposicaoTabela(
         id=i["id"],
         nome=i["nome"],
         codigo=i["codigo"],
