@@ -120,8 +120,6 @@ def inserir_insumo_item(item: dict, session):
         )
     )
 
-    session.flush()
-
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
 
