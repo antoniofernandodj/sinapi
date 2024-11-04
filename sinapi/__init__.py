@@ -100,47 +100,53 @@ def inserir_insumo_item(item: dict, session):
     if item["classe"]:
         inserir_classe(item["classe"], session)
 
-    session.merge(
-        InsumoComposicaoTabela(
-            id=item["id"],
-            nome=item["nome"],
-            codigo=item["codigo"],
-            id_tabela=item["idTabela"],
-            id_unidade=item["idUnidade"],
-            id_classe=item["idClasse"],
-            valor_onerado=item["valorOnerado"],
-            valor_nao_onerado=item["valorNaoOnerado"],
-            composicao=item["composicao"],
-            percentual_mao_de_obra=item.get("percentualMaoDeObra"),
-            percentual_material=item.get("percentualMaterial"),
-            percentual_equipamentos=item.get("percentualEquipamentos"),
-            percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),
-            percentual_outros=item.get("percentualOutros"),
-            excluido=item["excluido"],
-        )
+    insumo_composicao = InsumoComposicaoTabela(
+        id=item["id"],
+        nome=item["nome"],
+        codigo=item["codigo"],
+        id_tabela=item["idTabela"],
+        id_unidade=item["idUnidade"],
+        id_classe=item["idClasse"],
+        valor_onerado=item["valorOnerado"],
+        valor_nao_onerado=item["valorNaoOnerado"],
+        composicao=item["composicao"],
+        percentual_mao_de_obra=item.get("percentualMaoDeObra"),
+        percentual_material=item.get("percentualMaterial"),
+        percentual_equipamentos=item.get("percentualEquipamentos"),
+        percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),
+        percentual_outros=item.get("percentualOutros"),
+        excluido=item["excluido"],
     )
+
+    print(insumo_composicao)
+
+    session.merge(insumo_composicao)
+    session.flush()
+    session.commit()
 
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
 
     insumo_item = insumo_composicao_api["insumoItem"]
 
-    with session.no_autoflush:
-        inserir_insumo_item(insumo_item, session)
+    # with session.no_autoflush:
+    #     inserir_insumo_item(insumo_item, session)
 
-    # inserir_insumo_item(item=insumo_item, session=session)
+    inserir_insumo_item(item=insumo_item, session=session)
 
-    session.merge(
-        ComposicaoItem(
-            id=insumo_composicao_api["id"],
-            id_insumo=insumo_composicao_api["idInsumo"],
-            id_insumo_item=insumo_composicao_api["idInsumoItem"],
-            valor_onerado=insumo_composicao_api["valorOnerado"],
-            valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
-            coeficiente=insumo_composicao_api["coeficiente"],
-            excluido=insumo_composicao_api["excluido"],
-        )
+    composicao_item = ComposicaoItem(
+        id=insumo_composicao_api["id"],
+        id_insumo=insumo_composicao_api["idInsumo"],
+        id_insumo_item=insumo_composicao_api["idInsumoItem"],
+        valor_onerado=insumo_composicao_api["valorOnerado"],
+        valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
+        coeficiente=insumo_composicao_api["coeficiente"],
+        excluido=insumo_composicao_api["excluido"],
     )
+
+    print(composicao_item)
+
+    session.merge(composicao_item)
 
 
 def inserir_composicao(i: Dict[str, Any], session):
