@@ -5,7 +5,7 @@ from fastapi import Query
 from sqlalchemy import asc, desc, func
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from entrypoint.schema import (
     ClassesResponse,
@@ -142,9 +142,19 @@ class InsumoComposicaoTabelaService:
 
         query = compose_query(query)
         q_count = compose_query(q_count)
-
-        r = await self.session.execute(query.order_by(Table.id).offset(offset).limit(limit))
+    
         r_count = await self.session.execute(q_count)
+        r = await (
+            self.session.execute(
+                query.order_by(Table.id)
+                .options(selectinload(Table.itens_de_composicao))
+                .options(selectinload(Table.tabela))
+                .options(selectinload(Table.classe))
+                .options(selectinload(Table.unidade))
+                .offset(offset)
+                .limit(limit)
+            )
+        )
 
         result_count = r_count.scalar_one()
         total_pages = ceil(result_count / limit)
