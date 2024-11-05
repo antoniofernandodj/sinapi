@@ -268,5 +268,5 @@ async def async_read_estados(session: AsyncSession = Depends(get_async_db)):
 @app.get("/async/classes", response_model=ClassesResponse)
 async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
     service = ClassesService(session)
-    return service.read_all()
+    return await service.read_all()
 
