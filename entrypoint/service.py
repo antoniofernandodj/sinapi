@@ -46,7 +46,10 @@ class InsumoComposicaoTabelaService:
             .options(
                 selectinload(InsumoComposicaoTabela.itens_de_composicao)
                 .options(
-                    selectinload(ComposicaoItem.insumo_item)
+                    selectinload(ComposicaoItem.insumo_item),
+                    selectinload(InsumoComposicaoTabela.tabela),
+                    selectinload(InsumoComposicaoTabela.classe),
+                    selectinload(InsumoComposicaoTabela.unidade),
                 )
             )
             .filter_by(id=id)
