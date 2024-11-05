@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 import random
-from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
+from typing import Any, AsyncGenerator, Dict, List, Optional
 import httpx
 
 from sinapi.api.schema import TabelasResponse
@@ -14,6 +14,8 @@ try:
     from sinapi import schema  # type: ignore
 except:
     from sinapi.api import schema
+
+from .faltantes import faltantes 
 
 
 logging.basicConfig(level=logging.ERROR)
@@ -256,8 +258,15 @@ class SinapiService:
                 items=data["items"], totalRows=data["totalRows"]
             )
 
+            encontrado = False
             for item in result.items:
-                yield item
+                if item.id in faltantes:
+                    encontrado = True
+                    print('Item faltante encontrado:')
+                    print(item)
+                    yield item
+            if not encontrado:
+                print("Nenhum item econtrado nesta página")
 
             params["Page"] += 1
 
