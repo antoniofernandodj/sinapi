@@ -422,26 +422,20 @@ class InsumoComposicaoTabela(Base):
 
     def to_pydantic(self):
 
-        childs = False
-        itens_da_composicao_response = None
-        with suppress(Exception):
-            self.itens_de_composicao
-            childs = True
-
-        if childs:
-            itens_da_composicao_response = [
-                i.to_pydantic() for i in self.itens_de_composicao
-            ]
-
         classe_response = None
         unidade_response = None
         tabela_response = None
+        itens_da_composicao_response = None
         with suppress(Exception):
             tabela_response = self.tabela.to_pydantic()
         with suppress(Exception):
             classe_response = self.classe.to_pydantic()
         with suppress(Exception):
             unidade_response = self.unidade.to_pydantic()
+        with suppress(Exception):
+            itens_da_composicao_response = [
+                i.to_pydantic() for i in self.itens_de_composicao
+            ]
 
         return InsumoComposicaoTabelaResponse.model_validate(  # type: ignore
             {
@@ -463,12 +457,6 @@ class InsumoComposicaoTabela(Base):
                 "percentualServicosTerceiros": self.percentual_servicos_terceiros,
                 "percentualOutros": self.percentual_outros,
                 "excluido": self.excluido,
-                "insumosComposicoes": (
-                    itens_da_composicao_response
-                    if (
-                        itens_da_composicao_response and
-                        len(itens_da_composicao_response) > 0
-                    ) else None
-                ),
+                "insumosComposicoes": itens_da_composicao_response,
             }
         )
