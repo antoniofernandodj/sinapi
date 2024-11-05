@@ -25,7 +25,7 @@ ASYNC_DATABASE_INSUMOS_URL2 = "mysql+aiomysql://admin:I*2021t1201@mng.itemize.co
 
 
 engine = create_engine(DATABASE_INSUMOS_URL, echo=False)
-async_engine = create_async_engine(DATABASE_INSUMOS_URL, echo=False)
+async_engine = create_async_engine(ASYNC_DATABASE_INSUMOS_URL, echo=False)
 
 SessionLocal = sessionmaker(bind=engine)
 AsyncSessionLocal = async_sessionmaker(bind=async_engine)
