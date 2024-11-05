@@ -206,6 +206,62 @@ class SinapiService:
             yield result
             params["Page"] += 1
 
+
+    async def insumos_todos2(
+        self,
+        tipo_tabela: Optional[str] = None,
+        ano: Optional[str] = None,
+        mes: Optional[int] = None,
+        uf: Optional[str] = None,
+        nome_classe: Optional[str] = None,
+        nome_unidade: Optional[str] = None,
+        composicao: Optional[bool] = None,
+        term: Optional[str] = None,
+        order: Optional[str] = None,
+        direction: Optional[str] = None,
+        search_type: Optional[str] = None,
+        start_page: int = 1,
+    ) -> AsyncGenerator[schema.InsumosResponseItem, Any]:
+
+        params = self.__remove_none(
+            {
+                "TipoTabela": tipo_tabela,
+                "Ano": ano,
+                "Mes": mes,
+                "Uf": uf,
+                "NomeClasse": nome_classe,
+                "NomeUnidade": nome_unidade,
+                "Composicao": composicao,
+                "Term": term,
+                "Order": order,
+                "Direction": direction,
+                "SearchType": search_type,
+                "Page": start_page,
+                "Limit": 100,
+            }
+        )
+
+        loop = True
+        while loop:
+            print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
+
+            response = await self._make_request("GET", url="api/Insumos", params=params)
+
+            if response is None:
+                loop = False
+                break
+
+            data = response.json()
+            result = schema.InsumosResponse(
+                items=data["items"], totalRows=data["totalRows"]
+            )
+
+            for item in result.items:
+                yield item
+
+            params["Page"] += 1
+
+
     async def estados(
         self,
         term: Optional[str] = None,

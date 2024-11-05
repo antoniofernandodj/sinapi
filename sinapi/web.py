@@ -74,13 +74,13 @@ async def get_insumos_or_compositions(composicao=None):
 
         for mes, uf in estados_meses:
             print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
-            async for insumo_response in service.insumos_todos(
+            async for item in service.insumos_todos2(
                 ano=ano,
                 mes=mes,
                 uf=uf,
                 composicao=composicao,
             ):
-                yield insumo_response
+                yield item
 
     except Exception as error:
         import traceback

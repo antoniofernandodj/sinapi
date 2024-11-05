@@ -180,9 +180,14 @@ def inserir_composicoes(composicoes):
 
 
 async def cadastrar_composicoes():
-    async for composicao_response in get_insumos_or_compositions():
-        composicao_data = composicao_response.model_dump()
-        inserir_composicoes(composicao_data["items"])
+    with SessionLocal() as session:
+        async for item in get_insumos_or_compositions():
+            # composicao_data = composicao_response.model_dump()
+            print(f"Cadastrando item {item.id}")
+            inserir_composicao(item.model_dump(), session)
+        session.commit()
+
+        # inserir_composicoes(composicao_data["items"])
 
 
 async def main():

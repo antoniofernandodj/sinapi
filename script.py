@@ -15,8 +15,8 @@ from sqlalchemy.orm import selectinload
 
 AsyncSessionLocal = get_async_session_local(ASYNC_DATABASE_INSUMOS_URL2, echo=False)
 
-
 async def main():
+    FALTANTES = []
 
     async with AsyncSessionLocal() as session:
 
@@ -39,11 +39,12 @@ async def main():
                     if r not in results
                 ]
                 if faltantes:
-                    print('\n\n')
-                    print(tabela)
-                    print(f'{tabela.ano}/{tabela.mes}')
-                    print(tabela.estado)
-                    print('faltantes:')
-                    print(faltantes, end="\n\n")
+                    FALTANTES.extend(faltantes)
+
+        FALTANTES = list(set(FALTANTES))
+        with open('file.txt', 'w') as f:
+            print(FALTANTES, file=f)
+
+
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
