@@ -44,13 +44,11 @@ class InsumoComposicaoTabelaService:
         stmt = (
             select(InsumoComposicaoTabela)
             .options(
+                selectinload(ComposicaoItem.insumo_item),
+                selectinload(InsumoComposicaoTabela.tabela),
+                selectinload(InsumoComposicaoTabela.classe),
+                selectinload(InsumoComposicaoTabela.unidade),
                 selectinload(InsumoComposicaoTabela.itens_de_composicao)
-                .options(
-                    selectinload(ComposicaoItem.insumo_item),
-                    selectinload(InsumoComposicaoTabela.tabela),
-                    selectinload(InsumoComposicaoTabela.classe),
-                    selectinload(InsumoComposicaoTabela.unidade),
-                )
             )
             .filter_by(id=id)
         )
