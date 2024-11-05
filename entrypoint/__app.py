@@ -63,45 +63,6 @@ app.add_middleware(
 )
 
 
-# @app.get("/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
-# def read_insumo_composicao(
-#     composicao: bool,
-#     page: int = 1,
-#     order_by: Optional[str] = None,
-#     limit: Annotated[int, Query(lt=200)] = 10,
-#     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
-#     codigo: Optional[str] = None,
-#     id: Optional[int] = None,
-#     id_tabela: Optional[int] = None,
-#     id_classe: Optional[int] = None,
-#     session: Session = Depends(get_db),
-# ):
-
-#     service = InsumoComposicaoTabelaService(session=session)
-
-#     return service.read_insumo_composicao(
-#         composicao=composicao,
-#         codigo=codigo,
-#         descricao=descricao,
-#         id_tabela=id_tabela,
-#         id_classe=id_classe,
-#         id=id,
-#         order_by=order_by,
-#         page=page,
-#         limit=limit,
-#     )
-
-
-# @app.get("/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
-# def read_insumo_composicao_by_id(id: int, session: Session = Depends(get_db)):
-
-#     service = InsumoComposicaoTabelaService(session=session)
-#     response = service.read_one_insumo_composicao_by_id(id)
-#     if response is None:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     return response
-
-
 @app.get("/estados/composicoes")
 def read_composicoes_do_estado(
     session=Depends(get_db),
@@ -192,10 +153,7 @@ async def read_composicoes_do_estado_async(
     return response
 
 
-
-
 #############################################################################
-
 
 
 @app.get("/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
@@ -244,13 +202,10 @@ async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> Mes
 
 @app.get("/tabelas", response_model=TabelasResponse)
 async def async_read_tabelas(
-    mes_ano: Optional[date] = None,
+    mes_ano: date,
     id_estado: Optional[int] = None,
     session: AsyncSession = Depends(get_async_db),
 ):
-    if mes_ano is None:
-        raise HTTPException(status_code=400, detail="")
-
     tabelas_service = TabelasService(session)
     return await tabelas_service.read_tabelas(mes_ano, id_estado)
 

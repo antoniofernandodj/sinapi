@@ -227,9 +227,7 @@ class TabelasService:
     async def read_tabelas(self, mes_ano: date, id_estado: Optional[int] = None):
         query = select(Tabela)
         query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
-        if id_estado:
-            query = query.filter_by(id_estado=id_estado)
-
+        query = query.filter_by(id_estado=id_estado) if id_estado else query
         tabelas: Sequence[Tabela] = (await self.session.execute(query)).scalars().all()
         response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
         return response
