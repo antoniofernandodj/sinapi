@@ -426,7 +426,7 @@ class SinapiService:
                 if "Nenhuma tabela importada para o ano/mês informado" in response.text:
                     return None
 
-                logging.debug(response.json())
+                # logging.debug(response.json())
                 response.raise_for_status()
                 return response
 
