@@ -15,6 +15,11 @@ DATABASE_INSUMOS_URL = "mysql+pymysql://itemize:I*2021t1201@localhost/sinapi"
 DATABASE_INSUMOS_URL2 = "mysql+pymysql://admin:I*2021t1201@mng.itemize.com.br/sinapi"
 
 
+ASYNC_SGBD_URL = "mysql+aiomysql://itemize:I*2021t1201@localhost"
+ASYNC_DATABASE_INSUMOS_URL = "mysql+aiomysql://itemize:I*2021t1201@localhost/sinapi"
+ASYNC_DATABASE_INSUMOS_URL2 = "mysql+aiomysql://admin:I*2021t1201@mng.itemize.com.br/sinapi"
+
+
 # with create_engine(SGBD_URL, echo=False).connect() as connection:
 #     connection.execute(text("CREATE DATABASE IF NOT EXISTS sinapi"))
 
