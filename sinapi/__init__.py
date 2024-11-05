@@ -180,15 +180,13 @@ def inserir_composicoes(composicoes):
 
 
 async def cadastrar_composicoes():
-    async for composicao_response in get_insumos_or_compositions(ano="2024"):
+    async for composicao_response in get_insumos_or_compositions():
         composicao_data = composicao_response.model_dump()
         inserir_composicoes(composicao_data["items"])
 
 
 async def main():
-    # await cadastrar_composicoes()
-    # while True:
-    #     print("Terminou!")
-    #     await asyncio.sleep(3600)
-
-    await get_insumos_or_compositions('2024')
+    await cadastrar_composicoes()
+    while True:
+        print("Terminou!")
+        await asyncio.sleep(3600)

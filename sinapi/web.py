@@ -1,3 +1,4 @@
+import datetime
 from pickle import NONE
 from typing import Any, AsyncGenerator
 
@@ -18,10 +19,11 @@ senha = "eflEs2cF"
 # meses = [Mes(value=i, text=str(i)) for i in range(1, 13)]
 
 
-async def get_insumos_or_compositions(
-    ano: str, composicao=None
-):
+async def get_insumos_or_compositions(composicao=None):
+
+    ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
+
     # estados_response = await get_estados_a_cadastrar(service)
 
     # try:
@@ -39,9 +41,6 @@ async def get_insumos_or_compositions(
 
     #                 yield (insumo_response, estado_response)
     try:
-
-        result = await service.insumo(id=16641561)
-        print({'result': result})
 
         """
         estados_meses = [
@@ -69,19 +68,19 @@ async def get_insumos_or_compositions(
         ]
         """
 
-        # estados_meses = [
-        #     (9, "MG")
-        # ]
+        estados_meses = [
+            (9, "MG")
+        ]
 
-        # for mes, uf in estados_meses:
-        #     print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
-        #     async for insumo_response in service.insumos_todos(
-        #         ano=ano,
-        #         mes=mes,
-        #         uf=uf,
-        #         composicao=composicao,
-        #     ):
-        #         yield insumo_response
+        for mes, uf in estados_meses:
+            print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
+            async for insumo_response in service.insumos_todos(
+                ano=ano,
+                mes=mes,
+                uf=uf,
+                composicao=composicao,
+            ):
+                yield insumo_response
 
     except Exception as error:
         import traceback

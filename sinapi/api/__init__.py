@@ -186,6 +186,7 @@ class SinapiService:
 
         loop = True
         while loop:
+            print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
 
             response = await self._make_request("GET", url="api/Insumos", params=params)
 
@@ -204,37 +205,6 @@ class SinapiService:
 
             yield result
             params["Page"] += 1
-            print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
-
-
-    async def insumo(
-        self,
-        id: int
-    ):
-        
-        params = {
-            'id': id,
-            'Ano': 2024,
-            'Mes': 9,
-            "Page": 1,
-            "Limit": 100,
-
-        }
-
-        response = await self._make_request(
-            "GET",
-            url=f"api/Insumos",
-            params=params
-        )
-        if response is None:
-            return None
-
-        return response.text
-
-        # result = schema.InsumosResponse(
-        #     items=data["items"], totalRows=data["totalRows"]
-        # )
-
 
     async def estados(
         self,
