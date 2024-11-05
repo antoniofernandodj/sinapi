@@ -145,16 +145,16 @@ def read_tabelas(
     return response
 
 
-@app.get("/estados", response_model=EstadosResponse)
-def read_estados(session: Session = Depends(get_db)):
-    estados = session.query(Estado).all()
-    return EstadosResponse(estados=[estado.to_pydantic() for estado in estados])
+# @app.get("/estados", response_model=EstadosResponse)
+# def read_estados(session: Session = Depends(get_db)):
+#     estados = session.query(Estado).all()
+#     return EstadosResponse(estados=[estado.to_pydantic() for estado in estados])
 
 
-@app.get("/classes", response_model=ClassesResponse)
-def read_classes(session: Session = Depends(get_db)):
-    classes: List[Classe] = session.query(Classe).all()
-    return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
+# @app.get("/classes", response_model=ClassesResponse)
+# def read_classes(session: Session = Depends(get_db)):
+#     classes: List[Classe] = session.query(Classe).all()
+#     return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
 
 
 
@@ -259,13 +259,13 @@ async def async_read_tabelas(
     return await tabelas_service.read_tabelas(mes_ano, id_estado)
 
 
-@app.get("/async/estados", response_model=EstadosResponse)
+@app.get("/estados", response_model=EstadosResponse)
 async def async_read_estados(session: AsyncSession = Depends(get_async_db)):
     service = EstadosService(session)
     return await service.read_all()
 
 
-@app.get("/async/classes", response_model=ClassesResponse)
+@app.get("/classes", response_model=ClassesResponse)
 async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
     service = ClassesService(session)
     return await service.read_all()
