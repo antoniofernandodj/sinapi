@@ -268,6 +268,10 @@ class SinapiService:
             if not encontrado:
                 print("Nenhum item econtrado nesta página")
 
+            if len(result.items) == 0:
+                loop = False
+                break
+
             params["Page"] += 1
 
 
