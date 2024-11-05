@@ -425,7 +425,7 @@ class InsumoComposicaoTabela(Base):
         childs = False
         itens_da_composicao_response = None
         with suppress(Exception):
-            print(self.itens_de_composicao)
+            self.itens_de_composicao
             childs = True
 
         if childs:
