@@ -20,9 +20,9 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(Path(__file__).name)
 
 
-
 def retry(max_attempts: int, backoff: float):
     """Decorator to retry a function call with exponential backoff."""
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -32,18 +32,22 @@ def retry(max_attempts: int, backoff: float):
                     return await func(*args, **kwargs)
                 except Exception as e:
                     import traceback
+
                     traceback.print_exc()
                     attempts += 1
                     logger.error(f"Attempt {attempts} failed: {e}")
                     if attempts >= max_attempts:
                         logger.error("Max retries reached. Raising exception.")
                         raise
-                    backoff_time = backoff * (2 ** (attempts - 1)) + random.uniform(0, 1)
+                    backoff_time = backoff * (2 ** (attempts - 1)) + random.uniform(
+                        0, 1
+                    )
                     logger.debug(f"Retrying in {backoff_time:.2f} seconds...")
                     await asyncio.sleep(backoff_time)
-        return wrapper
-    return decorator
 
+        return wrapper
+
+    return decorator
 
 
 class SinapiService:
@@ -175,7 +179,7 @@ class SinapiService:
                 "Direction": direction,
                 "SearchType": search_type,
                 "Page": 1,
-                "Limit": 50,
+                "Limit": 100,
             }
         )
 
@@ -388,7 +392,7 @@ class SinapiService:
         data: Optional[Any] = None,
         params: Optional[Dict[str, Any]] = None,
     ) -> Optional[httpx.Response]:
-        
+
         async with httpx.AsyncClient(
             base_url=self.url_base, timeout=SinapiService.TIMEOUT
         ) as http_client:
