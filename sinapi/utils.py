@@ -8,13 +8,10 @@ from sqlalchemy import asc, desc
 try:
     from sinapi.api.schema import EstadoResponse
     from sinapi.api import SinapiService
-    from sinapi.database import Session
-    from sinapi.models import Estado
 except:
     from api import SinapiService
-    from database import Session
     from api.schema import EstadoResponse
-    from models import Estado
+
 
 login = "lsouza17@gmail.com"
 senha = "eflEs2cF"

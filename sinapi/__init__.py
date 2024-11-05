@@ -174,6 +174,7 @@ def inserir_composicao(i: Dict[str, Any], session):
 def inserir_composicoes(composicoes):
     with SessionLocal() as session:
         for composicao in composicoes:
+            print({'composicao_id': composicao['id']})
             inserir_composicao(composicao, session)
     session.commit()
 

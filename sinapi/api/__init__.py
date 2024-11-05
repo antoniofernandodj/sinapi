@@ -163,6 +163,7 @@ class SinapiService:
         order: Optional[str] = None,
         direction: Optional[str] = None,
         search_type: Optional[str] = None,
+        start_page: int = 1,
     ) -> AsyncGenerator[schema.InsumosResponse, Any]:
 
         params = self.__remove_none(
@@ -178,32 +179,32 @@ class SinapiService:
                 "Order": order,
                 "Direction": direction,
                 "SearchType": search_type,
-                "Page": 1,
+                "Page": start_page,
                 "Limit": 100,
             }
         )
 
-        results: List[schema.InsumosResponseItem] = []
         loop = True
         while loop:
+
             response = await self._make_request("GET", url="api/Insumos", params=params)
 
-            result = None
-            if response:
-                data = response.json()
-                result = schema.InsumosResponse(
-                    items=data["items"], totalRows=data["totalRows"]
-                )
-                yield result
+            if response is None:
+                loop = False
+                break
 
-            if result is None:
+            data = response.json()
+            result = schema.InsumosResponse(
+                items=data["items"], totalRows=data["totalRows"]
+            )
+
+            if len(result.items) == 0:
                 loop = False
-            elif len(result.items) != 0:
-                results.extend(result.items)
-                params["Page"] += 1
-                print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
-            else:
-                loop = False
+                break
+
+            yield result
+            params["Page"] += 1
+            print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
 
     async def estados(
         self,
