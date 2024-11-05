@@ -66,8 +66,12 @@ async def get_insumos_or_compositions(
         """
 
         estados_meses = [
-            (5, "RS"),
-            (6, "RS"),
+            (8, "MG"),
+            (9, "MG"),
+            (9, "MS"),
+            (7, "RS"),
+            (8, "RS"),
+            (9, "RS")
         ]
 
         for mes, uf in estados_meses:
