@@ -18,6 +18,7 @@ from entrypoint.schema import (
 
 from sinapi.models import (
     Classe,
+    ComposicaoItem,
     Estado,
     InsumoComposicaoTabela,
     Tabela
@@ -147,7 +148,12 @@ class InsumoComposicaoTabelaService:
         r = await (
             self.session.execute(
                 query.order_by(Table.id)
-                .options(selectinload(Table.itens_de_composicao))
+                .options(
+                    selectinload(Table.itens_de_composicao)
+                    .options(
+                        selectinload(ComposicaoItem.insumo_item)
+                    )
+                )
                 .options(selectinload(Table.tabela))
                 .options(selectinload(Table.classe))
                 .options(selectinload(Table.unidade))
