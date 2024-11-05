@@ -44,7 +44,7 @@ class InsumoComposicaoTabelaService:
         stmt = (
             select(InsumoComposicaoTabela)
             .options(
-                selectinload(ComposicaoItem.insumo_item),
+                # selectinload(ComposicaoItem.insumo_item),
                 selectinload(InsumoComposicaoTabela.tabela),
                 selectinload(InsumoComposicaoTabela.classe),
                 selectinload(InsumoComposicaoTabela.unidade),
