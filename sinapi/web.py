@@ -19,7 +19,7 @@ senha = "eflEs2cF"
 # meses = [Mes(value=i, text=str(i)) for i in range(1, 13)]
 
 
-async def get_insumos_or_compositions(composicao=None):
+async def get_insumos_or_compositions(composicao=True):
 
     ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
