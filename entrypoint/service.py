@@ -28,7 +28,7 @@ class InsumoComposicaoTabelaService:
     def __init__(self, session):
         self.session: Union[AsyncSession, Session] = session
 
-    def read_one_insummo_composicao_by_id(self, id: int):
+    def read_one_insumo_composicao_by_id(self, id: int):
         if not isinstance(self.session, Session):
             raise TypeError
         item = self.session.query(InsumoComposicaoTabela).filter_by(id=id).first()
