@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, List, Optional, Set
 from pydantic import BaseModel
+from contextlib import suppress
 from sqlalchemy import Column, Integer, Text, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship, DeclarativeBase  # type: ignore
 from sqlalchemy import Table
@@ -421,13 +422,16 @@ class InsumoComposicaoTabela(Base):
 
     def to_pydantic(self):
 
-        print('\n'*30)
-        print(self.itens_de_composicao)
-        print('\n'*30)
+        childs = False
+        itens_da_composicao_response = None
+        with suppress(Exception):
+            print(self.itens_de_composicao)
+            childs = True
 
-        itens_da_composicao_response = [
-            i.to_pydantic() for i in self.itens_de_composicao
-        ]
+        if childs:
+            itens_da_composicao_response = [
+                i.to_pydantic() for i in self.itens_de_composicao
+            ]
 
         return InsumoComposicaoTabelaResponse.model_validate(  # type: ignore
             {
@@ -451,8 +455,10 @@ class InsumoComposicaoTabela(Base):
                 "excluido": self.excluido,
                 "insumosComposicoes": (
                     itens_da_composicao_response
-                    if len(itens_da_composicao_response) > 0
-                    else None
+                    if (
+                        itens_da_composicao_response and
+                        len(itens_da_composicao_response) > 0
+                    ) else None
                 ),
             }
         )
