@@ -230,7 +230,7 @@ async def async_read_insumo_composicao(
 @app.get("/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
 async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends(get_async_db)):
     service = InsumoComposicaoTabelaService(session=session)
-    response = service.read_one_insumo_composicao_by_id(id)
+    response = await service.read_one_insumo_composicao_by_id_async(id)
     if response is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return response

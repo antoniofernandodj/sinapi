@@ -37,6 +37,27 @@ class InsumoComposicaoTabelaService:
             return None
         return item.to_pydantic()
 
+    async def read_one_insumo_composicao_by_id_async(self, id: int):
+        if not isinstance(self.session, AsyncSession):
+            raise TypeError
+
+        stmt = (
+            select(InsumoComposicaoTabela)
+            .options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao)
+                .options(
+                    selectinload(ComposicaoItem.insumo_item)
+                )
+            )
+            .filter_by(id=id)
+        )
+
+        composicao_execution_result = await self.session.execute(stmt)
+        composicao = composicao_execution_result.scalar()
+        if not composicao:
+            return None
+        return composicao.to_pydantic()
+
     def read_insumo_composicao(
         self,
         composicao: bool,
