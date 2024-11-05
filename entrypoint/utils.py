@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import Optional
 from sinapi.database import SessionLocal, AsyncSessionLocal
 from sqlalchemy.orm import Session
@@ -85,6 +86,7 @@ def get_db():
         db.close()
 
 
+@asynccontextmanager
 async def get_async_db():
     async with AsyncSessionLocal() as db:
         try:

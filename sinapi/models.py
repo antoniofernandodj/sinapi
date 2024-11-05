@@ -377,7 +377,7 @@ class ComposicaoItem(Base):
 
     def to_pydantic(self):
 
-        itens_response = self.insumo_item.to_pydantic(include_children=False)
+        itens_response = self.insumo_item.to_pydantic()
 
         return ComposicaoMontadaResponse.model_validate(
             {
@@ -419,14 +419,11 @@ class InsumoComposicaoTabela(Base):
     unidade: Mapped["Unidade"] = relationship(foreign_keys=[id_unidade])
     classe: Mapped["Classe"] = relationship(foreign_keys=[id_classe])
 
-    def to_pydantic(self, include_children=True):
+    def to_pydantic(self):
 
-        itens_da_composicao_response = []
-        if include_children:
-            itens_da_composicao = self.itens_de_composicao
-            itens_da_composicao_response = [
-                i.to_pydantic() for i in itens_da_composicao
-            ]
+        itens_da_composicao_response = [
+            i.to_pydantic() for i in self.itens_de_composicao
+        ]
 
         return InsumoComposicaoTabelaResponse.model_validate(  # type: ignore
             {

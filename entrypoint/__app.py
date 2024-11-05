@@ -2,13 +2,14 @@ import sys
 import pathlib
 from datetime import date
 
-from typing import Annotated, Any, List, Optional, Set
+from typing import Annotated, Any, List, Optional, Sequence, Set
 from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Query as SQLQuery
+from sqlalchemy.orm import Query as SQLQuery, selectinload
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
@@ -29,6 +30,7 @@ from entrypoint.utils import (
 )
 from sinapi.models import (
     # ComposicaoTabela,
+    ComposicaoItem,
     InsumoComposicaoTabela,
     Estado,
     Tabela,
@@ -100,62 +102,6 @@ def read_insumo_composicao_by_id(id: int, session: Session = Depends(get_db)):
     return response
 
 
-# @app.get("/meses", response_model=MesesResponse)
-# def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
-
-#     meses: Set[Mes] = set()
-#     tabelas: List[Tabela] = session.query(Tabela).all()
-
-#     for t in tabelas:
-#         if not isinstance(t.ano, int) or not isinstance(t.mes, int):
-#             raise TypeError
-
-#         mes = Mes(mes=t.mes, ano=t.ano)
-#         meses.add(mes)
-
-#     return MesesResponse(
-#         meses=sorted(list(meses), key=lambda mes: str(mes.ano) + "/" + str(mes.mes))
-#     )
-
-
-# @app.get("/tabelas", response_model=TabelasResponse)
-# def read_tabelas(
-#     mes_ano: Optional[date] = None,
-#     id_estado: Optional[int] = None,
-#     session: Session = Depends(get_db),
-# ):
-
-#     if mes_ano is None:
-#         raise HTTPException(status_code=400, detail="")
-
-#     query: SQLQuery = session.query(Tabela)
-
-#     if mes_ano:
-#         query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
-
-#     if id_estado:
-#         query = query.filter_by(id_estado=id_estado)
-
-#     tabelas: List[Tabela] = query.all()
-
-#     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
-
-#     return response
-
-
-# @app.get("/estados", response_model=EstadosResponse)
-# def read_estados(session: Session = Depends(get_db)):
-#     estados = session.query(Estado).all()
-#     return EstadosResponse(estados=[estado.to_pydantic() for estado in estados])
-
-
-# @app.get("/classes", response_model=ClassesResponse)
-# def read_classes(session: Session = Depends(get_db)):
-#     classes: List[Classe] = session.query(Classe).all()
-#     return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
-
-
-
 @app.get("/estados/composicoes")
 def read_composicoes_do_estado(
     session=Depends(get_db),
@@ -193,6 +139,58 @@ def read_composicoes_do_estado(
             del response[estado.nome]
 
     return response
+
+
+@app.get("/async/estados/composicoes")
+async def read_composicoes_do_estado_async(
+    session: AsyncSession =Depends(get_async_db),
+    codigo: Optional[int] = None,
+    id_composicao: Optional[int] = None,
+):
+
+    stmt = select(Estado)
+
+    estados_execution_result = await session.execute(stmt)
+    estados = estados_execution_result.scalars().all()
+
+    response = {}
+    for estado in estados:
+
+        response[estado.nome] = []
+        composicoes_do_estado: List[Any] = response[estado.nome]
+
+        stmt = select(Tabela).filter_by(id_estado=estado.id)
+        tabelas_execution_result = await session.execute(stmt)
+        tabelas = tabelas_execution_result.scalars().all()
+
+        for tabela in tabelas:
+
+            stmt = select(InsumoComposicaoTabela).filter_by(id_tabela=tabela.id)
+            if codigo:
+                stmt = stmt.filter_by(codigo=codigo)
+            if id_composicao:
+                stmt = stmt.filter_by(id=id_composicao)
+
+            stmt = stmt.options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao)
+                .options(
+                    selectinload(ComposicaoItem.insumo_item)
+                )
+            )
+
+            composicao_execution_result = await session.execute(stmt)
+            composicao = composicao_execution_result.scalar()
+            if composicao is None:
+                continue
+
+            result = composicao.to_pydantic()
+            composicoes_do_estado.append(result.model_dump())  # type: ignore
+
+        if len(composicoes_do_estado) == 0:
+            del response[estado.nome]
+
+    return response
+
 
 
 
@@ -252,7 +250,7 @@ async def async_read_tabelas(
 ):
     if mes_ano is None:
         raise HTTPException(status_code=400, detail="")
-    
+
     tabelas_service = TabelasService(session)
     return await tabelas_service.read_tabelas(mes_ano, id_estado)
 
