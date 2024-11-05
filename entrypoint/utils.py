@@ -86,7 +86,7 @@ def get_db():
         db.close()
 
 
-@asynccontextmanager
+# @asynccontextmanager
 async def get_async_db():
     async with AsyncSessionLocal() as db:
         try:
