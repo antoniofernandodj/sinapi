@@ -421,6 +421,10 @@ class InsumoComposicaoTabela(Base):
 
     def to_pydantic(self):
 
+        print('\n'*30)
+        print(self.itens_de_composicao)
+        print('\n'*30)
+
         itens_da_composicao_response = [
             i.to_pydantic() for i in self.itens_de_composicao
         ]
