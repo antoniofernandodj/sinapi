@@ -212,7 +212,7 @@ class SinapiService:
         id: int
     ):
 
-        response = await self._make_request("GET", url=f"api/Insumos/{id}")
+        response = await self._make_request("GET", url=f"api/Insumos", params={'id': id})
         if response is None:
             return None
 
