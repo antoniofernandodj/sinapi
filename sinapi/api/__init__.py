@@ -206,6 +206,23 @@ class SinapiService:
             params["Page"] += 1
             print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
 
+
+    async def insumo(
+        self,
+        id: int
+    ):
+
+        response = await self._make_request("GET", url=f"api/Insumos/{id}")
+        if response is None:
+            return None
+
+        return response.json()
+
+        # result = schema.InsumosResponse(
+        #     items=data["items"], totalRows=data["totalRows"]
+        # )
+
+
     async def estados(
         self,
         term: Optional[str] = None,

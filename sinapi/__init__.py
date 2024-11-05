@@ -186,7 +186,9 @@ async def cadastrar_composicoes():
 
 
 async def main():
-    await cadastrar_composicoes()
-    while True:
-        print("Terminou!")
-        await asyncio.sleep(3600)
+    # await cadastrar_composicoes()
+    # while True:
+    #     print("Terminou!")
+    #     await asyncio.sleep(3600)
+
+    await get_insumos_or_compositions('2024')

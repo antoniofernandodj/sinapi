@@ -20,7 +20,7 @@ senha = "eflEs2cF"
 
 async def get_insumos_or_compositions(
     ano: str, composicao=None
-) -> AsyncGenerator[InsumosResponse, Any]:
+):
     service = SinapiService(login, senha)
     # estados_response = await get_estados_a_cadastrar(service)
 
@@ -39,6 +39,10 @@ async def get_insumos_or_compositions(
 
     #                 yield (insumo_response, estado_response)
     try:
+
+        result = await service.insumo(id=16641561)
+        print({'result': result})
+
         """
         estados_meses = [
             (1, "MG"),
@@ -65,19 +69,19 @@ async def get_insumos_or_compositions(
         ]
         """
 
-        estados_meses = [
-            (9, "MG")
-        ]
+        # estados_meses = [
+        #     (9, "MG")
+        # ]
 
-        for mes, uf in estados_meses:
-            print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
-            async for insumo_response in service.insumos_todos(
-                ano=ano,
-                mes=mes,
-                uf=uf,
-                composicao=composicao,
-            ):
-                yield insumo_response
+        # for mes, uf in estados_meses:
+        #     print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
+        #     async for insumo_response in service.insumos_todos(
+        #         ano=ano,
+        #         mes=mes,
+        #         uf=uf,
+        #         composicao=composicao,
+        #     ):
+        #         yield insumo_response
 
     except Exception as error:
         import traceback
