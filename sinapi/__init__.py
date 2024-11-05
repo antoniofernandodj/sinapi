@@ -8,7 +8,7 @@ from sinapi.models import InsumoComposicaoTabela
 
 
 try:
-    from database import Session
+    from database import SessionLocal
     from web import get_insumos_or_compositions
     from models import (
         Estado,
@@ -18,7 +18,7 @@ try:
         ComposicaoItem,
     )
 except:
-    from sinapi.database import Session
+    from sinapi.database import SessionLocal
     from sinapi.web import get_insumos_or_compositions
     from sinapi.models import (
         Estado,
@@ -172,7 +172,7 @@ def inserir_composicao(i: Dict[str, Any], session):
 
 
 def inserir_composicoes(composicoes):
-    with Session() as session:
+    with SessionLocal() as session:
         for composicao in composicoes:
             inserir_composicao(composicao, session)
     session.commit()

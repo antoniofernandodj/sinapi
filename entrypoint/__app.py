@@ -1,27 +1,31 @@
+import sys
+import pathlib
 from datetime import date
-from math import ceil
+
 from typing import Annotated, Any, List, Optional, Set
 from fastapi import FastAPI, Depends, Query, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery
-from copy import deepcopy
 
-
-import sys
-import pathlib
-
-from entrypoint.service import InsumoComposicaoTabelaService
-from sinapi.api.schema import InsumoComposicaoTabelaResponse, InsumosResponseItem
-from sinapi.utils import apply_order_by
+from sqlalchemy.ext.asyncio import AsyncSession
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent.resolve()))
 
 
+from entrypoint.service import (
+    ClassesService,
+    EstadosService,
+    InsumoComposicaoTabelaService,
+    MesesService,
+    TabelasService
+)
+
+from sinapi.api.schema import InsumoComposicaoTabelaResponse
+
 from entrypoint.utils import (
     # mount_one_insumo_composicao_response,
-    get_db,
+    get_db, get_async_db
 )
 from sinapi.models import (
     # ComposicaoTabela,
@@ -126,7 +130,7 @@ def read_tabelas(
     if mes_ano is None:
         raise HTTPException(status_code=400, detail="")
 
-    query = session.query(Tabela)
+    query: SQLQuery = session.query(Tabela)
 
     if mes_ano:
         query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
@@ -153,147 +157,116 @@ def read_classes(session: Session = Depends(get_db)):
     return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
 
 
-# @app.get("/insumos", response_model=InsumosComposicoesResponse)
-# def read_insumos(
-#     page: int = 1,
-#     limit: Annotated[int, Query(lt=200)] = 10,
-#     order_by: Optional[str] = None,
-#     session: Session = Depends(get_db),
-#     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
-#     codigo: Optional[str] = None,
-#     id: Optional[int] = None,
-#     id_tabela: Optional[int] = None,
-#     id_classe: Optional[int] = None,
-# ):
 
-#     Table = InsumoTabela
-#     payload: List[InsumoTabela]
+@app.get("/estados/composicoes")
+def read_composicoes_do_estado(
+    session=Depends(get_db),
+    codigo: Optional[int] = None,
+    id_composicao: Optional[int] = None,
+):
 
-#     offset = (page - 1) * limit
+    estados: List[Estado] = session.query(Estado).all()
 
-#     query: SQLQuery = session.query(Table)
-#     if id:
-#         query = query.filter_by(id=id)
-#     if codigo:
-#         query = query.filter_by(codigo=codigo)
-#     if descricao:
-#         query = query.filter(Table.nome.like(f"%{descricao}%"))  # type: ignore
-#     if id_tabela:
-#         query = query.filter_by(id_tabela=id_tabela)
-#     if id_classe:
-#         query = query.filter_by(id_classe=id_classe)
-#     if order_by:
-#         query = apply_order_by(query, Table, order_by)
+    response = {}
+    for estado in estados:
 
-#     result_count = query.count()
-#     total_pages = ceil(result_count / limit)
+        response[estado.nome] = []
+        composicoes_do_estado: List[Any] = response[estado.nome]
 
-#     payload = query.order_by(Table.id).offset(offset).limit(limit).all()  # type: ignore
-#     payload_response = mount_insumo_composicao_response(session, payload)
+        query = session.query(Tabela).filter_by(id_estado=estado.id)
+        tabelas: List[Tabela] = query.all()
 
-#     return InsumosComposicoesResponse(
-#         payload=payload_response,
-#         total_pages=total_pages,
-#         current_page=page,
-#         result_count=result_count,
-#     )
+        for tabela in tabelas:
+
+            query = session.query(InsumoComposicaoTabela).filter_by(id_tabela=tabela.id)
+            if codigo:
+                query = query.filter_by(codigo=codigo)
+            if id_composicao:
+                query = query.filter_by(id=id_composicao)
+
+            composicao: Optional[InsumoComposicaoTabela] = query.first()
+            if composicao is None:
+                continue
+
+            result = composicao.to_pydantic()
+            composicoes_do_estado.append(result.model_dump())  # type: ignore
+
+        if len(composicoes_do_estado) == 0:
+            del response[estado.nome]
+
+    return response
 
 
-# @app.get("/composicoes", response_model=InsumosComposicoesResponse)
-# def read_composicoes(
-#     page: int = 1,
-#     limit: Annotated[int, Query(lt=200)] = 10,
-#     order_by: Optional[str] = None,
-#     session: Session = Depends(get_db),
-#     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
-#     codigo: Optional[str] = None,
-#     id: Optional[int] = None,
-#     id_tabela: Optional[int] = None,
-#     id_classe: Optional[int] = None,
-# ):
 
-#     Table = ComposicaoTabela
-#     payload: List[ComposicaoTabela]
-
-#     offset = (page - 1) * limit
-#     query = session.query(Table)
-
-#     if id:
-#         query = query.filter_by(id=id)
-#     if codigo:
-#         query = query.filter_by(codigo=codigo)
-#     if descricao:
-#         query = query.filter(Table.nome.like(f"%{descricao}%"))  # type: ignore
-#     if id_tabela:
-#         query = query.filter_by(id_tabela=id_tabela)
-#     if id_classe:
-#         query = query.filter_by(id_classe=id_classe)
-#     if order_by:
-#         query = apply_order_by(query, Table, order_by)
-
-#     result_count = query.count()
-#     total_pages = ceil(result_count / limit)
-
-#     payload = query.order_by(Table.id).offset(offset).limit(limit).all()  # type: ignore
-#     payload_response = mount_insumo_composicao_response(session, payload)
-
-#     return InsumosComposicoesResponse(
-#         payload=payload_response,
-#         total_pages=total_pages,
-#         current_page=page,
-#         result_count=result_count,
-#     )
+#############################################################################
 
 
-# @app.get("/composicoes/{composicao_id}", response_model=InsumosResponseItem)
-# def read_composicao(composicao_id: int, session: Session = Depends(get_db)):
 
-#     composicao: Optional[ComposicaoTabela] = (
-#         session.query(ComposicaoTabela).filter_by(id=composicao_id).first()
-#     )
-#     if not composicao:
-#         raise HTTPException(status_code=404, detail="Nenhuma composição encontrada")
+@app.get("/async/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
+async def async_read_insumo_composicao(
+    composicao: bool,
+    page: int = 1,
+    order_by: Optional[str] = None,
+    limit: Annotated[int, Query(lt=200)] = 10,
+    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+    codigo: Optional[str] = None,
+    id: Optional[int] = None,
+    id_tabela: Optional[int] = None,
+    id_classe: Optional[int] = None,
+    session: AsyncSession = Depends(get_async_db),
+):
 
-#     return mount_one_insumo_composicao_response(composicao, session)
+    service = InsumoComposicaoTabelaService(session=session)
+
+    return await service.read_insumo_composicao_async(
+        composicao=composicao,
+        codigo=codigo,
+        descricao=descricao,
+        id_tabela=id_tabela,
+        id_classe=id_classe,
+        id=id,
+        order_by=order_by,
+        page=page,
+        limit=limit,
+    )
 
 
-# @app.get("/estados/composicoes")
-# def read_composicoes_do_estado(
-#     session=Depends(get_db),
-#     codigo: Optional[int] = None,
-#     id_composicao: Optional[int] = None,
-# ):
+@app.get("/async/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
+async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends(get_async_db)):
+    service = InsumoComposicaoTabelaService(session=session)
+    response = service.read_one_insummo_composicao_by_id(id)
+    if response is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return response
 
-#     estados: List[Estado] = session.query(Estado).all()
 
-#     response = {}
-#     for estado in estados:
+@app.get("/async/meses", response_model=MesesResponse)
+async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> MesesResponse:
+    meses_services = MesesService(session)
+    return await meses_services.read_meses()
 
-#         response[estado.nome] = []
-#         composicoes_do_estado: List[Any] = response[estado.nome]
 
-#         query = session.query(Tabela).filter_by(id_estado=estado.id)
-#         tabelas: List[Tabela] = query.all()
+@app.get("/async/tabelas", response_model=TabelasResponse)
+async def async_read_tabelas(
+    mes_ano: Optional[date] = None,
+    id_estado: Optional[int] = None,
+    session: AsyncSession = Depends(get_async_db),
+):
+    if mes_ano is None:
+        raise HTTPException(status_code=400, detail="")
+    
+    tabelas_service = TabelasService(session)
+    return await tabelas_service.read_tabelas(mes_ano, id_estado)
 
-#         for tabela in tabelas:
 
-#             query = session.query(ComposicaoTabela).filter_by(id_tabela=tabela.id)
+@app.get("/async/estados", response_model=EstadosResponse)
+async def async_read_estados(session: AsyncSession = Depends(get_async_db)):
+    service = EstadosService(session)
+    return await service.read_all()
 
-#             if codigo:
-#                 query = query.filter_by(codigo=codigo)
 
-#             if id_composicao:
-#                 query = query.filter_by(id=id_composicao)
+@app.get("/async/classes", response_model=ClassesResponse)
+async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
+    service = ClassesService(session)
+    return service.read_all()
 
-#             composicao: Optional[ComposicaoTabela] = query.first()
-#             result = mount_one_insumo_composicao_response(composicao, session)
-
-#             if composicao is None:
-#                 continue
-
-#             composicoes_do_estado.append(result.model_dump())  # type: ignore
-
-#         if len(composicoes_do_estado) == 0:
-#             del response[estado.nome]
-
-#     return response
