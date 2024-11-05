@@ -120,29 +120,29 @@ def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
     )
 
 
-@app.get("/tabelas", response_model=TabelasResponse)
-def read_tabelas(
-    mes_ano: Optional[date] = None,
-    id_estado: Optional[int] = None,
-    session: Session = Depends(get_db),
-):
+# @app.get("/tabelas", response_model=TabelasResponse)
+# def read_tabelas(
+#     mes_ano: Optional[date] = None,
+#     id_estado: Optional[int] = None,
+#     session: Session = Depends(get_db),
+# ):
 
-    if mes_ano is None:
-        raise HTTPException(status_code=400, detail="")
+#     if mes_ano is None:
+#         raise HTTPException(status_code=400, detail="")
 
-    query: SQLQuery = session.query(Tabela)
+#     query: SQLQuery = session.query(Tabela)
 
-    if mes_ano:
-        query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
+#     if mes_ano:
+#         query = query.filter_by(ano=mes_ano.year, mes=mes_ano.month)
 
-    if id_estado:
-        query = query.filter_by(id_estado=id_estado)
+#     if id_estado:
+#         query = query.filter_by(id_estado=id_estado)
 
-    tabelas: List[Tabela] = query.all()
+#     tabelas: List[Tabela] = query.all()
 
-    response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
+#     response = TabelasResponse(tabelas=[tabela.to_pydantic() for tabela in tabelas])
 
-    return response
+#     return response
 
 
 # @app.get("/estados", response_model=EstadosResponse)
@@ -246,7 +246,7 @@ async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> Mes
     return await meses_services.read_meses()
 
 
-@app.get("/async/tabelas", response_model=TabelasResponse)
+@app.get("/tabelas", response_model=TabelasResponse)
 async def async_read_tabelas(
     mes_ano: Optional[date] = None,
     id_estado: Optional[int] = None,
