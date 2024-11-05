@@ -433,6 +433,16 @@ class InsumoComposicaoTabela(Base):
                 i.to_pydantic() for i in self.itens_de_composicao
             ]
 
+        classe_response = None
+        unidade_response = None
+        tabela_response = None
+        with suppress(Exception):
+            tabela_response = self.tabela.to_pydantic()
+        with suppress(Exception):
+            classe_response = self.classe.to_pydantic()
+        with suppress(Exception):
+            unidade_response = self.unidade.to_pydantic()
+
         return InsumoComposicaoTabelaResponse.model_validate(  # type: ignore
             {
                 "id": self.id,
@@ -441,9 +451,9 @@ class InsumoComposicaoTabela(Base):
                 "idTabela": self.id_tabela,
                 "idUnidade": self.id_unidade,
                 "idClasse": self.id_classe,
-                "tabela": self.tabela.to_pydantic(),
-                "classe": self.classe.to_pydantic(),
-                "unidade": self.unidade.to_pydantic(),
+                "tabela": tabela_response,
+                "classe": classe_response,
+                "unidade": unidade_response,
                 "valorOnerado": self.valor_onerado,
                 "valorNaoOnerado": self.valor_nao_onerado,
                 "composicao": self.composicao,
