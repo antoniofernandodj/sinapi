@@ -102,22 +102,22 @@ def read_insumo_composicao_by_id(id: int, session: Session = Depends(get_db)):
     return response
 
 
-@app.get("/meses", response_model=MesesResponse)
-def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
+# @app.get("/meses", response_model=MesesResponse)
+# def read_meses(session: Session = Depends(get_db)) -> MesesResponse:
 
-    meses: Set[Mes] = set()
-    tabelas: List[Tabela] = session.query(Tabela).all()
+#     meses: Set[Mes] = set()
+#     tabelas: List[Tabela] = session.query(Tabela).all()
 
-    for t in tabelas:
-        if not isinstance(t.ano, int) or not isinstance(t.mes, int):
-            raise TypeError
+#     for t in tabelas:
+#         if not isinstance(t.ano, int) or not isinstance(t.mes, int):
+#             raise TypeError
 
-        mes = Mes(mes=t.mes, ano=t.ano)
-        meses.add(mes)
+#         mes = Mes(mes=t.mes, ano=t.ano)
+#         meses.add(mes)
 
-    return MesesResponse(
-        meses=sorted(list(meses), key=lambda mes: str(mes.ano) + "/" + str(mes.mes))
-    )
+#     return MesesResponse(
+#         meses=sorted(list(meses), key=lambda mes: str(mes.ano) + "/" + str(mes.mes))
+#     )
 
 
 # @app.get("/tabelas", response_model=TabelasResponse)
@@ -240,7 +240,7 @@ async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends
     return response
 
 
-@app.get("/async/meses", response_model=MesesResponse)
+@app.get("/meses", response_model=MesesResponse)
 async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> MesesResponse:
     meses_services = MesesService(session)
     return await meses_services.read_meses()
