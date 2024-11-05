@@ -216,7 +216,7 @@ class SinapiService:
         if response is None:
             return None
 
-        return response.json()
+        return response.text
 
         # result = schema.InsumosResponse(
         #     items=data["items"], totalRows=data["totalRows"]
