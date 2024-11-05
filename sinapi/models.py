@@ -19,6 +19,9 @@ from sqlalchemy.orm import Mapped
 
 
 class Base(DeclarativeBase):
+
+    id: Any
+
     def truncate_value(self, value: Any, n: int = 10):
         if len(repr(value)) > n:
             return repr(value)[0:n] + "..."
@@ -26,21 +29,27 @@ class Base(DeclarativeBase):
 
     def __repr__(self):
 
+        id_part = f"id={self.id}, "
+
         inner = [
             str(key) + "=" + self.truncate_value(value, 30)
             for key, value in self.__dict__.items()
-            if not key.startswith("_")
+            if not key.startswith("_") and not key == 'id'
         ]
-        return self.__class__.__name__ + "(" + ", ".join(inner) + ")"
+
+        return f'{self.__class__.__name__}({id_part + ", ".join(inner)})'
 
     def __str__(self):
 
+        id_part = f"id={self.id}, "
+
         inner = [
             str(key) + "=" + self.truncate_value(value, 30)
             for key, value in self.__dict__.items()
-            if not key.startswith("_")
+            if not key.startswith("_") and not key == 'id'
         ]
-        return self.__class__.__name__ + "(" + ", ".join(inner) + ")"
+
+        return f'{self.__class__.__name__}({id_part + ", ".join(inner)})'
 
 
 class Estado(Base):
