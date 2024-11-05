@@ -191,7 +191,7 @@ class InsumoComposicaoTabelaService:
         return InsumosComposicoesTabelaResponse(
             total_pages=total_pages,
             result_count=result_count,
-            payload=[item.to_pydantic(self.session) for item in result],
+            payload=[item.to_pydantic() for item in result],
         )
     
 
