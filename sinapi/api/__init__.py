@@ -15,7 +15,7 @@ try:
 except:
     from sinapi.api import schema
 
-from .faltantes import faltantes 
+from .faltantes import faltantes
 
 
 logging.basicConfig(level=logging.ERROR)
@@ -208,7 +208,6 @@ class SinapiService:
             yield result
             params["Page"] += 1
 
-
     async def insumos_todos2(
         self,
         tipo_tabela: Optional[str] = None,
@@ -260,11 +259,10 @@ class SinapiService:
 
             encontrado = False
             for item in result.items:
-                if item.id in faltantes:
-                    encontrado = True
-                    print('Item faltante encontrado:')
-                    print(item)
-                    yield item
+                encontrado = True
+                print("Item faltante encontrado:")
+                print(item)
+                yield item
             if not encontrado:
                 print("Nenhum item econtrado nesta página")
 
@@ -273,7 +271,6 @@ class SinapiService:
                 break
 
             params["Page"] += 1
-
 
     async def estados(
         self,
