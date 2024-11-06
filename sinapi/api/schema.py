@@ -53,8 +53,6 @@ class Usuario(BaseModel):
     sobrenome: str
     senha: str
     telefone: Any
-    celular: str
-    emailVerificado: bool
     idTipoUsuario: int
     email: str
     dataHoraUltimoAcesso: str
@@ -64,6 +62,8 @@ class Usuario(BaseModel):
     logs: List
     permissoesUsuarios: List
     pagamentos: List[Pagamento]
+    emailVerificado: Optional[bool] = None
+    celular: Optional[str] = None
 
 
 class AuthData(BaseModel):
