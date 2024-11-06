@@ -257,9 +257,11 @@ class SinapiService:
                 items=data["items"], totalRows=data["totalRows"]
             )
 
-            print("\n")
-            print([item.id for item in result.items])
-            print("\n")
+            from pprint import pprint
+
+            print("\n\n\n\n\n\n\n")
+            pprint([result.model_dump])
+            print("\n\n\n\n\n\n\n")
 
             encontrado = False
             for item in result.items:
