@@ -85,6 +85,7 @@ async def get_insumos_or_compositions(composicao=True):
                 uf=uf,
                 composicao=composicao,
             ):
+                print(item)
                 yield item
 
     except Exception as error:
