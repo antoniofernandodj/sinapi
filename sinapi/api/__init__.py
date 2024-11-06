@@ -18,7 +18,7 @@ except:
 from .faltantes import faltantes
 
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(Path(__file__).name)
 
 
