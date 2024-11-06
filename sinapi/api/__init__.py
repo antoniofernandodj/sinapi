@@ -260,8 +260,6 @@ class SinapiService:
             encontrado = False
             for item in result.items:
                 encontrado = True
-                print("Item faltante encontrado:")
-                print(item)
                 yield item
             if not encontrado:
                 print("Nenhum item econtrado nesta página")
