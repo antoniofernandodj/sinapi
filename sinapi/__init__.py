@@ -174,7 +174,7 @@ def inserir_composicao(i: Dict[str, Any], session):
 def inserir_composicoes(composicoes):
     with SessionLocal() as session:
         for composicao in composicoes:
-            print({'composicao_id': composicao['id']})
+            print({"composicao_id": composicao["id"]})
             inserir_composicao(composicao, session)
     session.commit()
 
@@ -183,7 +183,7 @@ async def cadastrar_composicoes():
     with SessionLocal() as session:
         async for item in get_insumos_or_compositions():
             # composicao_data = composicao_response.model_dump()
-            print(f"Cadastrando item {item.id}")
+            print(item.id)
             inserir_composicao(item.model_dump(), session)
         session.commit()
 

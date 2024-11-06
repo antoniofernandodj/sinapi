@@ -23,11 +23,11 @@ senha = "teste"
 meses = [mes for mes in range(1, 13)]
 
 ufs = [
-    "AC",
-    "AL",
-    "AP",
-    "AM",
-    "BA",
+    # "AC",
+    # "AL",
+    # "AP",
+    # "AM",
+    # "BA",
     "CE",
     "DF",
     "ES",
