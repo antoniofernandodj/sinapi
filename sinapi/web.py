@@ -51,23 +51,26 @@ ufs = {
 }
 
 
-async def get_insumos_or_compositions(composicao=True):
+async def get_insumos_or_compositions(composicao=None):
 
     ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
 
     try:
-        for uf, meses in ufs.items():
-            for mes in meses:
-                print(f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}")
-                async for item in service.insumos_todos2(
-                    ano=ano,
-                    mes=mes,
-                    uf=uf,
-                    composicao=composicao,
-                ):
-                    # print(item)
-                    yield item
+        for composicao in [False, True]:
+            for uf, meses in ufs.items():
+                for mes in meses:
+                    print(
+                        f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}"
+                    )
+                    async for item in service.insumos_todos(
+                        ano=ano,
+                        mes=mes,
+                        uf=uf,
+                        composicao=composicao,
+                    ):
+                        # print(item)
+                        yield item
 
     except Exception as error:
         import traceback
