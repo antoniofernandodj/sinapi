@@ -260,10 +260,6 @@ class SinapiService:
                 items=data["items"], totalRows=data["totalRows"]
             )
 
-            print("\n\n\n\n\n\n\n")
-            print([item.id for item in result.items])
-            print("\n\n\n\n\n\n\n")
-
             encontrado = False
             for item in result.items:
                 encontrado = True
