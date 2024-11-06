@@ -265,6 +265,7 @@ class SinapiService:
             for item in result.items:
                 encontrado = True
                 yield item
+
             if not encontrado:
                 print("Nenhum item econtrado nesta página")
 
@@ -504,7 +505,7 @@ class SinapiService:
             }
         )
 
-        logging.info({"Authorization": f"Bearer {authorization.token}"})
+        # logging.info({"Authorization": f"Bearer {authorization.token}"})
 
         return kwargs
 
