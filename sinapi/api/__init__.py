@@ -67,13 +67,14 @@ class SinapiService:
         self.url_base = "https://api.apisinapi.com.br/"
 
     async def login(self) -> schema.AuthData:
+
+        if self.auth_data and self._is_token_valid():
+            logger.info("Using cached token")
+            return self.auth_data
+
         http_client = httpx.AsyncClient(
             base_url=self.url_base, timeout=SinapiService.TIMEOUT
         )
-
-        if self.auth_data and self._is_token_valid():
-            logger.debug("Using cached token")
-            return self.auth_data
 
         url = "api/Authentication/login"
         json = {"login": self.email, "senha": self.token}
@@ -86,7 +87,7 @@ class SinapiService:
         )
 
         self.auth_data = auth_data
-        logger.debug("Got new token")
+        logger.info("Got new token")
         return auth_data
 
     async def insumos(
