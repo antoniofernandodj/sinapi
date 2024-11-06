@@ -260,7 +260,7 @@ class SinapiService:
             from pprint import pprint
 
             print("\n\n\n\n\n\n\n")
-            pprint([result.model_dump])
+            pprint([result.model_dump()])
             print("\n\n\n\n\n\n\n")
 
             encontrado = False
