@@ -80,7 +80,7 @@ class SinapiService:
         request = await http_client.post(url=url, json=json)
 
         data = request.json()
-
+        print({"auth_data": data})
         auth_data = schema.AuthData(
             token=data["token"], expires=data["expires"], usuario=data["usuario"]
         )
