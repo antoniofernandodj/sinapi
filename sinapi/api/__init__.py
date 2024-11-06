@@ -79,10 +79,10 @@ class SinapiService:
         json = {"login": self.email, "senha": self.token}
         request = await http_client.post(url=url, json=json)
 
-        data = request.json()
-        print({"auth_data": data})
         auth_data = schema.AuthData(
-            token=data["token"], expires=data["expires"], usuario=data["usuario"]
+            token=request.json()["token"],
+            expires=request.json()["expires"],
+            usuario=request.json()["usuario"],
         )
 
         self.auth_data = auth_data
@@ -224,6 +224,8 @@ class SinapiService:
         start_page: int = 1,
     ) -> AsyncGenerator[schema.InsumosResponseItem, Any]:
 
+        Page = start_page
+
         params = self.__remove_none(
             {
                 "TipoTabela": tipo_tabela,
@@ -237,16 +239,17 @@ class SinapiService:
                 "Order": order,
                 "Direction": direction,
                 "SearchType": search_type,
-                "Page": start_page,
                 "Limit": 100,
             }
         )
 
         loop = True
         while loop:
-            print(f"{ano}/{mes} UF:{uf} Page: {params['Page']}")
+            print(f"{ano}/{mes} UF:{uf} Page: {Page}")
 
-            response = await self._make_request("GET", url="api/Insumos", params=params)
+            response = await self._make_request(
+                "GET", url="api/Insumos", params=(params | {"Page": Page})
+            )
 
             if response is None:
                 loop = False
@@ -257,10 +260,8 @@ class SinapiService:
                 items=data["items"], totalRows=data["totalRows"]
             )
 
-            from pprint import pprint
-
             print("\n\n\n\n\n\n\n")
-            pprint(data)
+            print([item.id for item in result.items])
             print("\n\n\n\n\n\n\n")
 
             encontrado = False
@@ -274,7 +275,7 @@ class SinapiService:
                 loop = False
                 break
 
-            params["Page"] += 1
+            Page += 1
 
     async def estados(
         self,
@@ -505,6 +506,8 @@ class SinapiService:
                 "headers": {"Authorization": f"Bearer {authorization.token}"},
             }
         )
+
+        logging.info({"Authorization": f"Bearer {authorization.token}"})
 
         return kwargs
 
