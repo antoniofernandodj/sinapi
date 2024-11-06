@@ -13,11 +13,11 @@ except:
     from api.schema import EstadoResponseItem, InsumosResponse
     from utils import get_estados_a_cadastrar
 
-# login = "lsouza17@gmail.com"
-# senha = "eflEs2cF"
+login = "lsouza17@gmail.com"
+senha = "eflEs2cF"
 
-login = "teste@teste.com.br"
-senha = "teste"
+# login = "teste@teste.com.br"
+# senha = "teste"
 
 
 ufs = {
