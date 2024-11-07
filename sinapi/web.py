@@ -69,7 +69,7 @@ async def get_insumos_or_compositions(composicao=None):
                         uf=uf,
                         composicao=composicao,
                     ):
-                        # print(item)
+                        print(item.id)
                         yield item
 
     except Exception as error:
