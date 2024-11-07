@@ -69,7 +69,7 @@ class SinapiService:
     async def login(self) -> schema.AuthData:
 
         if self.auth_data and self._is_token_valid():
-            logger.info("Using cached token")
+            # logger.info("Using cached token")
             return self.auth_data
 
         http_client = httpx.AsyncClient(
