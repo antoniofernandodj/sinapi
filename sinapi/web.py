@@ -57,7 +57,7 @@ async def get_insumos_or_compositions(composicao=None):
     service = SinapiService(login, senha)
 
     try:
-        for composicao in [False, True]:
+        for composicao in [True]:
             for uf, meses in ufs.items():
                 for mes in meses:
                     print(
