@@ -19,14 +19,15 @@ from entrypoint.service import (
     EstadosService,
     InsumoComposicaoTabelaService,
     MesesService,
-    TabelasService
+    TabelasService,
 )
 
 from sinapi.api.schema import InsumoComposicaoTabelaResponse
 
 from entrypoint.utils import (
     # mount_one_insumo_composicao_response,
-    get_db, get_async_db
+    get_db,
+    get_async_db,
 )
 from sinapi.models import (
     # ComposicaoTabela,
@@ -104,7 +105,7 @@ def read_composicoes_do_estado(
 
 @app.get("/async/estados/composicoes")
 async def read_composicoes_do_estado_async(
-    session: AsyncSession =Depends(get_async_db),
+    session: AsyncSession = Depends(get_async_db),
     codigo: Optional[int] = None,
     id_composicao: Optional[int] = None,
 ):
@@ -133,8 +134,7 @@ async def read_composicoes_do_estado_async(
                 stmt = stmt.filter_by(id=id_composicao)
 
             stmt = stmt.options(
-                selectinload(InsumoComposicaoTabela.itens_de_composicao)
-                .options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao).options(
                     selectinload(ComposicaoItem.insumo_item)
                 )
             )
@@ -158,7 +158,6 @@ async def read_composicoes_do_estado_async(
 
 @app.get("/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
 async def async_read_insumo_composicao(
-    composicao: Optional[bool],
     page: int = 1,
     order_by: Optional[str] = None,
     limit: Annotated[int, Query(lt=200)] = 10,
@@ -168,6 +167,7 @@ async def async_read_insumo_composicao(
     id_tabela: Optional[int] = None,
     id_classe: Optional[int] = None,
     session: AsyncSession = Depends(get_async_db),
+    composicao: Optional[bool] = None,
 ):
 
     service = InsumoComposicaoTabelaService(session=session)
@@ -186,7 +186,9 @@ async def async_read_insumo_composicao(
 
 
 @app.get("/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
-async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends(get_async_db)):
+async def async_read_insumo_composicao_by_id(
+    id: int, session: Session = Depends(get_async_db)
+):
     service = InsumoComposicaoTabelaService(session=session)
     response = await service.read_one_insumo_composicao_by_id_async(id)
     if response is None:
@@ -195,7 +197,9 @@ async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends
 
 
 @app.get("/meses", response_model=MesesResponse)
-async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> MesesResponse:
+async def async_read_meses(
+    session: AsyncSession = Depends(get_async_db),
+) -> MesesResponse:
     meses_services = MesesService(session)
     return await meses_services.read_meses()
 
@@ -220,4 +224,3 @@ async def async_read_estados(session: AsyncSession = Depends(get_async_db)):
 async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
     service = ClassesService(session)
     return await service.read_all()
-
