@@ -25,52 +25,51 @@ ufs = {
     # "AL",
     # "AP",
     # "AM",
-    "BA": [1],
-    "CE": list(range(1, 13)),
-    "DF": list(range(1, 13)),
-    "ES": list(range(1, 13)),
-    "GO": list(range(1, 13)),
-    "MA": list(range(1, 13)),
-    "MT": list(range(1, 13)),
-    "MS": list(range(1, 13)),
-    "MG": list(range(1, 13)),
-    "PA": list(range(1, 13)),
-    "PB": list(range(1, 13)),
-    "PR": list(range(1, 13)),
-    "PE": list(range(1, 13)),
-    "PI": list(range(1, 13)),
-    "RJ": list(range(1, 13)),
-    "RN": list(range(1, 13)),
-    "RS": list(range(1, 13)),
-    "RO": list(range(1, 13)),
-    "RR": list(range(1, 13)),
-    "SC": list(range(1, 13)),
-    "SP": list(range(1, 13)),
-    "SE": list(range(1, 13)),
-    "TO": list(range(1, 13)),
+    # "BA": [1],
+    "CE": list(range(1, 9)),
+    "DF": list(range(1, 9)),
+    "ES": list(range(1, 9)),
+    "GO": list(range(1, 9)),
+    "MA": list(range(1, 9)),
+    # "MT": list(range(1, 9)),
+    # "MS": list(range(1, 9)),
+    # "MG": list(range(1, 9)),
+    # "PA": list(range(1, 9)),
+    # "PB": list(range(1, 9)),
+    "PR": list(range(1, 5)),
+    # "PE": list(range(1, 9)),
+    # "PI": list(range(1, 9)),
+    "RJ": list(range(1, 9)),
+    "RN": list(range(1, 9)),
+    # "RS": list(range(1, 9)),
+    "RO": list(range(1, 9)),
+    "RR": list(range(1, 9)),
+    # "SC": list(range(1, 9)),
+    # "SP": list(range(1, 9)),
+    # "SE": list(range(1, 9)),
+    "TO": list(range(1, 9)),
 }
 
 
-async def get_insumos_or_compositions(composicao=None):
+async def get_insumos_or_compositions(composicao=True):
 
     ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
 
     try:
-        for composicao in [False, True]:
-            for uf, meses in ufs.items():
-                for mes in meses:
-                    print(
-                        f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}"
-                    )
-                    async for item in service.insumos_todos2(
-                        ano=ano,
-                        mes=mes,
-                        uf=uf,
-                        composicao=composicao,
-                    ):
-                        # print(item)
-                        yield item
+        for uf, meses in ufs.items():
+            for mes in meses:
+                print(
+                    f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}"
+                )
+                async for item in service.insumos_todos2(
+                    ano=ano,
+                    mes=mes,
+                    uf=uf,
+                    composicao=composicao,
+                ):
+                    print(item.id)
+                    yield item
 
     except Exception as error:
         import traceback
