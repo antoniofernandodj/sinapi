@@ -13,16 +13,10 @@ from entrypoint.schema import (
     InsumosComposicoesTabelaResponse,
     Mes,
     MesesResponse,
-    TabelasResponse
+    TabelasResponse,
 )
 
-from sinapi.models import (
-    Classe,
-    ComposicaoItem,
-    Estado,
-    InsumoComposicaoTabela,
-    Tabela
-)
+from sinapi.models import Classe, ComposicaoItem, Estado, InsumoComposicaoTabela, Tabela
 
 
 class InsumoComposicaoTabelaService:
@@ -44,8 +38,7 @@ class InsumoComposicaoTabelaService:
         stmt = (
             select(InsumoComposicaoTabela)
             .options(
-                selectinload(InsumoComposicaoTabela.itens_de_composicao)
-                .options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao).options(
                     selectinload(ComposicaoItem.insumo_item)
                 )
             )
@@ -128,7 +121,7 @@ class InsumoComposicaoTabelaService:
 
     async def read_insumo_composicao_async(
         self,
-        composicao: bool,
+        composicao: Optional[bool],
         page: int = 1,
         order_by: Optional[str] = None,
         limit: Annotated[int, Query(lt=200)] = 10,
@@ -145,7 +138,7 @@ class InsumoComposicaoTabelaService:
         offset = (page - 1) * limit
 
         query = select(Table)
-        q_count = select(func.count('*')).select_from(Table)
+        q_count = select(func.count("*")).select_from(Table)
 
         def compose_query(query):
             if composicao:
@@ -167,23 +160,20 @@ class InsumoComposicaoTabelaService:
 
         query = compose_query(query)
         q_count = compose_query(q_count)
-    
+
         r_count = await self.session.execute(q_count)
-        r = await (
-            self.session.execute(
-                query.order_by(Table.id)
-                .options(
-                    selectinload(Table.itens_de_composicao)
-                    .options(
-                        selectinload(ComposicaoItem.insumo_item)
-                    )
+        r = await self.session.execute(
+            query.order_by(Table.id)
+            .options(
+                selectinload(Table.itens_de_composicao).options(
+                    selectinload(ComposicaoItem.insumo_item)
                 )
-                .options(selectinload(Table.tabela))
-                .options(selectinload(Table.classe))
-                .options(selectinload(Table.unidade))
-                .offset(offset)
-                .limit(limit)
             )
+            .options(selectinload(Table.tabela))
+            .options(selectinload(Table.classe))
+            .options(selectinload(Table.unidade))
+            .offset(offset)
+            .limit(limit)
         )
 
         result_count = r_count.scalar_one()
@@ -196,7 +186,7 @@ class InsumoComposicaoTabelaService:
             result_count=result_count,
             payload=[item.to_pydantic() for item in result],
         )
-    
+
 
 class MesesService:
     def __init__(self, session):

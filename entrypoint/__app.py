@@ -158,7 +158,7 @@ async def read_composicoes_do_estado_async(
 
 @app.get("/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
 async def async_read_insumo_composicao(
-    composicao: bool,
+    composicao: Optional[bool],
     page: int = 1,
     order_by: Optional[str] = None,
     limit: Annotated[int, Query(lt=200)] = 10,
