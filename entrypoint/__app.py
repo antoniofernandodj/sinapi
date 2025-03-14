@@ -1,12 +1,15 @@
+import logging
 import sys
 import pathlib
 from datetime import date
 
 from typing import Annotated, Any, List, Optional, Sequence, Set
-from fastapi import FastAPI, Depends, Query, HTTPException
+from fastapi import FastAPI, Depends, Query, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery, selectinload
+from pymysql.err import OperationalError
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -53,6 +56,24 @@ app = FastAPI(
     openapi_url="/app/sinapi/openapi.json",
     root_path="/app/sinapi",
 )
+
+
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+
+
+@app.exception_handler(OperationalError)
+async def operational_error_handler(request: Request, exc: OperationalError):
+    logger.error(f"Erro operacional no banco de dados: {exc}")
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"Erro interno do servidor: Falha na conexão com o banco de dados: {exc}"
+        },
+    )
 
 
 app.add_middleware(
