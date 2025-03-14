@@ -71,7 +71,7 @@ async def operational_error_handler(request: Request, exc: OperationalError):
     return JSONResponse(
         status_code=500,
         content={
-            "detail": f"Erro interno do servidor: Falha na conexão com o banco de dados: {exc}"
+            "msg": f"Erro interno do servidor: Falha na conexão com o banco de dados: {exc}"
         },
     )
 
