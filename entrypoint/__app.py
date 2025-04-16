@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery, selectinload
 from pymysql.err import OperationalError
+from entrypoint.service import UnidadesService
+from entrypoint.schema import InsumosResponseUnidades
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -245,3 +247,41 @@ async def async_read_estados(session: AsyncSession = Depends(get_async_db)):
 async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
     service = ClassesService(session)
     return await service.read_all()
+
+
+@app.get("/unidades", response_model=InsumosResponseUnidades)
+def read_unidades(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 20,
+    order_by: Optional[str] = None,
+    nome: Optional[str] = None,
+    excluido: Optional[bool] = None,
+    session: Session = Depends(get_db),
+):
+    service = UnidadesService(session=session)
+    return service.read_all(
+        page=page,
+        limit=limit,
+        order_by=order_by,
+        nome=nome,
+        excluido=excluido,
+    )
+
+
+@app.get("/async/unidades", response_model=InsumosResponseUnidades)
+async def async_read_unidades(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 20,
+    order_by: Optional[str] = None,
+    nome: Optional[str] = None,
+    excluido: Optional[bool] = None,
+    session: AsyncSession = Depends(get_async_db),
+):
+    service = UnidadesService(session=session)
+    return await service.read_all_async(
+        page=page,
+        limit=limit,
+        order_by=order_by,
+        nome=nome,
+        excluido=excluido,
+    )

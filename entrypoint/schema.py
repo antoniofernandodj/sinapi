@@ -8,6 +8,7 @@ from sinapi.api.schema import (
     InsumosResponseItem,
     InsumosResponseTabela,
     InsumosResponseClasse,
+    InsumosResponseUnidade,
 )
 
 
@@ -51,3 +52,9 @@ class InsumosComposicoesTabelaResponse(BaseModel):
     payload: List[InsumoComposicaoTabelaResponse]
     total_pages: int
     result_count: int
+
+
+class InsumosResponseUnidades(BaseModel):
+    total_pages: int
+    result_count: int
+    payload: List[InsumosResponseUnidade]
