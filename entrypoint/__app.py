@@ -1,12 +1,17 @@
+import logging
 import sys
 import pathlib
 from datetime import date
 
 from typing import Annotated, Any, List, Optional, Sequence, Set
-from fastapi import FastAPI, Depends, Query, HTTPException
+from fastapi import FastAPI, Depends, Query, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Query as SQLQuery, selectinload
+from pymysql.err import OperationalError
+from entrypoint.service import UnidadesService
+from entrypoint.schema import InsumosResponseUnidades
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -19,14 +24,15 @@ from entrypoint.service import (
     EstadosService,
     InsumoComposicaoTabelaService,
     MesesService,
-    TabelasService
+    TabelasService,
 )
 
 from sinapi.api.schema import InsumoComposicaoTabelaResponse
 
 from entrypoint.utils import (
     # mount_one_insumo_composicao_response,
-    get_db, get_async_db
+    get_db,
+    get_async_db,
 )
 from sinapi.models import (
     # ComposicaoTabela,
@@ -52,6 +58,24 @@ app = FastAPI(
     openapi_url="/app/sinapi/openapi.json",
     root_path="/app/sinapi",
 )
+
+
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+
+
+
+@app.exception_handler(OperationalError)
+async def operational_error_handler(request: Request, exc: OperationalError):
+    logger.error(f"Erro operacional no banco de dados: {exc}")
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "msg": f"Erro interno do servidor: Falha na conexão com o banco de dados: {exc}"
+        },
+    )
 
 
 app.add_middleware(
@@ -104,7 +128,7 @@ def read_composicoes_do_estado(
 
 @app.get("/async/estados/composicoes")
 async def read_composicoes_do_estado_async(
-    session: AsyncSession =Depends(get_async_db),
+    session: AsyncSession = Depends(get_async_db),
     codigo: Optional[int] = None,
     id_composicao: Optional[int] = None,
 ):
@@ -133,8 +157,7 @@ async def read_composicoes_do_estado_async(
                 stmt = stmt.filter_by(id=id_composicao)
 
             stmt = stmt.options(
-                selectinload(InsumoComposicaoTabela.itens_de_composicao)
-                .options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao).options(
                     selectinload(ComposicaoItem.insumo_item)
                 )
             )
@@ -158,7 +181,6 @@ async def read_composicoes_do_estado_async(
 
 @app.get("/insumo-composicao/", response_model=InsumosComposicoesTabelaResponse)
 async def async_read_insumo_composicao(
-    composicao: bool,
     page: int = 1,
     order_by: Optional[str] = None,
     limit: Annotated[int, Query(lt=200)] = 10,
@@ -168,6 +190,7 @@ async def async_read_insumo_composicao(
     id_tabela: Optional[int] = None,
     id_classe: Optional[int] = None,
     session: AsyncSession = Depends(get_async_db),
+    composicao: Optional[bool] = None,
 ):
 
     service = InsumoComposicaoTabelaService(session=session)
@@ -200,7 +223,9 @@ async def async_read_insumo_composicao_search(
 
 
 @app.get("/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
-async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends(get_async_db)):
+async def async_read_insumo_composicao_by_id(
+    id: int, session: Session = Depends(get_async_db)
+):
     service = InsumoComposicaoTabelaService(session=session)
     response = await service.read_one_insumo_composicao_by_id_async(id)
     if response is None:
@@ -209,7 +234,9 @@ async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends
 
 
 @app.get("/meses", response_model=MesesResponse)
-async def async_read_meses(session: AsyncSession = Depends(get_async_db)) -> MesesResponse:
+async def async_read_meses(
+    session: AsyncSession = Depends(get_async_db),
+) -> MesesResponse:
     meses_services = MesesService(session)
     return await meses_services.read_meses()
 
@@ -235,3 +262,40 @@ async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
     service = ClassesService(session)
     return await service.read_all()
 
+
+@app.get("/unidades", response_model=InsumosResponseUnidades)
+def read_unidades(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 20,
+    order_by: Optional[str] = None,
+    nome: Optional[str] = None,
+    excluido: Optional[bool] = None,
+    session: Session = Depends(get_db),
+):
+    service = UnidadesService(session=session)
+    return service.read_all(
+        page=page,
+        limit=limit,
+        order_by=order_by,
+        nome=nome,
+        excluido=excluido,
+    )
+
+
+@app.get("/async/unidades", response_model=InsumosResponseUnidades)
+async def async_read_unidades(
+    page: int = 1,
+    limit: Annotated[int, Query(lt=200)] = 20,
+    order_by: Optional[str] = None,
+    nome: Optional[str] = None,
+    excluido: Optional[bool] = None,
+    session: AsyncSession = Depends(get_async_db),
+):
+    service = UnidadesService(session=session)
+    return await service.read_all_async(
+        page=page,
+        limit=limit,
+        order_by=order_by,
+        nome=nome,
+        excluido=excluido,
+    )

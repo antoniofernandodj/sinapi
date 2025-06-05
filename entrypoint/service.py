@@ -13,16 +13,12 @@ from entrypoint.schema import (
     InsumosComposicoesTabelaResponse,
     Mes,
     MesesResponse,
-    TabelasResponse
+    TabelasResponse,
 )
 
-from sinapi.models import (
-    Classe,
-    ComposicaoItem,
-    Estado,
-    InsumoComposicaoTabela,
-    Tabela
-)
+from sinapi.models import Classe, ComposicaoItem, Estado, InsumoComposicaoTabela, Tabela, Unidade
+
+from entrypoint.schema import InsumosResponseUnidades
 
 
 class InsumoComposicaoTabelaService:
@@ -44,8 +40,7 @@ class InsumoComposicaoTabelaService:
         stmt = (
             select(InsumoComposicaoTabela)
             .options(
-                selectinload(InsumoComposicaoTabela.itens_de_composicao)
-                .options(
+                selectinload(InsumoComposicaoTabela.itens_de_composicao).options(
                     selectinload(ComposicaoItem.insumo_item)
                 )
             )
@@ -128,7 +123,7 @@ class InsumoComposicaoTabelaService:
 
     async def read_insumo_composicao_async(
         self,
-        composicao: bool,
+        composicao: Optional[bool],
         page: int = 1,
         order_by: Optional[str] = None,
         limit: Annotated[int, Query(lt=200)] = 10,
@@ -145,7 +140,7 @@ class InsumoComposicaoTabelaService:
         offset = (page - 1) * limit
 
         query = select(Table)
-        q_count = select(func.count('*')).select_from(Table)
+        q_count = select(func.count("*")).select_from(Table)
 
         def compose_query(query):
             if composicao:
@@ -167,23 +162,20 @@ class InsumoComposicaoTabelaService:
 
         query = compose_query(query)
         q_count = compose_query(q_count)
-    
+
         r_count = await self.session.execute(q_count)
-        r = await (
-            self.session.execute(
-                query.order_by(Table.id)
-                .options(
-                    selectinload(Table.itens_de_composicao)
-                    .options(
-                        selectinload(ComposicaoItem.insumo_item)
-                    )
+        r = await self.session.execute(
+            query.order_by(Table.id)
+            .options(
+                selectinload(Table.itens_de_composicao).options(
+                    selectinload(ComposicaoItem.insumo_item)
                 )
-                .options(selectinload(Table.tabela))
-                .options(selectinload(Table.classe))
-                .options(selectinload(Table.unidade))
-                .offset(offset)
-                .limit(limit)
             )
+            .options(selectinload(Table.tabela))
+            .options(selectinload(Table.classe))
+            .options(selectinload(Table.unidade))
+            .offset(offset)
+            .limit(limit)
         )
 
         result_count = r_count.scalar_one()
@@ -298,3 +290,94 @@ class ClassesService:
         query = select(Classe)
         classes = (await self.session.execute(query)).scalars().all()
         return ClassesResponse(classes=[classe.to_pydantic() for classe in classes])
+
+
+class UnidadesService:
+    def __init__(self, session):
+        self.session: Union[AsyncSession, Session] = session
+
+    def read_all(
+        self,
+        page: int = 1,
+        limit: Annotated[int, Query(lt=200)] = 20,
+        order_by: Optional[str] = None,
+        nome: Optional[str] = None,
+        excluido: Optional[bool] = None,
+    ):
+        if not isinstance(self.session, Session):
+            raise TypeError
+
+        offset = (page - 1) * limit
+        query = self.session.query(Unidade)
+
+        if nome:
+            query = query.filter(Unidade.nome.ilike(f"%{nome}%"))
+        if excluido is not None:
+            query = query.filter(Unidade.excluido == excluido)
+        if order_by:
+            query = self.apply_order_by(query, Unidade, order_by)
+
+        total = query.count()
+        total_pages = ceil(total / limit)
+
+        result = query.offset(offset).limit(limit).all()
+        payload = [u.to_pydantic() for u in result]
+
+        return InsumosResponseUnidades(
+            total_pages=total_pages,
+            result_count=total,
+            payload=payload
+        )
+
+    async def read_all_async(
+        self,
+        page: int = 1,
+        limit: Annotated[int, Query(lt=200)] = 20,
+        order_by: Optional[str] = None,
+        nome: Optional[str] = None,
+        excluido: Optional[bool] = None,
+    ):
+        if not isinstance(self.session, AsyncSession):
+            raise TypeError
+
+        offset = (page - 1) * limit
+        query = select(Unidade)
+        q_count = select(func.count()).select_from(Unidade)
+
+        def compose(q):
+            if nome:
+                q = q.filter(Unidade.nome.ilike(f"%{nome}%"))
+            if excluido is not None:
+                q = q.filter(Unidade.excluido == excluido)
+            if order_by:
+                q = self.apply_order_by(q, Unidade, order_by)
+            return q
+
+        query = compose(query)
+        q_count = compose(q_count)
+
+        r_count = await self.session.execute(q_count)
+        result_count = r_count.scalar_one()
+
+        r = await self.session.execute(
+            query.order_by(Unidade.id).offset(offset).limit(limit)
+        )
+        unidades = r.scalars().all()
+
+        return InsumosResponseUnidades(
+            total_pages=ceil(result_count / limit),
+            result_count=result_count,
+            payload=[u.to_pydantic() for u in unidades]
+        )
+
+    def apply_order_by(self, query, model, order_by_str):
+        if " " in order_by_str:
+            column_name, direction = order_by_str.split()
+        else:
+            column_name, direction = order_by_str, "asc"
+
+        column = getattr(model, column_name, None)
+        if column is None:
+            raise ValueError(f"Coluna inválida: {column_name}")
+
+        return query.order_by(desc(column) if direction.lower() == "desc" else asc(column))
