@@ -185,6 +185,20 @@ async def async_read_insumo_composicao(
     )
 
 
+@app.get("/insumo-composicao/search", response_model=InsumosComposicoesTabelaResponse)
+async def async_read_insumo_composicao_search(
+    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+    session: AsyncSession = Depends(get_async_db),
+):
+
+    service = InsumoComposicaoTabelaService(session=session)
+
+    return await service.read_insumo_composicao_using_like_async(
+        composicao=False,
+        like_param=descricao,
+    )
+
+
 @app.get("/insumo-composicao/{id}", response_model=InsumoComposicaoTabelaResponse)
 async def async_read_insumo_composicao_by_id(id: int, session: Session = Depends(get_async_db)):
     service = InsumoComposicaoTabelaService(session=session)

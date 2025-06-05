@@ -196,7 +196,54 @@ class InsumoComposicaoTabelaService:
             result_count=result_count,
             payload=[item.to_pydantic() for item in result],
         )
+
+
+    async def read_insumo_composicao_using_like_async(
+        self,
+        composicao: bool,
+        like_param: Annotated[Optional[str], Query(max_length=200)] = None,
+    ):
+        if not isinstance(self.session, AsyncSession):
+            raise TypeError
+
+        Table = InsumoComposicaoTabela
+
+        query = select(Table)
+
+        def compose_query(query):
+            if composicao:
+                query = query.filter_by(composicao=composicao)
+            if like_param:
+                query = query.filter(Table.nome.like(f"%{like_param}%"))
+            return query
+
+        query = compose_query(query)
+
     
+        r = await (
+            self.session.execute(
+                query.order_by(Table.id)
+                .options(
+                    selectinload(Table.itens_de_composicao)
+                    .options(
+                        selectinload(ComposicaoItem.insumo_item)
+                    )
+                )
+                .options(selectinload(Table.tabela))
+                .options(selectinload(Table.classe))
+                .options(selectinload(Table.unidade))
+            )
+        )
+
+        result = r.scalars().all()
+
+        return InsumosComposicoesTabelaResponse(
+            total_pages=0,
+            result_count=0,
+            payload=[item.to_pydantic() for item in result],
+        )
+    
+
 
 class MesesService:
     def __init__(self, session):
