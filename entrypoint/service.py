@@ -1,11 +1,24 @@
 from datetime import date
 from math import ceil
-from typing import Annotated, Optional, Sequence, Set, Union
+from typing import (
+    Annotated,
+    Optional,
+    Sequence,
+    Set,
+    Union
+)
 from fastapi import Query
-from sqlalchemy import asc, desc, func
+from sqlalchemy.sql import (
+    asc,
+    desc,
+    func
+)
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import (
+    Session,
+    selectinload
+)
 
 from entrypoint.schema import (
     ClassesResponse,
@@ -16,9 +29,18 @@ from entrypoint.schema import (
     TabelasResponse,
 )
 
-from sinapi.models import Classe, ComposicaoItem, Estado, InsumoComposicaoTabela, Tabela, Unidade
+from sinapi.models import (
+    Classe,
+    ComposicaoItem,
+    Estado,
+    InsumoComposicaoTabela,
+    Tabela,
+    Unidade
+)
 
-from entrypoint.schema import InsumosResponseUnidades
+from entrypoint.schema import (
+    InsumosResponseUnidades
+)
 
 
 class InsumoComposicaoTabelaService:
