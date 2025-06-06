@@ -229,7 +229,7 @@ class InsumoComposicaoTabelaService:
                 query = query.filter_by(composicao=composicao)
             if like_param:
                 query = query.filter(Table.nome.like(f"%{like_param}%"))
-            return query
+            return query.limit(100)
 
         query = compose_query(query)
 
