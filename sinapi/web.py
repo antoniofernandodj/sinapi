@@ -20,7 +20,7 @@ senha = "eflEs2cF"
 # senha = "teste"
 
 
-ufs = {
+ufs_meses = {
     # "AC",
     # "AL",
     # "AP",
@@ -57,7 +57,7 @@ async def get_insumos_or_compositions(composicao=False):
     service = SinapiService(login, senha)
 
     try:
-        for uf, meses in ufs.items():
+        for uf, meses in ufs_meses.items():
             for mes in meses:
                 print(
                     f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, composicao: {composicao}"
