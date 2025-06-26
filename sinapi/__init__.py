@@ -1,7 +1,7 @@
 import asyncio
-from contextlib import suppress
-from typing import Any, Dict, Optional
-from sqlalchemy.exc import InvalidRequestError, IntegrityError
+from typing import Type, TypeVar, Generic, Optional, Any, Dict
+from sqlalchemy.orm import Session
+# from sqlalchemy.exc import InvalidRequestError, IntegrityError
 import json
 
 try:
@@ -15,7 +15,7 @@ try:
         ComposicaoItem,
         InsumoComposicaoTabela
     )
-except:
+except Exception:
     from sinapi.database import SessionLocal
     from sinapi.web import get_insumos_or_compositions
     from sinapi.models import (
@@ -27,9 +27,86 @@ except:
         InsumoComposicaoTabela
     )
 
+
+
+
+
+
+T = TypeVar('T')
+
+class BaseRepository(Generic[T]):
+    def __init__(self, session: Session, model: Type[T]):
+        self.session = session
+        self.model = model
+
+    def get_by_id(self, entity_id) -> Optional[T]:
+        return self.session.get(self.model, entity_id)
+
+    def save(self, instance: T) -> T:
+        self.session.merge(instance)
+        self.session.flush()
+        return instance
+
+    def update(self, entity_id, **kwargs) -> Optional[T]:
+        instance = self.get_by_id(entity_id)
+        if instance:
+            for key, value in kwargs.items():
+                setattr(instance, key, value)
+            self.session.flush()
+        return instance
+
+    def delete(self, entity_id) -> bool:
+        instance = self.get_by_id(entity_id)
+        if instance:
+            self.session.delete(instance)
+            self.session.flush()
+            return True
+        return False
+
+
+class EstadoRepository(BaseRepository[Estado]):
+    def __init__(self, session):
+        super().__init__(session, Estado)
+
+class UnidadeRepository(BaseRepository[Unidade]):
+    def __init__(self, session):
+        super().__init__(session, Unidade)
+
+class ClasseRepository(BaseRepository[Classe]):
+    def __init__(self, session):
+        super().__init__(session, Classe)
+
+class TabelaRepository(BaseRepository[Tabela]):
+    def __init__(self, session):
+        super().__init__(session, Tabela)
+
+class InsumoComposicaoTabelaRepository(BaseRepository[InsumoComposicaoTabela]):
+    def __init__(self, session):
+        super().__init__(session, InsumoComposicaoTabela)
+
+class ComposicaoItemRepository(BaseRepository[ComposicaoItem]):
+    def __init__(self, session):
+        super().__init__(session, ComposicaoItem)
+
+
+
+
+
 class Processor:
     def __init__(self, session):
         self.session = session
+        self.estado_repo = EstadoRepository(session)
+        self.unidade_repo = UnidadeRepository(session)
+        self.classe_repo = ClasseRepository(session)
+        self.tabela_repo = TabelaRepository(session)
+        self.insumo_repo = InsumoComposicaoTabelaRepository(session)
+        self.composicao_item_repo = ComposicaoItemRepository(session)
+
+    def assert_classe(self, classe_id):
+        if not self.classe_repo.get_by_id(classe_id):
+            classe = Classe(id=classe_id, nome="[CLASSIFICAR]")
+            self.classe_repo.save(classe)
+            self.session.flush()
 
     # Função auxiliar para inserir com verificação
     def safe_merge(self, model_class, data):
@@ -96,7 +173,6 @@ class Processor:
         })
 
     def inserir_insumo_item(self, item: dict):
-        # Persistir dependências primeiro
         if item.get('unidade'):
             self.inserir_unidade(item['unidade'])
         if item.get('tabela'):
@@ -181,6 +257,8 @@ class Processor:
                 model_class = model_map[field]
                 if not self.session.get(model_class, value):
                     raise ValueError(f"{field} {value} não encontrado para composição {i['id']}")
+
+            self.assert_classe(required_deps['id_classe'])
 
             # Preparar dados da composição principal
             composicao_data = {
