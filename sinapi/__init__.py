@@ -14,7 +14,7 @@ try:
         ComposicaoItem,
         InsumoComposicaoTabela
     )
-except Exception:
+except:
     from sinapi.database import SessionLocal
     from sinapi.web import get_insumos_or_compositions
     from sinapi.models import (
@@ -26,154 +26,194 @@ except Exception:
         InsumoComposicaoTabela
     )
 
+# Função auxiliar para inserir com verificação
+def safe_merge(session, entity, data, model_class, id_field='id'):
+    """Insere ou atualiza uma entidade com verificação de existência"""
+    existing = session.get(model_class, data[id_field])
+    if existing:
+        for key, value in data.items():
+            setattr(existing, key, value)
+    else:
+        session.add(model_class(**data))
+    session.flush()
+
 def inserir_estado(data, session):
-    session.merge(
-        Estado(
-            id=data["id"],
-            nome=data["nome"],
-            uf=data["uf"],
-            ibge=data["ibge"],
-            excluido=data["excluido"] if data["excluido"] is not None else False,
-        )
-    )
+    safe_merge(session, data, Estado, {
+        'id': data['id'],
+        'nome': data['nome'],
+        'uf': data['uf'],
+        'ibge': data['ibge'],
+        'excluido': data.get('excluido', False)
+    })
 
 def inserir_unidade(item: Optional[dict], session):
-    if item is None:
+    if not item:
         return
-    session.merge(
-        Unidade(
-            id=item["id"],
-            nome=item["nome"],
-            excluido=item["excluido"],
-        )
-    )
-    # Força a persistência imediata
-    session.flush()
+    safe_merge(session, item, Unidade, {
+        'id': item['id'],
+        'nome': item['nome'],
+        'excluido': item.get('excluido')
+    })
 
 def inserir_classe(item: Optional[dict], session):
-    if item is None:
+    if not item:
         return
-    session.merge(
-        Classe(
-            id=item["id"],
-            nome=item["nome"],
-            excluido=item["excluido"],
-        )
-    )
-    # Força a persistência imediata
-    session.flush()
+    safe_merge(session, item, Classe, {
+        'id': item['id'],
+        'nome': item['nome'],
+        'excluido': item.get('excluido')
+    })
 
 def inserir_tabela(item: Optional[dict], session):
-    if item is None:
+    if not item:
         return
-    session.merge(
-        Tabela(
-            id=item["id"],
-            nome=item["nome"],
-            id_estado=item["idEstado"],
-            mes=item["mes"],
-            ano=item["ano"],
-            data_hora_atualizacao=item["dataHoraAtualizacao"],
-            id_tipo_tabela=item["idTipoTabela"],
-            excluido=item["excluido"],
-        )
-    )
-    # Força a persistência imediata
-    session.flush()
+    safe_merge(session, item, Tabela, {
+        'id': item['id'],
+        'nome': item['nome'],
+        'id_estado': item['idEstado'],
+        'mes': item['mes'],
+        'ano': item['ano'],
+        'data_hora_atualizacao': item['dataHoraAtualizacao'],
+        'id_tipo_tabela': item['idTipoTabela'],
+        'excluido': item.get('excluido')
+    })
 
 def inserir_insumo_item(item: dict, session):
-    if item["unidade"]:
-        inserir_unidade(item["unidade"], session)
-    if item["tabela"]:
-        inserir_tabela(item["tabela"], session)
-    if item["classe"]:
-        inserir_classe(item["classe"], session)
+    # Persistir dependências primeiro
+    if item.get('unidade'):
+        inserir_unidade(item['unidade'], session)
+    if item.get('tabela'):
+        inserir_tabela(item['tabela'], session)
+    if item.get('classe'):
+        inserir_classe(item['classe'], session)
 
-    insumo_composicao = InsumoComposicaoTabela(
-        id=item["id"],
-        nome=item["nome"],
-        codigo=item["codigo"],
-        id_tabela=item["idTabela"],
-        id_unidade=item["idUnidade"],
-        id_classe=item["idClasse"],
-        valor_onerado=item["valorOnerado"],
-        valor_nao_onerado=item["valorNaoOnerado"],
-        composicao=item["composicao"],
-        percentual_mao_de_obra=item.get("percentualMaoDeObra"),
-        percentual_material=item.get("percentualMaterial"),
-        percentual_equipamentos=item.get("percentualEquipamentos"),
-        percentual_servicos_terceiros=item.get("percentualServicosTerceiros"),
-        percentual_outros=item.get("percentualOutros"),
-        excluido=item["excluido"],
-    )
+    # Certificar que a classe existe
+    if 'idClasse' in item and not session.get(Classe, item['idClasse']):
+        raise ValueError(f"Classe {item['idClasse']} não encontrada para insumo {item['id']}")
 
-    session.merge(insumo_composicao)
-    session.flush()
+    # Preparar dados do insumo
+    insumo_data = {
+        'id': item['id'],
+        'nome': item['nome'],
+        'codigo': item['codigo'],
+        'id_tabela': item['idTabela'],
+        'id_unidade': item['idUnidade'],
+        'id_classe': item['idClasse'],
+        'valor_onerado': item['valorOnerado'],
+        'valor_nao_onerado': item['valorNaoOnerado'],
+        'composicao': item['composicao'],
+        'percentual_mao_de_obra': item.get('percentualMaoDeObra'),
+        'percentual_material': item.get('percentualMaterial'),
+        'percentual_equipamentos': item.get('percentualEquipamentos'),
+        'percentual_servicos_terceiros': item.get('percentualServicosTerceiros'),
+        'percentual_outros': item.get('percentualOutros'),
+        'excluido': item.get('excluido')
+    }
+
+    safe_merge(session, insumo_data, InsumoComposicaoTabela)
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
-    insumo_item = insumo_composicao_api["insumoItem"]
-    inserir_insumo_item(item=insumo_item, session=session)
+    if not insumo_composicao_api.get('insumoItem'):
+        return
 
-    composicao_item = ComposicaoItem(
-        id=insumo_composicao_api["id"],
-        id_insumo=insumo_composicao_api["idInsumo"],
-        id_insumo_item=insumo_composicao_api["idInsumoItem"],
-        valor_onerado=insumo_composicao_api["valorOnerado"],
-        valor_nao_onerado=insumo_composicao_api["valorNaoOnerado"],
-        coeficiente=insumo_composicao_api["coeficiente"],
-        excluido=insumo_composicao_api["excluido"],
-    )
+    inserir_insumo_item(insumo_composicao_api['insumoItem'], session)
 
-    session.merge(composicao_item)
-    session.flush()
+    composicao_data = {
+        'id': insumo_composicao_api['id'],
+        'id_insumo': insumo_composicao_api['idInsumo'],
+        'id_insumo_item': insumo_composicao_api['idInsumoItem'],
+        'valor_onerado': insumo_composicao_api['valorOnerado'],
+        'valor_nao_onerado': insumo_composicao_api['valorNaoOnerado'],
+        'coeficiente': insumo_composicao_api['coeficiente'],
+        'excluido': insumo_composicao_api.get('excluido')
+    }
+
+    safe_merge(session, composicao_data, ComposicaoItem)
 
 def inserir_composicao(i: Dict[str, Any], session):
-    # Persiste primeiro as dependências
-    inserir_unidade(i["unidade"], session)
-    inserir_tabela(i["tabela"], session)
-    inserir_classe(i["classe"], session)
+    try:
+        # Persistir dependências primeiro com flush explícito
+        if i.get('unidade'):
+            inserir_unidade(i['unidade'], session)
+            session.flush()
 
-    # Cria o objeto principal
-    item = InsumoComposicaoTabela(
-        id=i["id"],
-        nome=i["nome"],
-        codigo=i["codigo"],
-        id_tabela=i["tabela"]["id"],
-        id_unidade=i["unidade"]["id"],
-        id_classe=i["classe"]["id"],
-        valor_onerado=i["valorOnerado"],
-        valor_nao_onerado=i["valorNaoOnerado"],
-        composicao=i["composicao"],
-        percentual_mao_de_obra=i["percentualMaoDeObra"],
-        percentual_material=i["percentualMaterial"],
-        percentual_equipamentos=i["percentualEquipamentos"],
-        percentual_servicos_terceiros=i["percentualServicosTerceiros"],
-        percentual_outros=i["percentualOutros"],
-        excluido=i["excluido"],
-    )
+        if i.get('tabela'):
+            inserir_tabela(i['tabela'], session)
+            session.flush()
 
-    # Persiste o objeto principal
-    session.merge(item)
-    session.flush()
+        if i.get('classe'):
+            inserir_classe(i['classe'], session)
+            session.flush()
 
-    # Insere os itens da composição
-    for insumo_composicao in i["insumosComposicoes"]:
-        try:
+        # Verificar se todas as dependências foram persistidas
+        required_deps = {
+            'id_tabela': i['tabela']['id'] if i.get('tabela') else None,
+            'id_unidade': i['unidade']['id'] if i.get('unidade') else None,
+            'id_classe': i['classe']['id'] if i.get('classe') else None
+        }
+
+        for field, value in required_deps.items():
+            if value is None:
+                raise ValueError(f"Valor faltando para {field} na composição {i['id']}")
+
+            # Verificar se a dependência existe no banco
+            model_map = {
+                'id_tabela': Tabela,
+                'id_unidade': Unidade,
+                'id_classe': Classe
+            }
+
+            if not session.get(model_map[field], value):
+                raise ValueError(f"{field} {value} não encontrado para composição {i['id']}")
+
+        # Preparar dados da composição principal
+        composicao_data = {
+            'id': i['id'],
+            'nome': i['nome'],
+            'codigo': i['codigo'],
+            'id_tabela': required_deps['id_tabela'],
+            'id_unidade': required_deps['id_unidade'],
+            'id_classe': required_deps['id_classe'],
+            'valor_onerado': i['valorOnerado'],
+            'valor_nao_onerado': i['valorNaoOnerado'],
+            'composicao': i['composicao'],
+            'percentual_mao_de_obra': i.get('percentualMaoDeObra'),
+            'percentual_material': i.get('percentualMaterial'),
+            'percentual_equipamentos': i.get('percentualEquipamentos'),
+            'percentual_servicos_terceiros': i.get('percentualServicosTerceiros'),
+            'percentual_outros': i.get('percentualOutros'),
+            'excluido': i.get('excluido')
+        }
+
+        safe_merge(session, composicao_data, InsumoComposicaoTabela)
+        session.flush()
+
+        # Processar itens da composição
+        for insumo_composicao in i.get('insumosComposicoes', []):
             inserir_composicoes_insumo(insumo_composicao, session)
-        except IntegrityError:
-            session.rollback()
-            # Tenta novamente após rollback
-            inserir_composicoes_insumo(insumo_composicao, session)
+
+        return True
+
+    except Exception as e:
+        session.rollback()
+        print(f"Erro ao processar composição {i.get('id')}: {str(e)}")
+        return False
 
 async def cadastrar_composicoes():
     with SessionLocal() as session:
         async for item in get_insumos_or_compositions():
+            composicao_data = item.model_dump()
             try:
-                inserir_composicao(item.model_dump(), session)
-                session.commit()
+                success = inserir_composicao(composicao_data, session)
+                if success:
+                    session.commit()
+                    print(f"Composição {composicao_data['id']} inserida com sucesso")
+                else:
+                    print(f"Falha ao inserir composição {composicao_data['id']}")
             except Exception as e:
                 session.rollback()
-                print(f"Erro ao inserir composição {item.id}: {str(e)}")
+                print(f"Erro crítico ao inserir composição {composicao_data.get('id')}: {str(e)}")
+
         print("Processamento concluído")
 
 async def main():
