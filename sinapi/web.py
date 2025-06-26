@@ -51,7 +51,7 @@ ufs = {
 }
 
 
-async def get_insumos_or_compositions(composicao=True):
+async def get_insumos_or_compositions(composicao=False):
 
     ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
