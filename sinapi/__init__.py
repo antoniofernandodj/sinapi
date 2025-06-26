@@ -56,6 +56,7 @@ def inserir_unidade(item: Optional[dict], session):
 
 
 def inserir_classe(item: Optional[dict], session):
+    breakpoint()
     if item is None:
         return
 
@@ -141,6 +142,7 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
 
 
 def inserir_composicao(i: Dict[str, Any], session):
+    breakpoint()
 
     inserir_unidade(i["unidade"], session)
     inserir_tabela(i["tabela"], session)
@@ -180,6 +182,7 @@ def inserir_composicao(i: Dict[str, Any], session):
 
 
 async def cadastrar_composicoes():
+    breakpoint()
     with SessionLocal() as session:
         async for item in get_insumos_or_compositions():
             # composicao_data = composicao_response.model_dump()
