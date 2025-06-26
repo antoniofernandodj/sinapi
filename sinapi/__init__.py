@@ -2,6 +2,7 @@ import asyncio
 from contextlib import suppress
 from typing import Any, Dict, Optional
 from sqlalchemy.exc import InvalidRequestError, IntegrityError
+import json
 
 try:
     from database import SessionLocal
@@ -142,6 +143,11 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
     safe_merge(session, ComposicaoItem, composicao_data)
 
 def inserir_composicao(i: Dict[str, Any], session):
+
+
+    print(json.dumps(i, indent=4))
+
+
     try:
         # Persistir dependências primeiro com flush explícito
         if i.get('unidade'):
