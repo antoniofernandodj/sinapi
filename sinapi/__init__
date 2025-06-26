@@ -1,7 +1,11 @@
 import asyncio
+
 from contextlib import suppress
 from typing import Any, Dict, Optional
-from sqlalchemy.exc import InvalidRequestError, IntegrityError
+from sqlalchemy.exc import InvalidRequestError
+
+from sinapi.models import InsumoComposicaoTabela
+
 
 try:
     from database import SessionLocal
@@ -12,7 +16,6 @@ try:
         Unidade,
         Classe,
         ComposicaoItem,
-        InsumoComposicaoTabela
     )
 except Exception:
     from sinapi.database import SessionLocal
@@ -23,10 +26,11 @@ except Exception:
         Unidade,
         Classe,
         ComposicaoItem,
-        InsumoComposicaoTabela
     )
 
+
 def inserir_estado(data, session):
+
     session.merge(
         Estado(
             id=data["id"],
@@ -37,9 +41,11 @@ def inserir_estado(data, session):
         )
     )
 
+
 def inserir_unidade(item: Optional[dict], session):
     if item is None:
         return
+
     session.merge(
         Unidade(
             id=item["id"],
@@ -47,12 +53,13 @@ def inserir_unidade(item: Optional[dict], session):
             excluido=item["excluido"],
         )
     )
-    # Força a persistência imediata
-    session.flush()
+
 
 def inserir_classe(item: Optional[dict], session):
+    breakpoint()
     if item is None:
         return
+
     session.merge(
         Classe(
             id=item["id"],
@@ -60,12 +67,12 @@ def inserir_classe(item: Optional[dict], session):
             excluido=item["excluido"],
         )
     )
-    # Força a persistência imediata
-    session.flush()
+
 
 def inserir_tabela(item: Optional[dict], session):
     if item is None:
         return
+
     session.merge(
         Tabela(
             id=item["id"],
@@ -78,10 +85,10 @@ def inserir_tabela(item: Optional[dict], session):
             excluido=item["excluido"],
         )
     )
-    # Força a persistência imediata
-    session.flush()
+
 
 def inserir_insumo_item(item: dict, session):
+
     if item["unidade"]:
         inserir_unidade(item["unidade"], session)
     if item["tabela"]:
@@ -109,9 +116,16 @@ def inserir_insumo_item(item: dict, session):
 
     session.merge(insumo_composicao)
     session.flush()
+    session.commit()
+
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
+
     insumo_item = insumo_composicao_api["insumoItem"]
+
+    # with session.no_autoflush:
+    #     inserir_insumo_item(insumo_item, session)
+
     inserir_insumo_item(item=insumo_item, session=session)
 
     composicao_item = ComposicaoItem(
@@ -125,15 +139,14 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
     )
 
     session.merge(composicao_item)
-    session.flush()
+
 
 def inserir_composicao(i: Dict[str, Any], session):
-    # Persiste primeiro as dependências
+    breakpoint()
+
     inserir_unidade(i["unidade"], session)
     inserir_tabela(i["tabela"], session)
     inserir_classe(i["classe"], session)
-
-    # Cria o objeto principal
     item = InsumoComposicaoTabela(
         id=i["id"],
         nome=i["nome"],
@@ -151,36 +164,38 @@ def inserir_composicao(i: Dict[str, Any], session):
         percentual_outros=i["percentualOutros"],
         excluido=i["excluido"],
     )
-
-    # Persiste o objeto principal
     session.merge(item)
     session.flush()
+    with suppress(InvalidRequestError):
+        session.refresh(item)
 
-    # Insere os itens da composição
     for insumo_composicao in i["insumosComposicoes"]:
-        try:
-            inserir_composicoes_insumo(insumo_composicao, session)
-        except IntegrityError:
-            session.rollback()
-            # Tenta novamente após rollback
-            inserir_composicoes_insumo(insumo_composicao, session)
+        inserir_composicoes_insumo(insumo_composicao, session)
 
-async def cadastrar_composicoes():
-    with SessionLocal() as session:
-        async for item in get_insumos_or_compositions():
-            try:
-                inserir_composicao(item.model_dump(), session)
-                session.commit()
-            except Exception as e:
-                session.rollback()
-                print(f"Erro ao inserir composição {item.id}: {str(e)}")
-        print("Processamento concluído")
+
+# def inserir_composicoes(composicoes):
+#     with SessionLocal() as session:
+#         for composicao in composicoes:
+#             print({"composicao_id": composicao["id"]})
+#             inserir_composicao(composicao, session)
+#     session.commit()
+
+
+async def cadastrar_composicoes(session):
+    breakpoint()
+
+    async for item in get_insumos_or_compositions():
+        # composicao_data = composicao_response.model_dump()
+        # print(item.id, end=" ")
+        inserir_composicao(item.model_dump(), session)
+    # print(" ")
+    session.commit()
+    # inserir_composicoes(composicao_data["items"])
+
 
 async def main():
-    await cadastrar_composicoes()
-    while True:
-        print("Aguardando próxima execução...")
-        await asyncio.sleep(3600)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    with SessionLocal() as session:
+        await cadastrar_composicoes(session)
+        while True:
+            print("Terminou!")
+            await asyncio.sleep(3600)

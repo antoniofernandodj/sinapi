@@ -60,7 +60,7 @@ async def get_insumos_or_compositions(composicao=True):
         for uf, meses in ufs.items():
             for mes in meses:
                 print(
-                    f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}"
+                    f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, composicao: {composicao}"
                 )
                 async for item in service.insumos_todos2(
                     ano=ano,
