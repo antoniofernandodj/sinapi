@@ -27,18 +27,27 @@ except:
     )
 
 # Função auxiliar para inserir com verificação
-def safe_merge(session, entity, data, model_class, id_field='id'):
+def safe_merge(session, model_class, data):
     """Insere ou atualiza uma entidade com verificação de existência"""
-    existing = session.get(model_class, data[id_field])
+    # Obtém o valor do campo id
+    entity_id = data.get('id')
+    if entity_id is None:
+        raise ValueError("Campo 'id' não encontrado nos dados")
+
+    # Tenta obter a entidade existente
+    existing = session.get(model_class, entity_id)
     if existing:
+        # Atualiza os atributos
         for key, value in data.items():
             setattr(existing, key, value)
     else:
+        # Cria uma nova instância
         session.add(model_class(**data))
+    # Força a persistência
     session.flush()
 
 def inserir_estado(data, session):
-    safe_merge(session, data, Estado, {
+    safe_merge(session, Estado, {
         'id': data['id'],
         'nome': data['nome'],
         'uf': data['uf'],
@@ -49,7 +58,7 @@ def inserir_estado(data, session):
 def inserir_unidade(item: Optional[dict], session):
     if not item:
         return
-    safe_merge(session, item, Unidade, {
+    safe_merge(session, Unidade, {
         'id': item['id'],
         'nome': item['nome'],
         'excluido': item.get('excluido')
@@ -58,7 +67,7 @@ def inserir_unidade(item: Optional[dict], session):
 def inserir_classe(item: Optional[dict], session):
     if not item:
         return
-    safe_merge(session, item, Classe, {
+    safe_merge(session, Classe, {
         'id': item['id'],
         'nome': item['nome'],
         'excluido': item.get('excluido')
@@ -67,7 +76,7 @@ def inserir_classe(item: Optional[dict], session):
 def inserir_tabela(item: Optional[dict], session):
     if not item:
         return
-    safe_merge(session, item, Tabela, {
+    safe_merge(session, Tabela, {
         'id': item['id'],
         'nome': item['nome'],
         'id_estado': item['idEstado'],
@@ -88,8 +97,10 @@ def inserir_insumo_item(item: dict, session):
         inserir_classe(item['classe'], session)
 
     # Certificar que a classe existe
-    if 'idClasse' in item and not session.get(Classe, item['idClasse']):
-        raise ValueError(f"Classe {item['idClasse']} não encontrada para insumo {item['id']}")
+    if 'idClasse' in item:
+        classe_id = item['idClasse']
+        if not session.get(Classe, classe_id):
+            raise ValueError(f"Classe {classe_id} não encontrada para insumo {item['id']}")
 
     # Preparar dados do insumo
     insumo_data = {
@@ -98,7 +109,7 @@ def inserir_insumo_item(item: dict, session):
         'codigo': item['codigo'],
         'id_tabela': item['idTabela'],
         'id_unidade': item['idUnidade'],
-        'id_classe': item['idClasse'],
+        'id_classe': item.get('idClasse'),
         'valor_onerado': item['valorOnerado'],
         'valor_nao_onerado': item['valorNaoOnerado'],
         'composicao': item['composicao'],
@@ -110,7 +121,7 @@ def inserir_insumo_item(item: dict, session):
         'excluido': item.get('excluido')
     }
 
-    safe_merge(session, insumo_data, InsumoComposicaoTabela)
+    safe_merge(session, InsumoComposicaoTabela, insumo_data)
 
 def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
     if not insumo_composicao_api.get('insumoItem'):
@@ -128,22 +139,17 @@ def inserir_composicoes_insumo(insumo_composicao_api: dict, session):
         'excluido': insumo_composicao_api.get('excluido')
     }
 
-    safe_merge(session, composicao_data, ComposicaoItem)
+    safe_merge(session, ComposicaoItem, composicao_data)
 
 def inserir_composicao(i: Dict[str, Any], session):
     try:
         # Persistir dependências primeiro com flush explícito
         if i.get('unidade'):
             inserir_unidade(i['unidade'], session)
-            session.flush()
-
         if i.get('tabela'):
             inserir_tabela(i['tabela'], session)
-            session.flush()
-
         if i.get('classe'):
             inserir_classe(i['classe'], session)
-            session.flush()
 
         # Verificar se todas as dependências foram persistidas
         required_deps = {
@@ -163,7 +169,8 @@ def inserir_composicao(i: Dict[str, Any], session):
                 'id_classe': Classe
             }
 
-            if not session.get(model_map[field], value):
+            model_class = model_map[field]
+            if not session.get(model_class, value):
                 raise ValueError(f"{field} {value} não encontrado para composição {i['id']}")
 
         # Preparar dados da composição principal
@@ -185,8 +192,7 @@ def inserir_composicao(i: Dict[str, Any], session):
             'excluido': i.get('excluido')
         }
 
-        safe_merge(session, composicao_data, InsumoComposicaoTabela)
-        session.flush()
+        safe_merge(session, InsumoComposicaoTabela, composicao_data)
 
         # Processar itens da composição
         for insumo_composicao in i.get('insumosComposicoes', []):
