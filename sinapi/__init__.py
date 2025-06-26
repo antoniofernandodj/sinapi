@@ -180,11 +180,7 @@ class Processor:
         if item.get('classe'):
             self.inserir_classe(item['classe'])
 
-        # Certificar que a classe existe
-        if 'idClasse' in item:
-            classe_id = item['idClasse']
-            if not self.session.get(Classe, classe_id):
-                raise ValueError(f"Classe {classe_id} não encontrada para insumo {item['id']}")
+        self.assert_classe(item['idClasse'])
 
         # Preparar dados do insumo
         insumo_data = {
@@ -193,7 +189,7 @@ class Processor:
             'codigo': item['codigo'],
             'id_tabela': item['idTabela'],
             'id_unidade': item['idUnidade'],
-            'id_classe': item.get('idClasse'),
+            'id_classe': item['idClasse'],
             'valor_onerado': item['valorOnerado'],
             'valor_nao_onerado': item['valorNaoOnerado'],
             'composicao': item['composicao'],
