@@ -12,7 +12,7 @@ from sinapi.api.schema import TabelasResponse
 
 try:
     from sinapi import schema  # type: ignore
-except:
+except Exception:
     from sinapi.api import schema
 
 
