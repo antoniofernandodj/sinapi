@@ -12,6 +12,7 @@ from sqlalchemy.orm import Query as SQLQuery, selectinload
 from pymysql.err import OperationalError
 from entrypoint.service import UnidadesService
 from entrypoint.schema import InsumosResponseUnidades
+from pydantic import Field, BaseModel
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -183,7 +184,8 @@ async def read_composicoes_do_estado_async(
 async def async_read_insumo_composicao(
     page: int = 1,
     order_by: Optional[str] = None,
-    limit: Annotated[int, Query(lt=200)] = 10,
+    limit: int = 10,
+    # limit: Annotated[int, Query(lt=200)] = 10,
     descricao: Annotated[Optional[str], Query(max_length=200)] = None,
     codigo: Optional[str] = None,
     id: Optional[int] = None,
@@ -208,9 +210,15 @@ async def async_read_insumo_composicao(
     )
 
 
+class SearchParams(BaseModel):
+    descricao: str
+    # limit: int = Field(50, gt=0, le=50)
+    limit: int
+
+
 @app.get("/insumo-composicao/search", response_model=InsumosComposicoesTabelaResponse)
 async def async_read_insumo_composicao_search(
-    descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+    q: Annotated[SearchParams, Query()],
     session: AsyncSession = Depends(get_async_db),
 ):
 
@@ -218,7 +226,8 @@ async def async_read_insumo_composicao_search(
 
     return await service.read_insumo_composicao_using_like_async(
         composicao=False,
-        like_param=descricao,
+        like_param=q.descricao,
+        limit=q.limit,
     )
 
 
@@ -266,7 +275,8 @@ async def async_read_classes(session: AsyncSession = Depends(get_async_db)):
 @app.get("/unidades", response_model=InsumosResponseUnidades)
 def read_unidades(
     page: int = 1,
-    limit: Annotated[int, Query(lt=200)] = 20,
+    limit: int = 20,
+    # limit: Annotated[int, Query(lt=200)] = 20,
     order_by: Optional[str] = None,
     nome: Optional[str] = None,
     excluido: Optional[bool] = None,
@@ -285,7 +295,8 @@ def read_unidades(
 @app.get("/async/unidades", response_model=InsumosResponseUnidades)
 async def async_read_unidades(
     page: int = 1,
-    limit: Annotated[int, Query(lt=200)] = 20,
+    limit: int = 20,
+    # limit: Annotated[int, Query(lt=200)] = 20,
     order_by: Optional[str] = None,
     nome: Optional[str] = None,
     excluido: Optional[bool] = None,

@@ -1,13 +1,12 @@
 from datetime import date
 from math import ceil
 from typing import (
-    Annotated,
     Optional,
     Sequence,
     Set,
     Union
 )
-from fastapi import Query
+from sqlalchemy import Select
 from sqlalchemy.sql import (
     asc,
     desc,
@@ -83,8 +82,8 @@ class InsumoComposicaoTabelaService:
         composicao: bool,
         page: int = 1,
         order_by: Optional[str] = None,
-        limit: Annotated[int, Query(lt=200)] = 10,
-        descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+        limit: int = 10,
+        descricao: Optional[str] = None,
         codigo: Optional[str] = None,
         id: Optional[int] = None,
         id_tabela: Optional[int] = None,
@@ -148,8 +147,8 @@ class InsumoComposicaoTabelaService:
         composicao: Optional[bool],
         page: int = 1,
         order_by: Optional[str] = None,
-        limit: Annotated[int, Query(lt=200)] = 10,
-        descricao: Annotated[Optional[str], Query(max_length=200)] = None,
+        limit: int = 10,
+        descricao: Optional[str] = None,
         codigo: Optional[str] = None,
         id: Optional[int] = None,
         id_tabela: Optional[int] = None,
@@ -215,7 +214,8 @@ class InsumoComposicaoTabelaService:
     async def read_insumo_composicao_using_like_async(
         self,
         composicao: bool,
-        like_param: Annotated[Optional[str], Query(max_length=200)] = None,
+        limit: int,
+        like_param: Optional[str] = None,
     ):
         if not isinstance(self.session, AsyncSession):
             raise TypeError
@@ -224,12 +224,13 @@ class InsumoComposicaoTabelaService:
 
         query = select(Table)
 
-        def compose_query(query):
+        def compose_query(query: Select):
             if composicao:
                 query = query.filter_by(composicao=composicao)
             if like_param:
                 query = query.filter(Table.nome.like(f"%{like_param}%"))
-            return query.limit(100)
+
+            return query.limit(limit)
 
         query = compose_query(query)
 
@@ -321,7 +322,7 @@ class UnidadesService:
     def read_all(
         self,
         page: int = 1,
-        limit: Annotated[int, Query(lt=200)] = 20,
+        limit: int = 20,
         order_by: Optional[str] = None,
         nome: Optional[str] = None,
         excluido: Optional[bool] = None,
@@ -354,7 +355,7 @@ class UnidadesService:
     async def read_all_async(
         self,
         page: int = 1,
-        limit: Annotated[int, Query(lt=200)] = 20,
+        limit: int = 20,
         order_by: Optional[str] = None,
         nome: Optional[str] = None,
         excluido: Optional[bool] = None,

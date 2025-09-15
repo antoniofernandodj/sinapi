@@ -20,47 +20,47 @@ senha = "eflEs2cF"
 # senha = "teste"
 
 
-ufs = {
+ufs_meses = {
     # "AC",
     # "AL",
     # "AP",
     # "AM",
     # "BA": [1],
-    "CE": range(1, 9),
-    "DF": range(1, 9),
-    "ES": range(1, 9),
-    "GO": range(1, 9),
-    "MA": range(1, 9),
+    # "CE": range(1, 9),
+    # "DF": range(1, 9),
+    # "ES": range(1, 9),
+    # "GO": range(1, 9),
+    # "MA": range(1, 9),
     # "MT": range(1, 9),
     # "MS": range(1, 9),
     # "MG": range(1, 9),
     # "PA": range(1, 9),
     # "PB": range(1, 9),
-    "PR": range(1, 5),
+    # "PR": range(1, 5),
     # "PE": range(1, 9),
     # "PI": range(1, 9),
-    "RJ": range(1, 9),
-    "RN": range(1, 9),
-    # "RS": range(1, 9),
-    "RO": range(1, 9),
-    "RR": range(1, 9),
+    # "RJ": range(1, 9),
+    # "RN": range(1, 9),
+    "RS": range(5, 6),
+    # "RO": range(1, 9),
+    # "RR": range(1, 9),
     # "SC": range(1, 9),
     # "SP": range(1, 9),
     # "SE": range(1, 9),
-    "TO": range(1, 9),
+    # "TO": range(1, 9),
 }
 
 
-async def get_insumos_or_compositions(composicao=True):
+async def get_insumos_or_compositions(composicao=False):
 
     ano = str(datetime.date.today().year)
     service = SinapiService(login, senha)
 
     try:
-        for uf, meses in ufs.items():
+        for uf, meses in ufs_meses.items():
             for mes in meses:
                 print(
-                    f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, {composicao}"
+                    f"Buscando para ano: {ano}, mes: {mes}, uf: {uf}, composicao: {composicao}"
                 )
                 async for item in service.insumos_todos2(
                     ano=ano,
