@@ -11,4 +11,3 @@ app:
 	docker rm -f sinapi_entrypoint
 	docker run -d -it --name sinapi_entrypoint --network host sinapi_entrypoint
 	docker logs -f sinapi_entrypoint
-
